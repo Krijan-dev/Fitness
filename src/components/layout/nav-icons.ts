@@ -1,0 +1,28 @@
+import {
+  LayoutDashboard,
+  Calculator,
+  BookOpen,
+  Compass,
+  CalendarDays,
+  Activity,
+  ShoppingCart,
+  Tags,
+  Package,
+  Scale,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
+
+export const navIconMap: Record<string, LucideIcon> = {
+  LayoutDashboard,
+  Calculator,
+  BookOpen,
+  Compass,
+  CalendarDays,
+  Activity,
+  ShoppingCart,
+  Tags,
+  Package,
+  Scale,
+  Settings,
+};

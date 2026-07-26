@@ -1,0 +1,138 @@
+[
+  {
+    "id": "discovered-1",
+    "title": "Thai Basil Chicken",
+    "description": "Aromatic stir-fry with chicken, basil and vegetables. Perfect for meal prep.",
+    "imageUrl": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400",
+    "cuisine": "Thai",
+    "mealType": "dinner",
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 15,
+    "servings": 4,
+    "caloriesPerServing": 420,
+    "proteinPerServing": 38,
+    "carbsPerServing": 22,
+    "fatPerServing": 18,
+    "ingredients": [
+      {
+        "id": "d-ing-1",
+        "name": "Chicken thigh",
+        "quantity": 600,
+        "unit": "g",
+        "caloriesPer100g": 177,
+        "proteinPer100g": 19,
+        "carbsPer100g": 0,
+        "fatPer100g": 11
+      },
+      {
+        "id": "d-ing-2",
+        "name": "Capsicum",
+        "quantity": 200,
+        "unit": "g",
+        "caloriesPer100g": 31,
+        "proteinPer100g": 1,
+        "carbsPer100g": 6,
+        "fatPer100g": 0.3
+      }
+    ],
+    "instructions": [
+      "Slice chicken and vegetables.",
+      "Stir-fry chicken until golden.",
+      "Add vegetables and sauce.",
+      "Finish with fresh basil."
+    ],
+    "dietaryTags": ["high-protein", "gluten-free"],
+    "difficulty": "easy",
+    "source": "Mock Provider"
+  },
+  {
+    "id": "discovered-2",
+    "title": "Overnight Oats",
+    "description": "Creamy overnight oats with banana and Greek yogurt.",
+    "imageUrl": "https://images.unsplash.com/photo-1517673400265-9b023aba1a5f?w=400",
+    "cuisine": "American",
+    "mealType": "breakfast",
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 0,
+    "servings": 2,
+    "caloriesPerServing": 310,
+    "proteinPerServing": 18,
+    "carbsPerServing": 45,
+    "fatPerServing": 8,
+    "ingredients": [
+      {
+        "id": "d-ing-3",
+        "name": "Oats",
+        "quantity": 100,
+        "unit": "g",
+        "caloriesPer100g": 389,
+        "proteinPer100g": 17,
+        "carbsPer100g": 66,
+        "fatPer100g": 7
+      },
+      {
+        "id": "d-ing-4",
+        "name": "Greek yogurt",
+        "quantity": 200,
+        "unit": "g",
+        "caloriesPer100g": 59,
+        "proteinPer100g": 10,
+        "carbsPer100g": 3.6,
+        "fatPer100g": 0.4
+      }
+    ],
+    "instructions": [
+      "Combine oats and milk.",
+      "Refrigerate overnight.",
+      "Top with yogurt and banana."
+    ],
+    "dietaryTags": ["vegetarian", "meal-prep", "low-calorie"],
+    "difficulty": "easy",
+    "source": "Mock Provider"
+  },
+  {
+    "id": "discovered-3",
+    "title": "Beef & Sweet Potato Hash",
+    "description": "Hearty hash with lean beef mince and roasted sweet potato.",
+    "imageUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?w=400",
+    "cuisine": "American",
+    "mealType": "lunch",
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 25,
+    "servings": 3,
+    "caloriesPerServing": 485,
+    "proteinPerServing": 35,
+    "carbsPerServing": 38,
+    "fatPerServing": 20,
+    "ingredients": [
+      {
+        "id": "d-ing-5",
+        "name": "Lean beef mince",
+        "quantity": 500,
+        "unit": "g",
+        "caloriesPer100g": 176,
+        "proteinPer100g": 20,
+        "carbsPer100g": 0,
+        "fatPer100g": 10
+      },
+      {
+        "id": "d-ing-6",
+        "name": "Sweet potato",
+        "quantity": 400,
+        "unit": "g",
+        "caloriesPer100g": 86,
+        "proteinPer100g": 1.6,
+        "carbsPer100g": 20,
+        "fatPer100g": 0.1
+      }
+    ],
+    "instructions": [
+      "Dice sweet potato and roast.",
+      "Cook beef mince with spices.",
+      "Combine and serve."
+    ],
+    "dietaryTags": ["high-protein", "gluten-free"],
+    "difficulty": "medium",
+    "source": "Mock Provider"
+  }
+]

@@ -1,0 +1,283 @@
+[
+  {
+    "id": "ing-chicken-breast",
+    "name": "Chicken breast",
+    "category": "meat",
+    "caloriesPer100g": 120,
+    "proteinPer100g": 23,
+    "carbsPer100g": 0,
+    "fatPer100g": 2.6,
+    "fibrePer100g": 0,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-chicken-thigh",
+    "name": "Chicken thigh",
+    "category": "meat",
+    "caloriesPer100g": 177,
+    "proteinPer100g": 19,
+    "carbsPer100g": 0,
+    "fatPer100g": 11,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-beef-mince",
+    "name": "Lean beef mince",
+    "category": "meat",
+    "caloriesPer100g": 176,
+    "proteinPer100g": 20,
+    "carbsPer100g": 0,
+    "fatPer100g": 10,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-salmon",
+    "name": "Salmon",
+    "category": "seafood",
+    "caloriesPer100g": 208,
+    "proteinPer100g": 20,
+    "carbsPer100g": 0,
+    "fatPer100g": 13,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-tuna",
+    "name": "Tuna",
+    "category": "seafood",
+    "caloriesPer100g": 132,
+    "proteinPer100g": 28,
+    "carbsPer100g": 0,
+    "fatPer100g": 1.3,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-eggs",
+    "name": "Eggs",
+    "category": "dairy",
+    "caloriesPer100g": 155,
+    "proteinPer100g": 13,
+    "carbsPer100g": 1.1,
+    "fatPer100g": 11,
+    "defaultUnit": "item"
+  },
+  {
+    "id": "ing-white-rice",
+    "name": "White rice",
+    "category": "grains",
+    "caloriesPer100g": 130,
+    "proteinPer100g": 2.7,
+    "carbsPer100g": 28,
+    "fatPer100g": 0.3,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-brown-rice",
+    "name": "Brown rice",
+    "category": "grains",
+    "caloriesPer100g": 111,
+    "proteinPer100g": 2.6,
+    "carbsPer100g": 23,
+    "fatPer100g": 0.9,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-basmati-rice",
+    "name": "Basmati rice",
+    "category": "grains",
+    "caloriesPer100g": 121,
+    "proteinPer100g": 3,
+    "carbsPer100g": 25,
+    "fatPer100g": 0.4,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-pasta",
+    "name": "Pasta",
+    "category": "grains",
+    "caloriesPer100g": 131,
+    "proteinPer100g": 5,
+    "carbsPer100g": 25,
+    "fatPer100g": 1.1,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-potato",
+    "name": "Potato",
+    "category": "vegetables",
+    "caloriesPer100g": 77,
+    "proteinPer100g": 2,
+    "carbsPer100g": 17,
+    "fatPer100g": 0.1,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-sweet-potato",
+    "name": "Sweet potato",
+    "category": "vegetables",
+    "caloriesPer100g": 86,
+    "proteinPer100g": 1.6,
+    "carbsPer100g": 20,
+    "fatPer100g": 0.1,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-onion",
+    "name": "Onion",
+    "category": "vegetables",
+    "caloriesPer100g": 40,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 9.3,
+    "fatPer100g": 0.1,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-tomato",
+    "name": "Tomato",
+    "category": "vegetables",
+    "caloriesPer100g": 18,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 3.9,
+    "fatPer100g": 0.2,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-diced-tomatoes",
+    "name": "Diced tomatoes",
+    "category": "vegetables",
+    "caloriesPer100g": 20,
+    "proteinPer100g": 1,
+    "carbsPer100g": 4,
+    "fatPer100g": 0.1,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-garlic",
+    "name": "Garlic",
+    "category": "vegetables",
+    "caloriesPer100g": 149,
+    "proteinPer100g": 6.4,
+    "carbsPer100g": 33,
+    "fatPer100g": 0.5,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-broccoli",
+    "name": "Broccoli",
+    "category": "vegetables",
+    "caloriesPer100g": 34,
+    "proteinPer100g": 2.8,
+    "carbsPer100g": 7,
+    "fatPer100g": 0.4,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-spinach",
+    "name": "Spinach",
+    "category": "vegetables",
+    "caloriesPer100g": 23,
+    "proteinPer100g": 2.9,
+    "carbsPer100g": 3.6,
+    "fatPer100g": 0.4,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-capsicum",
+    "name": "Capsicum",
+    "category": "vegetables",
+    "caloriesPer100g": 31,
+    "proteinPer100g": 1,
+    "carbsPer100g": 6,
+    "fatPer100g": 0.3,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-olive-oil",
+    "name": "Olive oil",
+    "category": "oils",
+    "caloriesPer100g": 884,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": 100,
+    "defaultUnit": "ml"
+  },
+  {
+    "id": "ing-butter",
+    "name": "Butter",
+    "category": "dairy",
+    "caloriesPer100g": 717,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 0.1,
+    "fatPer100g": 81,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-milk",
+    "name": "Milk",
+    "category": "dairy",
+    "caloriesPer100g": 42,
+    "proteinPer100g": 3.4,
+    "carbsPer100g": 5,
+    "fatPer100g": 1,
+    "defaultUnit": "ml"
+  },
+  {
+    "id": "ing-greek-yogurt",
+    "name": "Greek yogurt",
+    "category": "dairy",
+    "caloriesPer100g": 59,
+    "proteinPer100g": 10,
+    "carbsPer100g": 3.6,
+    "fatPer100g": 0.4,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-cottage-cheese",
+    "name": "Cottage cheese",
+    "category": "dairy",
+    "caloriesPer100g": 98,
+    "proteinPer100g": 11,
+    "carbsPer100g": 3.4,
+    "fatPer100g": 4.3,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-whey-protein",
+    "name": "Whey protein",
+    "category": "other",
+    "caloriesPer100g": 400,
+    "proteinPer100g": 80,
+    "carbsPer100g": 8,
+    "fatPer100g": 5,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-oats",
+    "name": "Oats",
+    "category": "grains",
+    "caloriesPer100g": 389,
+    "proteinPer100g": 17,
+    "carbsPer100g": 66,
+    "fatPer100g": 7,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-banana",
+    "name": "Banana",
+    "category": "fruits",
+    "caloriesPer100g": 89,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 23,
+    "fatPer100g": 0.3,
+    "defaultUnit": "g"
+  },
+  {
+    "id": "ing-apple",
+    "name": "Apple",
+    "category": "fruits",
+    "caloriesPer100g": 52,
+    "proteinPer100g": 0.3,
+    "carbsPer100g": 14,
+    "fatPer100g": 0.2,
+    "defaultUnit": "g"
+  }
+]

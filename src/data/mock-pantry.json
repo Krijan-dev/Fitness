@@ -1,0 +1,44 @@
+[
+  {
+    "id": "pantry-1",
+    "name": "Olive oil",
+    "quantity": 250,
+    "unit": "ml",
+    "category": "pantry",
+    "lowStockThreshold": 100
+  },
+  {
+    "id": "pantry-2",
+    "name": "White rice",
+    "quantity": 800,
+    "unit": "g",
+    "category": "pantry",
+    "lowStockThreshold": 500
+  },
+  {
+    "id": "pantry-3",
+    "name": "Eggs",
+    "quantity": 4,
+    "unit": "item",
+    "category": "dairy",
+    "lowStockThreshold": 6,
+    "expiryDate": "2026-03-25"
+  },
+  {
+    "id": "pantry-4",
+    "name": "Greek yogurt",
+    "quantity": 150,
+    "unit": "g",
+    "category": "dairy",
+    "lowStockThreshold": 200,
+    "expiryDate": "2026-03-22"
+  },
+  {
+    "id": "pantry-5",
+    "name": "Chicken breast",
+    "quantity": 0,
+    "unit": "g",
+    "category": "meat",
+    "lowStockThreshold": 500
+  }
+]

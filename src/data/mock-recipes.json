@@ -1,0 +1,136 @@
+[
+  {
+    "id": "recipe-1",
+    "name": "Chicken & Rice Bowl",
+    "category": "meal-prep",
+    "description": "High-protein meal prep bowl with seasoned chicken and jasmine rice.",
+    "ingredients": [
+      {
+        "id": "ing-1",
+        "name": "Chicken breast",
+        "quantity": 500,
+        "unit": "g",
+        "caloriesPer100g": 120,
+        "proteinPer100g": 23,
+        "carbsPer100g": 0,
+        "fatPer100g": 2.6
+      },
+      {
+        "id": "ing-2",
+        "name": "White rice",
+        "quantity": 300,
+        "unit": "g",
+        "caloriesPer100g": 130,
+        "proteinPer100g": 2.7,
+        "carbsPer100g": 28,
+        "fatPer100g": 0.3
+      }
+    ],
+    "totalNutrition": {
+      "calories": 990,
+      "protein": 123.1,
+      "carbs": 84,
+      "fat": 14.3
+    },
+    "cookedWeight": 750,
+    "servingSize": 350,
+    "servings": 4,
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 30,
+    "isFavourite": true,
+    "createdAt": "2026-03-01T08:00:00.000Z",
+    "updatedAt": "2026-03-01T08:00:00.000Z"
+  },
+  {
+    "id": "recipe-2",
+    "name": "Greek Yogurt Parfait",
+    "category": "breakfast",
+    "description": "Quick breakfast with Greek yogurt, oats and banana.",
+    "ingredients": [
+      {
+        "id": "ing-3",
+        "name": "Greek yogurt",
+        "quantity": 200,
+        "unit": "g",
+        "caloriesPer100g": 59,
+        "proteinPer100g": 10,
+        "carbsPer100g": 3.6,
+        "fatPer100g": 0.4
+      },
+      {
+        "id": "ing-4",
+        "name": "Oats",
+        "quantity": 50,
+        "unit": "g",
+        "caloriesPer100g": 389,
+        "proteinPer100g": 17,
+        "carbsPer100g": 66,
+        "fatPer100g": 7
+      },
+      {
+        "id": "ing-5",
+        "name": "Banana",
+        "quantity": 120,
+        "unit": "g",
+        "caloriesPer100g": 89,
+        "proteinPer100g": 1.1,
+        "carbsPer100g": 23,
+        "fatPer100g": 0.3
+      }
+    ],
+    "totalNutrition": {
+      "calories": 381,
+      "protein": 29.5,
+      "carbs": 55.5,
+      "fat": 7.9
+    },
+    "servingSize": 370,
+    "servings": 1,
+    "prepTimeMinutes": 5,
+    "cookTimeMinutes": 0,
+    "isFavourite": false,
+    "createdAt": "2026-03-05T07:30:00.000Z",
+    "updatedAt": "2026-03-05T07:30:00.000Z"
+  },
+  {
+    "id": "recipe-3",
+    "name": "Salmon & Broccoli",
+    "category": "dinner",
+    "description": "Omega-3 rich salmon with steamed broccoli.",
+    "ingredients": [
+      {
+        "id": "ing-6",
+        "name": "Salmon",
+        "quantity": 200,
+        "unit": "g",
+        "caloriesPer100g": 208,
+        "proteinPer100g": 20,
+        "carbsPer100g": 0,
+        "fatPer100g": 13
+      },
+      {
+        "id": "ing-7",
+        "name": "Broccoli",
+        "quantity": 150,
+        "unit": "g",
+        "caloriesPer100g": 34,
+        "proteinPer100g": 2.8,
+        "carbsPer100g": 7,
+        "fatPer100g": 0.4
+      }
+    ],
+    "totalNutrition": {
+      "calories": 467,
+      "protein": 44.2,
+      "carbs": 10.5,
+      "fat": 26.6
+    },
+    "servingSize": 350,
+    "servings": 1,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 20,
+    "isFavourite": true,
+    "createdAt": "2026-02-20T18:00:00.000Z",
+    "updatedAt": "2026-02-20T18:00:00.000Z"
+  }
+]
