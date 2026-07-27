@@ -2,20 +2,20 @@
 
 import Link from "next/link";
 import { Menu, Settings } from "lucide-react";
-import { APP_NAME } from "@/utils/constants";
+import { APP_NAME, NAV_GROUPS, getNavLabelForPath } from "@/utils/constants";
 import { Button } from "@/components/common/Button";
 import { useState } from "react";
-import { NAV_ITEMS } from "@/utils/constants";
 import { navIconMap } from "./nav-icons";
 import { usePathname } from "next/navigation";
 
 export function TopBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const pageTitle = getNavLabelForPath(pathname);
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/95 backdrop-blur px-4 lg:px-6">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border/80 bg-background/80 backdrop-blur-md px-4 lg:px-8">
         <div className="flex items-center gap-3 lg:hidden">
           <Button
             variant="ghost"
@@ -25,13 +25,16 @@ export function TopBar() {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <Link href="/dashboard" className="font-semibold text-foreground">
-            {APP_NAME}
-          </Link>
+          <span className="font-semibold text-foreground truncate">
+            {pageTitle}
+          </span>
         </div>
-        <div className="hidden lg:block">
-          <p className="text-sm text-muted-foreground">
-            Track meals, plan prep, and optimise your nutrition
+        <div className="hidden lg:block min-w-0">
+          <p className="text-sm font-medium text-foreground">{pageTitle}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {pathname === "/dashboard"
+              ? "Your nutrition and meal prep at a glance"
+              : APP_NAME}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -55,7 +58,7 @@ export function TopBar() {
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-card border-r border-border p-4">
+          <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-card border-r border-border p-5 shadow-xl">
             <div className="mb-6 flex items-center justify-between">
               <span className="font-semibold">{APP_NAME}</span>
               <Button
@@ -67,32 +70,40 @@ export function TopBar() {
                 ✕
               </Button>
             </div>
-            <nav>
-              <ul className="space-y-1">
-                {NAV_ITEMS.map((item) => {
-                  const Icon = navIconMap[item.icon];
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            <nav className="space-y-6">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.label}>
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {group.label}
+                  </p>
+                  <ul className="space-y-0.5">
+                    {group.items.map((item) => {
+                      const Icon = navIconMap[item.icon];
+                      const isActive =
+                        pathname === item.href ||
+                        (item.href !== "/dashboard" &&
+                          pathname.startsWith(item.href));
 
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-muted"
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            onClick={() => setMenuOpen(false)}
+                            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                              isActive
+                                ? "bg-primary/15 text-primary"
+                                : "text-muted-foreground hover:bg-muted"
+                            }`}
+                          >
+                            <Icon className="h-5 w-5" />
+                            {item.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
             </nav>
           </div>
         </div>

@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus, ShoppingCart, Tags } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { FilterBar } from "@/components/layout/FilterBar";
+import { PageSection } from "@/components/layout/PageSection";
 import { SearchInput } from "@/components/common/SearchInput";
 import { Select } from "@/components/common/Select";
 import { Button } from "@/components/common/Button";
@@ -90,30 +92,35 @@ export function ShoppingListContent() {
 
       {actionMessage ? (
         <div
-          className="mb-6 rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success"
+          className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success"
           role="status"
         >
           {actionMessage}
         </div>
       ) : null}
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="To buy"
-          value={unpurchasedCount}
-          icon={ShoppingCart}
-        />
-        <StatCard label="Purchased" value={purchasedCount} />
-        <StatCard label="Total items" value={items.length} />
-      </div>
+      <PageSection>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard
+            compact
+            label="To buy"
+            value={unpurchasedCount}
+            icon={ShoppingCart}
+          />
+          <StatCard compact label="Purchased" value={purchasedCount} />
+          <StatCard compact label="Total" value={items.length} />
+        </div>
+      </PageSection>
 
-      <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_auto]">
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Search items..."
-          label="Search"
-        />
+      <FilterBar>
+        <div className="flex-1 min-w-[200px]">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search items..."
+            label="Search"
+          />
+        </div>
         <Select
           label="Show"
           value={filter}
@@ -125,29 +132,31 @@ export function ShoppingListContent() {
             setFilter(e.target.value as ShoppingFilterOption)
           }
         />
-      </div>
+      </FilterBar>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            markAllPurchased();
-            showMessage("All items marked purchased.");
-          }}
-          disabled={unpurchasedCount === 0}
-        >
-          Mark all purchased
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setClearOpen(true)}
-          disabled={purchasedCount === 0}
-        >
-          Clear purchased
-        </Button>
-      </div>
+      <PageSection>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              markAllPurchased();
+              showMessage("All items marked purchased.");
+            }}
+            disabled={unpurchasedCount === 0}
+          >
+            Mark all purchased
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setClearOpen(true)}
+            disabled={purchasedCount === 0}
+          >
+            Clear purchased
+          </Button>
+        </div>
+      </PageSection>
 
       {filteredItems.length === 0 ? (
         <EmptyState

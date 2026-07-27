@@ -11,13 +11,12 @@ import {
   Compass,
   Flame,
   Beef,
-  Wheat,
-  Droplets,
-  Package,
   CalendarDays,
   TrendingDown,
+  Package,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { PageSection } from "@/components/layout/PageSection";
 import { StatCard } from "@/components/common/StatCard";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/common/Card";
 import { ProgressBar } from "@/components/common/ProgressBar";
@@ -35,12 +34,12 @@ import { calculateWeeklyWeightChange } from "@/utils/calculations";
 import { formatCurrency } from "@/utils/currency";
 
 const quickActions = [
-  { label: "Calculate Meal", href: "/meal-calculator", icon: Calculator },
-  { label: "Add Recipe", href: "/recipes", icon: BookOpen },
-  { label: "Log Meal", href: "/daily-tracker", icon: Activity },
-  { label: "Add Shopping Item", href: "/shopping-list", icon: ShoppingCart },
-  { label: "Log Weight", href: "/weight-tracker", icon: Scale },
-  { label: "Discover Recipes", href: "/discover", icon: Compass },
+  { label: "Calculate meal", href: "/meal-calculator", icon: Calculator },
+  { label: "Log meal", href: "/daily-tracker", icon: Activity },
+  { label: "Plan week", href: "/meal-planner", icon: CalendarDays },
+  { label: "Shopping list", href: "/shopping-list", icon: ShoppingCart },
+  { label: "Discover", href: "/discover", icon: Compass },
+  { label: "Log weight", href: "/weight-tracker", icon: Scale },
 ];
 
 export function DashboardContent() {
@@ -98,71 +97,83 @@ export function DashboardContent() {
         description="Your nutrition, meal prep, and progress at a glance."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard
-          label="Today's Calories"
-          value={Math.round(todayNutrition.calories)}
-          subValue={`${Math.round(caloriesRemaining)} remaining`}
-          icon={Flame}
-        />
-        <StatCard
-          label="Protein"
-          value={`${Math.round(todayNutrition.protein)}g`}
-          subValue={`Goal: ${proteinGoal}g`}
-          icon={Beef}
-        />
-        <StatCard
-          label="Current Weight"
-          value={`${currentWeight} kg`}
-          subValue={`Target: ${targetWeight} kg`}
-          icon={Scale}
-          trend={weeklyChange < 0 ? "down" : weeklyChange > 0 ? "up" : "neutral"}
-        />
-        <StatCard
-          label="Weekly Change"
-          value={`${weeklyChange > 0 ? "+" : ""}${weeklyChange.toFixed(1)} kg`}
-          subValue="Past 7 days"
-          icon={TrendingDown}
-          trend={weeklyChange < 0 ? "down" : weeklyChange > 0 ? "up" : "neutral"}
-        />
-      </div>
+      <PageSection title="Today">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="Calories"
+            value={Math.round(todayNutrition.calories)}
+            subValue={`${Math.round(caloriesRemaining)} left of ${calorieGoal}`}
+            icon={Flame}
+          />
+          <StatCard
+            label="Protein"
+            value={`${Math.round(todayNutrition.protein)}g`}
+            subValue={`Goal ${proteinGoal}g`}
+            icon={Beef}
+          />
+          <StatCard
+            label="Weight"
+            value={`${currentWeight} kg`}
+            subValue={`Target ${targetWeight} kg`}
+            icon={Scale}
+          />
+          <StatCard
+            label="Weekly change"
+            value={`${weeklyChange > 0 ? "+" : ""}${weeklyChange.toFixed(1)} kg`}
+            subValue="Past 7 days"
+            icon={TrendingDown}
+            trend={weeklyChange < 0 ? "down" : weeklyChange > 0 ? "up" : "neutral"}
+          />
+        </div>
+      </PageSection>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="Carbohydrates" value={`${Math.round(todayNutrition.carbs)}g`} icon={Wheat} />
-        <StatCard label="Fat" value={`${Math.round(todayNutrition.fat)}g`} icon={Droplets} />
-        <StatCard label="Meals Logged" value={meals.length} subValue="Today" icon={Activity} />
-        <StatCard label="Saved Recipes" value={recipes.length} icon={BookOpen} />
-      </div>
+      <PageSection title="Progress">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Nutrition goals</CardTitle>
+              <CardDescription>Macros logged today</CardDescription>
+            </CardHeader>
+            <div className="space-y-5">
+              <ProgressBar
+                label="Calories"
+                value={todayNutrition.calories}
+                max={calorieGoal}
+              />
+              <ProgressBar
+                label="Protein"
+                value={todayNutrition.protein}
+                max={proteinGoal}
+                color="success"
+              />
+              <ProgressBar
+                label="Carbs"
+                value={todayNutrition.carbs}
+                max={settings.nutritionGoals.dailyCarbGoal}
+              />
+              <ProgressBar
+                label="Fat"
+                value={todayNutrition.fat}
+                max={settings.nutritionGoals.dailyFatGoal}
+                color="warning"
+              />
+            </div>
+          </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        <StatCard
-          label="Shopping List"
-          value={unpurchasedCount}
-          subValue="Items to buy"
-          icon={ShoppingCart}
-        />
-        <StatCard
-          label="Pantry Alerts"
-          value={lowStockCount}
-          subValue="Low stock items"
-          icon={Package}
-        />
-        <StatCard
-          label="Weekly Grocery Est."
-          value={formatCurrency(estimatedGroceryCost)}
-          subValue="Based on list"
-          icon={ShoppingCart}
-        />
-        <StatCard
-          label="Planned Meals"
-          value={plannedMeals.length}
-          subValue="This week"
-          icon={CalendarDays}
-        />
-      </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Weight trend</CardTitle>
+              <CardDescription>Recent entries</CardDescription>
+            </CardHeader>
+            <WeightProgressChart data={sortedWeights} />
+          </Card>
+        </div>
+      </PageSection>
 
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+      <PageSection
+        title="Quick actions"
+        description="Jump straight to common tasks."
+      >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {quickActions.map((action) => {
             const Icon = action.icon;
@@ -170,142 +181,131 @@ export function DashboardContent() {
               <Link key={action.href} href={action.href}>
                 <Button
                   variant="secondary"
-                  className="w-full justify-start h-auto py-3"
+                  className="w-full justify-start h-auto py-3.5 px-4"
                 >
-                  <Icon className="h-4 w-4" />
-                  {action.label}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="font-medium">{action.label}</span>
                 </Button>
               </Link>
             );
           })}
         </div>
-      </div>
+      </PageSection>
 
-      <div className="grid gap-6 lg:grid-cols-2 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Today&apos;s Nutrition</CardTitle>
-            <CardDescription>Progress toward your daily goals</CardDescription>
-          </CardHeader>
-          <div className="space-y-4">
-            <ProgressBar
-              label="Calories"
-              value={todayNutrition.calories}
-              max={calorieGoal}
-            />
-            <ProgressBar
-              label="Protein"
-              value={todayNutrition.protein}
-              max={proteinGoal}
-              color="success"
-            />
-            <ProgressBar
-              label="Carbohydrates"
-              value={todayNutrition.carbs}
-              max={settings.nutritionGoals.dailyCarbGoal}
-            />
-            <ProgressBar
-              label="Fat"
-              value={todayNutrition.fat}
-              max={settings.nutritionGoals.dailyFatGoal}
-              color="warning"
-            />
-          </div>
-        </Card>
+      <PageSection title="Lists & planning">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            compact
+            label="To buy"
+            value={unpurchasedCount}
+            subValue={formatCurrency(estimatedGroceryCost) + " est."}
+            icon={ShoppingCart}
+          />
+          <StatCard
+            compact
+            label="Pantry alerts"
+            value={lowStockCount}
+            subValue="Low stock"
+            icon={Package}
+          />
+          <StatCard
+            compact
+            label="Planned meals"
+            value={plannedMeals.length}
+            subValue="This week"
+            icon={CalendarDays}
+          />
+          <StatCard
+            compact
+            label="Recipes"
+            value={recipes.length}
+            subValue="In your library"
+            icon={BookOpen}
+          />
+        </div>
+      </PageSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Weight Progress</CardTitle>
-            <CardDescription>Your weight trend over time</CardDescription>
-          </CardHeader>
-          <WeightProgressChart data={sortedWeights} />
-        </Card>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Recipes</CardTitle>
-            <CardDescription>Your latest saved meals</CardDescription>
-          </CardHeader>
-          <ul className="space-y-3">
-            {recentRecipes.map((recipe) => (
-              <li
-                key={recipe.id}
-                className="flex items-center justify-between rounded-lg border border-border p-3"
-              >
-                <div>
-                  <p className="font-medium text-sm">{recipe.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {Math.round(recipe.totalNutrition.calories / recipe.servings)} cal/serving
-                  </p>
-                </div>
-                <span className="text-xs text-muted-foreground capitalize">
-                  {recipe.category.replace("-", " ")}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Planned Meals</CardTitle>
-            <CardDescription>This week&apos;s meal plan</CardDescription>
-          </CardHeader>
-          <ul className="space-y-3">
-            {plannedMeals.slice(0, 4).map((meal) => (
-              <li
-                key={meal.id}
-                className="flex items-center justify-between rounded-lg border border-border p-3"
-              >
-                <div>
-                  <p className="font-medium text-sm">{meal.recipeName}</p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {meal.day} · {meal.mealType}
-                  </p>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {Math.round(meal.nutrition.calories)} cal
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Shopping Summary</CardTitle>
-            <CardDescription>Items on your list</CardDescription>
-          </CardHeader>
-          <ul className="space-y-3">
-            {shoppingItems
-              .filter((i) => !i.purchased)
-              .slice(0, 4)
-              .map((item) => (
+      <PageSection title="Recent activity">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recipes</CardTitle>
+              <CardDescription>Recently saved</CardDescription>
+            </CardHeader>
+            <ul className="space-y-2">
+              {recentRecipes.map((recipe) => (
                 <li
-                  key={item.id}
-                  className="flex items-center justify-between rounded-lg border border-border p-3"
+                  key={recipe.id}
+                  className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/20 px-3 py-3"
                 >
-                  <div>
-                    <p className="font-medium text-sm">{item.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {item.category}
+                  <div className="min-w-0 pr-2">
+                    <p className="font-medium text-sm truncate">{recipe.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {Math.round(recipe.totalNutrition.calories / recipe.servings)} cal/serving
                     </p>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {item.quantity} {item.unit}
+                  <span className="text-xs text-muted-foreground capitalize shrink-0">
+                    {recipe.category.replace("-", " ")}
                   </span>
                 </li>
               ))}
-          </ul>
-          {lowStockCount > 0 ? (
-            <p className="mt-4 text-sm text-warning">
-              {lowStockCount} pantry item{lowStockCount !== 1 ? "s" : ""} running low
-            </p>
-          ) : null}
-        </Card>
-      </div>
+            </ul>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Meal plan</CardTitle>
+              <CardDescription>Coming up this week</CardDescription>
+            </CardHeader>
+            <ul className="space-y-2">
+              {plannedMeals.slice(0, 4).map((meal) => (
+                <li
+                  key={meal.id}
+                  className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/20 px-3 py-3"
+                >
+                  <div className="min-w-0 pr-2">
+                    <p className="font-medium text-sm truncate">{meal.recipeName}</p>
+                    <p className="text-xs text-muted-foreground capitalize mt-0.5">
+                      {meal.day} · {meal.mealType}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {Math.round(meal.nutrition.calories)} cal
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Shopping</CardTitle>
+              <CardDescription>Next items to buy</CardDescription>
+            </CardHeader>
+            <ul className="space-y-2">
+              {shoppingItems
+                .filter((i) => !i.purchased)
+                .slice(0, 4)
+                .map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/20 px-3 py-3"
+                  >
+                    <div className="min-w-0 pr-2">
+                      <p className="font-medium text-sm truncate">{item.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize mt-0.5">
+                        {item.category}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {item.quantity} {item.unit}
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          </Card>
+        </div>
+      </PageSection>
     </>
   );
 }

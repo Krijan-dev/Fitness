@@ -20,16 +20,18 @@ export function PageHeader({
   children,
 }: PageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">{title}</h1>
+    <div className="mb-2 flex flex-col gap-4 border-b border-border/60 pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]">
+          {title}
+        </h1>
         {description ? (
-          <p className="mt-1 text-sm text-muted-foreground max-w-2xl">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground max-w-2xl">
             {description}
           </p>
         ) : null}
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
         {action ? (
           action.href ? (
             <Link href={action.href}>

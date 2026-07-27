@@ -17,19 +17,21 @@ export function AppShell({ children }: AppShellProps) {
   const hydrated = useStoreHydration();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background app-shell-bg">
       <SkipLink />
       <Sidebar />
-      <div className="lg:pl-64">
+      <div className="lg:pl-72">
         <TopBar />
         <main
           id="main-content"
-          className="px-4 py-6 pb-24 lg:px-8 lg:pb-8 max-w-7xl mx-auto"
+          className="mx-auto max-w-6xl px-4 py-8 pb-28 lg:px-8 lg:pb-10"
         >
           {!hydrated ? (
             <LoadingState message="Loading your data..." />
           ) : (
-            <ErrorBoundary>{children}</ErrorBoundary>
+            <ErrorBoundary>
+              <div className="flex flex-col gap-10">{children}</div>
+            </ErrorBoundary>
           )}
         </main>
       </div>

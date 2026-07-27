@@ -157,7 +157,7 @@ export function SettingsContent() {
         </div>
       ) : null}
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>Profile</CardTitle>
