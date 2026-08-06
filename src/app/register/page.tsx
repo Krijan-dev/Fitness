@@ -17,7 +17,7 @@ import { useToast } from "@/components/common/Toast";
 export default function RegisterPage() {
   const router = useRouter();
   const register = useAuthStore((s) => s.register);
-  const loading = useAuthStore((s) => s.loading);
+  const submitting = useAuthStore((s) => s.submitting);
   const { push } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -86,7 +86,7 @@ export default function RegisterPage() {
           onChange={setConfirmPassword}
           autoComplete="new-password"
         />
-        <Button type="submit" className="w-full" isLoading={loading} size="lg">
+        <Button type="submit" className="w-full" isLoading={submitting} size="lg">
           Create account
         </Button>
       </form>
