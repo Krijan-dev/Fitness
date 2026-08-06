@@ -1,44 +1,103 @@
-import { NextRequest, NextResponse } from "next/server";
-import { mockRecipeProvider } from "@/services/recipes/mock-recipe.provider";
-import type { RecipeSearchParams } from "@/types/recipe";
+import { NextRequest } from "next/server";
+import { Recipe } from "@/models/Recipe";
+import { withAuth } from "@/lib/route-auth";
+import { recipeCreateSchema } from "@/lib/validations";
+import { toClientRecipe } from "@/lib/mappers";
+import { jsonOk, handleApiError, jsonError } from "@/lib/api";
+import { generateId } from "@/utils/ids";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = request.nextUrl;
-    const provider = process.env.RECIPE_API_PROVIDER || "mock";
+    const session = await withAuth(request);
+    const docs = await Recipe.find({ userId: session.userId }).sort({
+      updatedAt: -1,
+    });
+    return jsonOk({ data: docs.map(toClientRecipe) });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
 
-    const params: RecipeSearchParams = {
-      query: searchParams.get("query") || undefined,
-      cuisine: searchParams.get("cuisine") || undefined,
-      mealType: searchParams.get("mealType") || undefined,
-      maxCalories: searchParams.get("maxCalories")
-        ? Number(searchParams.get("maxCalories"))
-        : undefined,
-      minProtein: searchParams.get("minProtein")
-        ? Number(searchParams.get("minProtein"))
-        : undefined,
-      maxCookTime: searchParams.get("maxCookTime")
-        ? Number(searchParams.get("maxCookTime"))
-        : undefined,
-      dietaryTags: searchParams.get("dietaryTags")
-        ? searchParams.get("dietaryTags")!.split(",").filter(Boolean)
-        : undefined,
-    };
+export async function POST(request: NextRequest) {
+  try {
+    const session = await withAuth(request);
+    const body = await request.json();
+    const data = recipeCreateSchema.parse(body);
+    const clientId = typeof body.id === "string" ? body.id : generateId();
 
-    if (provider === "mock") {
-      const recipes = await mockRecipeProvider.searchRecipes(params);
-      return NextResponse.json({ data: recipes, source: "mock" });
+    const existing = await Recipe.findOne({
+      userId: session.userId,
+      clientId,
+    });
+    if (existing) {
+      return jsonError("Recipe already exists", 409);
     }
 
-    // Future: external provider via server-side API key
-    return NextResponse.json(
-      { error: "Recipe provider not configured. Set RECIPE_API_PROVIDER=mock." },
-      { status: 503 }
-    );
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to fetch recipes." },
-      { status: 500 }
-    );
+    const doc = await Recipe.create({
+      userId: session.userId,
+      clientId,
+      title: data.name,
+      category: data.category,
+      description: data.description,
+      ingredients: data.ingredients,
+      nutrition: data.totalNutrition,
+      cookedWeight: data.cookedWeight,
+      servingSize: data.servingSize,
+      servings: data.servings,
+      prepTimeMinutes: data.prepTimeMinutes,
+      cookTimeMinutes: data.cookTimeMinutes,
+      notes: data.notes,
+      favourite: data.isFavourite ?? false,
+      imageUrl: data.imageUrl,
+    });
+
+    return jsonOk({ data: toClientRecipe(doc) }, 201);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await withAuth(request);
+    const body = await request.json();
+    if (!Array.isArray(body?.recipes)) {
+      return jsonError("Expected { recipes: [] }", 400);
+    }
+
+    const recipes = body.recipes as Array<Record<string, unknown>>;
+    await Recipe.deleteMany({ userId: session.userId });
+
+    if (recipes.length > 0) {
+      await Recipe.insertMany(
+        recipes.map((r) => ({
+          userId: session.userId,
+          clientId: String(r.id || generateId()),
+          title: String(r.name || "Untitled"),
+          category: String(r.category || "other"),
+          description: r.description,
+          ingredients: r.ingredients || [],
+          nutrition: r.totalNutrition || {
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+          },
+          cookedWeight: r.cookedWeight,
+          servingSize: Number(r.servingSize || 1),
+          servings: Number(r.servings || 1),
+          prepTimeMinutes: r.prepTimeMinutes,
+          cookTimeMinutes: r.cookTimeMinutes,
+          notes: r.notes,
+          favourite: Boolean(r.isFavourite),
+          imageUrl: r.imageUrl,
+        }))
+      );
+    }
+
+    const docs = await Recipe.find({ userId: session.userId });
+    return jsonOk({ data: docs.map(toClientRecipe) });
+  } catch (error) {
+    return handleApiError(error);
   }
 }

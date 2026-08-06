@@ -1,0 +1,83 @@
+"use client";
+
+import {
+  AuthShell,
+  AuthFormMessage,
+  PasswordInput,
+  Button,
+  Input,
+  Link,
+  useRouter,
+  useState,
+  type FormEvent,
+} from "@/components/auth/AuthShell";
+import { useAuthStore } from "@/stores/auth-store";
+import { useToast } from "@/components/common/Toast";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const login = useAuthStore((s) => s.login);
+  const loading = useAuthStore((s) => s.loading);
+  const { push } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    try {
+      await login(email, password);
+      push("Welcome back!", "success");
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+    }
+  }
+
+  return (
+    <AuthShell
+      title="Welcome back"
+      subtitle="Sign in to continue to your meal prep workspace."
+      footer={
+        <>
+          Don&apos;t have an account?{" "}
+          <Link href="/register" className="font-medium text-primary hover:underline">
+            Create one
+          </Link>
+        </>
+      }
+    >
+      <form className="space-y-4" onSubmit={onSubmit}>
+        {error ? <AuthFormMessage tone="error" message={error} /> : null}
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          required
+        />
+        <PasswordInput
+          id="password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          autoComplete="current-password"
+        />
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-muted-foreground hover:text-primary"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <Button type="submit" className="w-full" isLoading={loading} size="lg">
+          Sign in
+        </Button>
+      </form>
+    </AuthShell>
+  );
+}

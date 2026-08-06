@@ -112,7 +112,7 @@ export function buildRecipeSearchUrl(
     params.set("dietaryTags", filterParams.dietaryTags.join(","));
 
   const qs = params.toString();
-  return qs ? `/api/recipes?${qs}` : "/api/recipes";
+  return qs ? `/api/discover?${qs}` : "/api/discover";
 }
 
 function mealTypeToCategory(mealType?: string): RecipeCategory {

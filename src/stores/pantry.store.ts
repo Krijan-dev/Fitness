@@ -1,14 +1,12 @@
 import { create } from "zustand";
 import type { PantryItem } from "@/types/pantry";
-import { localStorageService } from "@/services/storage/localStorage.service";
-import { STORAGE_KEYS } from "@/services/storage/storage.keys";
-import mockPantry from "@/data/mock-pantry.json";
+import { apiGet, apiSend, syncInBackground } from "@/lib/api-client";
 import { generateId } from "@/utils/ids";
 
 interface PantryState {
   items: PantryItem[];
   hydrated: boolean;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
   addItem: (item: Omit<PantryItem, "id">) => void;
   updateItem: (id: string, updates: Partial<PantryItem>) => void;
   removeItem: (id: string) => void;
@@ -16,42 +14,44 @@ interface PantryState {
   reset: () => void;
 }
 
-function loadPantry(): PantryItem[] {
-  const stored = localStorageService.getItem<PantryItem[]>(STORAGE_KEYS.PANTRY);
-  if (stored && Array.isArray(stored)) {
-    return stored;
-  }
-  return mockPantry as PantryItem[];
+function persistAll(items: PantryItem[]) {
+  syncInBackground(() => apiSend("/api/pantry", "PUT", { items }));
 }
 
 export const usePantryStore = create<PantryState>((set, get) => ({
   items: [],
   hydrated: false,
 
-  hydrate: () => {
+  hydrate: async () => {
     if (get().hydrated) return;
-    set({ items: loadPantry(), hydrated: true });
+    try {
+      const res = await apiGet<{ data: PantryItem[] }>("/api/pantry");
+      set({ items: res.data, hydrated: true });
+    } catch (error) {
+      console.error("Failed to hydrate pantry", error);
+      set({ items: [], hydrated: true });
+    }
   },
 
   addItem: (item) => {
     const newItem: PantryItem = { ...item, id: generateId() };
     const items = [...get().items, newItem];
-    localStorageService.setItem(STORAGE_KEYS.PANTRY, items);
     set({ items });
+    syncInBackground(() => apiSend("/api/pantry", "POST", newItem));
   },
 
   updateItem: (id, updates) => {
     const items = get().items.map((i) =>
       i.id === id ? { ...i, ...updates } : i
     );
-    localStorageService.setItem(STORAGE_KEYS.PANTRY, items);
     set({ items });
+    syncInBackground(() => apiSend(`/api/pantry/${id}`, "PATCH", updates));
   },
 
   removeItem: (id) => {
     const items = get().items.filter((i) => i.id !== id);
-    localStorageService.setItem(STORAGE_KEYS.PANTRY, items);
     set({ items });
+    syncInBackground(() => apiSend(`/api/pantry/${id}`, "DELETE"));
   },
 
   getLowStockItems: () => {
@@ -63,8 +63,7 @@ export const usePantryStore = create<PantryState>((set, get) => ({
   },
 
   reset: () => {
-    const items = mockPantry as PantryItem[];
-    localStorageService.setItem(STORAGE_KEYS.PANTRY, items);
-    set({ items });
+    set({ items: [] });
+    persistAll([]);
   },
 }));

@@ -1,35 +1,31 @@
 import { create } from "zustand";
 import type { Recipe } from "@/types/recipe";
-import { localStorageService } from "@/services/storage/localStorage.service";
-import { STORAGE_KEYS } from "@/services/storage/storage.keys";
-import mockRecipes from "@/data/mock-recipes.json";
+import { apiGet, apiSend, syncInBackground } from "@/lib/api-client";
 import { generateId } from "@/utils/ids";
 
 interface RecipeState {
   recipes: Recipe[];
   hydrated: boolean;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
   addRecipe: (recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">) => void;
   updateRecipe: (id: string, updates: Partial<Recipe>) => void;
   removeRecipe: (id: string) => void;
   reset: () => void;
 }
 
-function loadRecipes(): Recipe[] {
-  const stored = localStorageService.getItem<Recipe[]>(STORAGE_KEYS.RECIPES);
-  if (stored && Array.isArray(stored) && stored.length > 0) {
-    return stored;
-  }
-  return mockRecipes as Recipe[];
-}
-
 export const useRecipeStore = create<RecipeState>((set, get) => ({
   recipes: [],
   hydrated: false,
 
-  hydrate: () => {
+  hydrate: async () => {
     if (get().hydrated) return;
-    set({ recipes: loadRecipes(), hydrated: true });
+    try {
+      const res = await apiGet<{ data: Recipe[] }>("/api/recipes");
+      set({ recipes: res.data, hydrated: true });
+    } catch (error) {
+      console.error("Failed to hydrate recipes", error);
+      set({ recipes: [], hydrated: true });
+    }
   },
 
   addRecipe: (recipe) => {
@@ -40,8 +36,8 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
       updatedAt: new Date().toISOString(),
     };
     const recipes = [...get().recipes, newRecipe];
-    localStorageService.setItem(STORAGE_KEYS.RECIPES, recipes);
     set({ recipes });
+    syncInBackground(() => apiSend("/api/recipes", "POST", newRecipe));
   },
 
   updateRecipe: (id, updates) => {
@@ -50,19 +46,20 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
         ? { ...r, ...updates, updatedAt: new Date().toISOString() }
         : r
     );
-    localStorageService.setItem(STORAGE_KEYS.RECIPES, recipes);
     set({ recipes });
+    syncInBackground(() => apiSend(`/api/recipes/${id}`, "PATCH", updates));
   },
 
   removeRecipe: (id) => {
     const recipes = get().recipes.filter((r) => r.id !== id);
-    localStorageService.setItem(STORAGE_KEYS.RECIPES, recipes);
     set({ recipes });
+    syncInBackground(() => apiSend(`/api/recipes/${id}`, "DELETE"));
   },
 
   reset: () => {
-    localStorageService.removeItem(STORAGE_KEYS.RECIPES);
-    set({ recipes: mockRecipes as Recipe[] });
-    localStorageService.setItem(STORAGE_KEYS.RECIPES, mockRecipes as Recipe[]);
+    set({ recipes: [] });
+    syncInBackground(() =>
+      apiSend("/api/recipes", "PUT", { recipes: [] })
+    );
   },
 }));

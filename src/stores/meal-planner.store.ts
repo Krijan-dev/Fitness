@@ -1,73 +1,58 @@
 import { create } from "zustand";
 import type { PlannedMeal, WeeklyMealPlan } from "@/types/meal";
-import { localStorageService } from "@/services/storage/localStorage.service";
-import { STORAGE_KEYS } from "@/services/storage/storage.keys";
+import { apiGet, apiSend, syncInBackground } from "@/lib/api-client";
 import { generateId } from "@/utils/ids";
 import { getWeekStart } from "@/utils/date";
 
 interface MealPlannerState {
   plan: WeeklyMealPlan;
   hydrated: boolean;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
   addPlannedMeal: (meal: Omit<PlannedMeal, "id">) => void;
   updatePlannedMeal: (id: string, updates: Partial<PlannedMeal>) => void;
   removePlannedMeal: (id: string) => void;
-  movePlannedMeal: (id: string, day: string, mealType?: PlannedMeal["mealType"]) => void;
+  movePlannedMeal: (
+    id: string,
+    day: string,
+    mealType?: PlannedMeal["mealType"]
+  ) => void;
   copyDay: (fromDay: string, toDay: string) => void;
   clearDay: (day: string) => void;
   clearWeek: () => void;
   reset: () => void;
 }
 
-const defaultPlan = (): WeeklyMealPlan => ({
-  id: generateId(),
-  weekStart: getWeekStart(),
-  meals: [
-    {
-      id: "planned-1",
-      recipeId: "recipe-1",
-      recipeName: "Chicken & Rice Bowl",
-      mealType: "lunch",
-      day: "monday",
-      servings: 1,
-      nutrition: { calories: 462, protein: 57.4, carbs: 39.1, fat: 6.7 },
-    },
-    {
-      id: "planned-2",
-      recipeId: "recipe-3",
-      recipeName: "Salmon & Broccoli",
-      mealType: "dinner",
-      day: "tuesday",
-      servings: 1,
-      nutrition: { calories: 467, protein: 44.2, carbs: 10.5, fat: 26.6 },
-    },
-    {
-      id: "planned-3",
-      recipeId: "recipe-2",
-      recipeName: "Greek Yogurt Parfait",
-      mealType: "breakfast",
-      day: "wednesday",
-      servings: 1,
-      nutrition: { calories: 381, protein: 29.5, carbs: 55.5, fat: 7.9 },
-    },
-  ],
-});
+function emptyPlan(): WeeklyMealPlan {
+  return { id: generateId(), weekStart: getWeekStart(), meals: [] };
+}
 
-function loadPlan(): WeeklyMealPlan {
-  const stored = localStorageService.getItem<WeeklyMealPlan>(STORAGE_KEYS.MEAL_PLANNER);
-  if (stored && stored.meals) {
-    return stored;
-  }
-  return defaultPlan();
+function persistPlan(plan: WeeklyMealPlan) {
+  syncInBackground(() =>
+    apiSend("/api/planner", "PUT", {
+      weekStart: plan.weekStart,
+      meals: plan.meals,
+      clientId: plan.id,
+      id: plan.id,
+    })
+  );
 }
 
 export const useMealPlannerStore = create<MealPlannerState>((set, get) => ({
   plan: { id: "", weekStart: "", meals: [] },
   hydrated: false,
 
-  hydrate: () => {
+  hydrate: async () => {
     if (get().hydrated) return;
-    set({ plan: loadPlan(), hydrated: true });
+    try {
+      const weekStart = getWeekStart();
+      const res = await apiGet<{ data: WeeklyMealPlan }>(
+        `/api/planner?weekStart=${encodeURIComponent(weekStart)}`
+      );
+      set({ plan: res.data || emptyPlan(), hydrated: true });
+    } catch (error) {
+      console.error("Failed to hydrate planner", error);
+      set({ plan: emptyPlan(), hydrated: true });
+    }
   },
 
   addPlannedMeal: (meal) => {
@@ -76,8 +61,8 @@ export const useMealPlannerStore = create<MealPlannerState>((set, get) => ({
       ...get().plan,
       meals: [...get().plan.meals, newMeal],
     };
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
     set({ plan });
+    persistPlan(plan);
   },
 
   removePlannedMeal: (id) => {
@@ -85,8 +70,8 @@ export const useMealPlannerStore = create<MealPlannerState>((set, get) => ({
       ...get().plan,
       meals: get().plan.meals.filter((m) => m.id !== id),
     };
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
     set({ plan });
+    persistPlan(plan);
   },
 
   updatePlannedMeal: (id, updates) => {
@@ -96,21 +81,19 @@ export const useMealPlannerStore = create<MealPlannerState>((set, get) => ({
         m.id === id ? { ...m, ...updates } : m
       ),
     };
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
     set({ plan });
+    persistPlan(plan);
   },
 
   movePlannedMeal: (id, day, mealType) => {
     const plan = {
       ...get().plan,
       meals: get().plan.meals.map((m) =>
-        m.id === id
-          ? { ...m, day, mealType: mealType ?? m.mealType }
-          : m
+        m.id === id ? { ...m, day, mealType: mealType ?? m.mealType } : m
       ),
     };
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
     set({ plan });
+    persistPlan(plan);
   },
 
   copyDay: (fromDay, toDay) => {
@@ -125,8 +108,8 @@ export const useMealPlannerStore = create<MealPlannerState>((set, get) => ({
       ...get().plan,
       meals: [...get().plan.meals, ...copies],
     };
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
     set({ plan });
+    persistPlan(plan);
   },
 
   clearDay: (day) => {
@@ -134,19 +117,19 @@ export const useMealPlannerStore = create<MealPlannerState>((set, get) => ({
       ...get().plan,
       meals: get().plan.meals.filter((m) => m.day !== day),
     };
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
     set({ plan });
+    persistPlan(plan);
   },
 
   clearWeek: () => {
     const plan = { ...get().plan, meals: [] };
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
     set({ plan });
+    persistPlan(plan);
   },
 
   reset: () => {
-    const plan = defaultPlan();
-    localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, plan);
+    const plan = emptyPlan();
     set({ plan });
+    persistPlan(plan);
   },
 }));
