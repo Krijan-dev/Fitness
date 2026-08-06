@@ -1,7 +1,13 @@
+import { config as loadEnv } from "dotenv";
+import { resolve } from "path";
 import { connectMongo } from "../src/lib/mongodb";
 import { hashPassword } from "../src/lib/auth";
 import { User } from "../src/models/User";
 import { UserSettings } from "../src/models/UserSettings";
+
+// Next.js loads .env.local automatically; tsx does not — load both here.
+loadEnv({ path: resolve(process.cwd(), ".env.local") });
+loadEnv({ path: resolve(process.cwd(), ".env") });
 
 async function seedAdmin() {
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
@@ -9,10 +15,14 @@ async function seedAdmin() {
   const name = process.env.ADMIN_NAME?.trim() || "Admin";
 
   if (!process.env.MONGODB_URI) {
-    throw new Error("MONGODB_URI is required");
+    throw new Error(
+      "MONGODB_URI is required. Put it in .env.local at the project root."
+    );
   }
   if (!email || !password) {
-    throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD are required");
+    throw new Error(
+      "ADMIN_EMAIL and ADMIN_PASSWORD are required in .env.local"
+    );
   }
   if (password.length < 8) {
     throw new Error("ADMIN_PASSWORD must be at least 8 characters");
