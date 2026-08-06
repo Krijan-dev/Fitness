@@ -27,8 +27,9 @@ export default function LoginPage() {
     try {
       await login(email, password);
       push("Welcome back!", "success");
-      // Hard navigation so the auth cookie is included on the next request
-      window.location.assign("/dashboard");
+      const role = useAuthStore.getState().user?.role;
+      // Admins go straight to the admin portal — never the user app
+      window.location.assign(role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     }
