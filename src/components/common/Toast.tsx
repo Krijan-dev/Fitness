@@ -87,8 +87,8 @@ export function useToast() {
   if (!ctx) {
     return {
       toasts: [] as Toast[],
-      push: (_message: string, _tone?: ToastTone) => undefined,
-      dismiss: (_id: string) => undefined,
+      push: () => undefined,
+      dismiss: () => undefined,
     };
   }
   return ctx;

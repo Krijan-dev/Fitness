@@ -1,9 +1,9 @@
-import type { Recipe, DiscoveredRecipe, RecipeSearchParams } from "@/types/recipe";
+import type { Recipe, DiscoveredRecipe } from "@/types/recipe";
 import type { RecipeProvider } from "./recipe-provider.interface";
 import { useRecipeStore } from "@/stores/recipe.store";
 
 export class LocalRecipeProvider implements RecipeProvider {
-  async searchRecipes(_params: RecipeSearchParams): Promise<DiscoveredRecipe[]> {
+  async searchRecipes(): Promise<DiscoveredRecipe[]> {
     return [];
   }
 

@@ -119,8 +119,10 @@ export async function PATCH(request: NextRequest) {
     if (!meal) return jsonError("Meal not found", 404);
 
     if (updates.date && updates.date !== entry.date) {
-      entry.meals = entry.meals.filter((m) => m.clientId !== id);
-      await entry.save();
+      await DailyEntry.updateOne(
+        { _id: entry._id },
+        { $pull: { meals: { clientId: id } } }
+      );
 
       const moved = {
         clientId: id,
@@ -141,15 +143,23 @@ export async function PATCH(request: NextRequest) {
         { upsert: true }
       );
     } else {
-      Object.assign(meal, {
-        name: updates.name ?? meal.name,
-        servingAmount: updates.servingAmount ?? meal.servingAmount,
-        nutrition: updates.nutrition ?? meal.nutrition,
-        mealType: updates.mealType ?? meal.mealType,
-        recipeId: updates.recipeId ?? meal.recipeId,
-        notes: updates.notes ?? meal.notes,
-      });
-      await entry.save();
+      const mealIndex = entry.meals.findIndex((m) => m.clientId === id);
+      if (mealIndex < 0) return jsonError("Meal not found", 404);
+      const current = entry.meals[mealIndex];
+      await DailyEntry.updateOne(
+        { _id: entry._id, "meals.clientId": id },
+        {
+          $set: {
+            "meals.$.name": updates.name ?? current.name,
+            "meals.$.servingAmount":
+              updates.servingAmount ?? current.servingAmount,
+            "meals.$.nutrition": updates.nutrition ?? current.nutrition,
+            "meals.$.mealType": updates.mealType ?? current.mealType,
+            "meals.$.recipeId": updates.recipeId ?? current.recipeId,
+            "meals.$.notes": updates.notes ?? current.notes,
+          },
+        }
+      );
     }
 
     return jsonOk({ success: true });

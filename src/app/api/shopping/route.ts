@@ -3,7 +3,7 @@ import { ShoppingItem } from "@/models/ShoppingItem";
 import { withAuth } from "@/lib/route-auth";
 import { shoppingItemSchema } from "@/lib/validations";
 import { toClientShoppingItem } from "@/lib/mappers";
-import { jsonOk, handleApiError, jsonError } from "@/lib/api";
+import { jsonOk, handleApiError } from "@/lib/api";
 import { generateId } from "@/utils/ids";
 import { z } from "zod";
 
