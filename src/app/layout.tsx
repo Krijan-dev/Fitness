@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { ThemeApplier } from "@/components/layout/ThemeApplier";
 import { ToastProvider } from "@/components/common/Toast";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "MealPrep Pro",
@@ -16,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
-      <body>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={inter.variable}>
+      <body className="font-sans antialiased">
         <ThemeApplier />
         <ToastProvider>
           <AppShell>{children}</AppShell>

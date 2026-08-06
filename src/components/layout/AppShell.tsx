@@ -10,6 +10,7 @@ import { LoadingState } from "@/components/common/LoadingState";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { SkipLink } from "./SkipLink";
 import { useAuthStore } from "@/stores/auth-store";
+import { SkeletonCard } from "@/components/ui/Skeleton";
 
 interface AppShellProps {
   children: ReactNode;
@@ -40,32 +41,26 @@ export function AppShell({ children }: AppShellProps) {
     <div className="min-h-screen bg-background app-shell-bg">
       <SkipLink />
       <Sidebar />
-      <div className="lg:pl-72">
+      <div className="lg:pl-[19rem]">
         <TopBar />
         <main
           id="main-content"
           className="mx-auto max-w-6xl px-4 py-8 pb-28 lg:px-8 lg:pb-10"
         >
           {!hydrated ? (
-            <LoadingState message="Loading your data..." />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SkeletonCard />
+              <SkeletonCard />
+              <LoadingState message="Loading your workspace..." />
+            </div>
           ) : (
             <ErrorBoundary>
-              <div className="flex flex-col gap-10">{children}</div>
+              <div className="page-enter flex flex-col gap-8">{children}</div>
             </ErrorBoundary>
           )}
         </main>
       </div>
       <MobileNavigation />
     </div>
-  );
-}
-
-// Avoid hydrating API stores on public auth pages.
-export function shouldHydrateAppData(pathname: string): boolean {
-  return (
-    !pathname.startsWith("/login") &&
-    !pathname.startsWith("/register") &&
-    !pathname.startsWith("/forgot-password") &&
-    !pathname.startsWith("/admin")
   );
 }

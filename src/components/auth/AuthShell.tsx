@@ -23,14 +23,14 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(145deg, #0b1220 0%, #1e1b4b 45%, #312e81 100%)",
+              "linear-gradient(145deg, #0A0F1C 0%, #0f2918 45%, #111827 100%)",
           }}
         />
         <div
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 opacity-50"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 20%, rgba(99,102,241,0.45), transparent 40%), radial-gradient(circle at 80% 0%, rgba(56,189,248,0.25), transparent 35%), radial-gradient(circle at 70% 80%, rgba(168,85,247,0.2), transparent 40%)",
+              "radial-gradient(circle at 20% 20%, rgba(34,197,94,0.35), transparent 40%), radial-gradient(circle at 80% 0%, rgba(59,130,246,0.22), transparent 35%), radial-gradient(circle at 70% 80%, rgba(139,92,246,0.18), transparent 40%)",
           }}
         />
         <div className="relative z-10">

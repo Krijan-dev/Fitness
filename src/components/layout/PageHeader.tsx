@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { type ReactNode } from "react";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/Button";
+import { PageHeader as UiPageHeader } from "@/components/ui/PageHeader";
 
 interface PageHeaderProps {
   title: string;
@@ -19,30 +20,28 @@ export function PageHeader({
   action,
   children,
 }: PageHeaderProps) {
+  const actions = (
+    <div className="flex flex-wrap items-center gap-2">
+      {action ? (
+        action.href ? (
+          <Link href={action.href}>
+            <Button>{action.label}</Button>
+          </Link>
+        ) : (
+          <Button onClick={action.onClick}>{action.label}</Button>
+        )
+      ) : null}
+      {children}
+    </div>
+  );
+
   return (
-    <div className="mb-2 flex flex-col gap-4 border-b border-border/60 pb-6 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]">
-          {title}
-        </h1>
-        {description ? (
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground max-w-2xl">
-            {description}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex flex-wrap items-center gap-2 shrink-0">
-        {action ? (
-          action.href ? (
-            <Link href={action.href}>
-              <Button>{action.label}</Button>
-            </Link>
-          ) : (
-            <Button onClick={action.onClick}>{action.label}</Button>
-          )
-        ) : null}
-        {children}
-      </div>
+    <div className="mb-2 border-b border-border/70 pb-6">
+      <UiPageHeader
+        title={title}
+        description={description}
+        actions={action || children ? actions : undefined}
+      />
     </div>
   );
 }

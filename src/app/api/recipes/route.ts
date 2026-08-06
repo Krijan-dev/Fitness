@@ -9,9 +9,10 @@ import { generateId } from "@/utils/ids";
 export async function GET(request: NextRequest) {
   try {
     const session = await withAuth(request);
-    const docs = await Recipe.find({ userId: session.userId }).sort({
-      updatedAt: -1,
-    });
+    const docs = await Recipe.find({
+      userId: session.userId,
+      ownerType: { $ne: "admin" },
+    }).sort({ updatedAt: -1 });
     return jsonOk({ data: docs.map(toClientRecipe) });
   } catch (error) {
     return handleApiError(error);
@@ -39,7 +40,10 @@ export async function POST(request: NextRequest) {
       title: data.name,
       category: data.category,
       description: data.description,
+      cuisine: data.cuisine,
+      difficulty: data.difficulty,
       ingredients: data.ingredients,
+      instructions: data.instructions || "",
       nutrition: data.totalNutrition,
       cookedWeight: data.cookedWeight,
       servingSize: data.servingSize,
@@ -49,6 +53,9 @@ export async function POST(request: NextRequest) {
       notes: data.notes,
       favourite: data.isFavourite ?? false,
       imageUrl: data.imageUrl,
+      ownerType: "user",
+      visibility: "private",
+      status: "published",
     });
 
     return jsonOk({ data: toClientRecipe(doc) }, 201);
@@ -66,7 +73,10 @@ export async function PUT(request: NextRequest) {
     }
 
     const recipes = body.recipes as Array<Record<string, unknown>>;
-    await Recipe.deleteMany({ userId: session.userId });
+    await Recipe.deleteMany({
+      userId: session.userId,
+      ownerType: { $ne: "admin" },
+    });
 
     if (recipes.length > 0) {
       await Recipe.insertMany(
@@ -76,7 +86,10 @@ export async function PUT(request: NextRequest) {
           title: String(r.name || "Untitled"),
           category: String(r.category || "other"),
           description: r.description,
+          cuisine: r.cuisine,
+          difficulty: r.difficulty,
           ingredients: r.ingredients || [],
+          instructions: r.instructions || "",
           nutrition: r.totalNutrition || {
             calories: 0,
             protein: 0,
@@ -91,11 +104,17 @@ export async function PUT(request: NextRequest) {
           notes: r.notes,
           favourite: Boolean(r.isFavourite),
           imageUrl: r.imageUrl,
+          ownerType: "user",
+          visibility: "private",
+          status: "published",
         }))
       );
     }
 
-    const docs = await Recipe.find({ userId: session.userId });
+    const docs = await Recipe.find({
+      userId: session.userId,
+      ownerType: { $ne: "admin" },
+    });
     return jsonOk({ data: docs.map(toClientRecipe) });
   } catch (error) {
     return handleApiError(error);

@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         type: "recipe_created" as const,
         id: r._id.toString(),
         title: r.title,
-        subtitle: `User ${r.userId.toString()}`,
+        subtitle: `User ${r.userId?.toString() || "unknown"}`,
         at: r.createdAt?.toISOString?.(),
       })),
     ]

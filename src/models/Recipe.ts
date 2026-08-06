@@ -40,28 +40,52 @@ const recipeSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
       index: true,
     },
     clientId: { type: String, index: true },
     title: { type: String, required: true },
     category: { type: String, required: true },
     description: String,
+    cuisine: String,
+    difficulty: {
+      type: String,
+      enum: ["easy", "medium", "hard"],
+    },
     ingredients: { type: [ingredientSchema], default: [] },
+    instructions: { type: String, default: "" },
     nutrition: { type: nutritionSchema, required: true },
     cookedWeight: Number,
-    servingSize: { type: Number, required: true },
-    servings: { type: Number, required: true },
+    servingSize: { type: Number, required: true, default: 100 },
+    servings: { type: Number, required: true, default: 1 },
     prepTimeMinutes: Number,
     cookTimeMinutes: Number,
     notes: String,
     favourite: { type: Boolean, default: false },
     imageUrl: String,
+    ownerType: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
+      index: true,
+    },
+    visibility: {
+      type: String,
+      enum: ["private", "public"],
+      default: "private",
+      index: true,
+    },
+    status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "published",
+      index: true,
+    },
   },
   { timestamps: true }
 );
 
 recipeSchema.index({ userId: 1, clientId: 1 });
+recipeSchema.index({ ownerType: 1, visibility: 1, status: 1 });
 
 export type RecipeDocument = InferSchemaType<typeof recipeSchema> & {
   _id: mongoose.Types.ObjectId;

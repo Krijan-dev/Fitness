@@ -4,41 +4,60 @@
 
 :root,
 [data-theme="dark"] {
-  --background: #0a0a0f;
-  --foreground: #f4f4f5;
-  --card: #12121a;
-  --card-foreground: #f4f4f5;
-  --border: #27272f;
-  --muted: #1a1a24;
-  --muted-foreground: #a1a1aa;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --accent: #1e1e2e;
-  --accent-foreground: #f4f4f5;
+  --background: #0a0f1c;
+  --foreground: #f8fafc;
+  --surface: #111827;
+  --surface-elevated: #1a2234;
+  --surface-hover: #243045;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --border: #2b3548;
+  --muted: #1a2234;
+  --muted-foreground: #94a3b8;
+  --text-muted: #64748b;
+  --primary: #22c55e;
+  --primary-hover: #16a34a;
+  --primary-foreground: #052e16;
+  --secondary: #3b82f6;
+  --secondary-foreground: #eff6ff;
+  --accent: #8b5cf6;
+  --accent-foreground: #f5f3ff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --success: #22c55e;
   --warning: #f59e0b;
-  --radius: 0.75rem;
+  --ring: #22c55e;
+  --radius: 0.875rem;
+  --sidebar: rgba(17, 24, 39, 0.72);
+  --glow: rgba(34, 197, 94, 0.22);
 }
 
 [data-theme="light"] {
-  --background: #f4f4f5;
-  --foreground: #18181b;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-hover: #f1f5f9;
   --card: #ffffff;
-  --card-foreground: #18181b;
-  --border: #e4e4e7;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --primary: #4f46e5;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --text-muted: #94a3b8;
+  --primary: #16a34a;
+  --primary-hover: #15803d;
   --primary-foreground: #ffffff;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
+  --secondary: #2563eb;
+  --secondary-foreground: #ffffff;
+  --accent: #7c3aed;
+  --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --success: #16a34a;
   --warning: #d97706;
-  --radius: 0.75rem;
+  --ring: #16a34a;
+  --sidebar: rgba(255, 255, 255, 0.85);
+  --glow: rgba(22, 163, 74, 0.15);
 }
 
 * {
@@ -52,37 +71,52 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle page backdrop */
 .app-shell-bg {
-  background-image: radial-gradient(
-    ellipse 80% 50% at 50% -20%,
-    color-mix(in srgb, var(--primary) 12%, transparent),
-    transparent
-  );
+  background-image:
+    radial-gradient(ellipse 70% 45% at 10% -10%, color-mix(in srgb, var(--primary) 14%, transparent), transparent),
+    radial-gradient(ellipse 50% 40% at 90% 0%, color-mix(in srgb, var(--secondary) 10%, transparent), transparent);
 }
 
-/* Prevent horizontal overflow on mobile */
+.surface-card {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.page-enter {
+  animation: page-fade 0.35s ease-out;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 html,
 body {
   overflow-x: hidden;
   max-width: 100vw;
 }
 
-/* Dialog backdrop */
 dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(4px);
 }
 
-/* Focus visible for keyboard navigation */
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+::selection {
+  background: color-mix(in srgb, var(--primary) 35%, transparent);
 }

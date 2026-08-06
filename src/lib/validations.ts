@@ -54,7 +54,10 @@ export const recipeCreateSchema = z.object({
   name: z.string().min(1),
   category: z.string().min(1),
   description: z.string().optional(),
+  cuisine: z.string().optional(),
+  difficulty: z.enum(["easy", "medium", "hard"]).optional(),
   ingredients: z.array(ingredientSchema).default([]),
+  instructions: z.string().optional(),
   totalNutrition: nutritionSchema,
   cookedWeight: z.number().optional(),
   servingSize: z.number(),
@@ -64,6 +67,9 @@ export const recipeCreateSchema = z.object({
   notes: z.string().optional(),
   isFavourite: z.boolean().optional().default(false),
   imageUrl: z.string().optional(),
+  ownerType: z.enum(["admin", "user"]).optional(),
+  visibility: z.enum(["private", "public"]).optional(),
+  status: z.enum(["draft", "published"]).optional(),
 });
 
 export const recipeUpdateSchema = recipeCreateSchema.partial();
