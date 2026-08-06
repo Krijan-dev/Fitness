@@ -5,7 +5,10 @@ import { apiGet, apiSend } from "@/lib/api-client";
 interface AuthState {
   user: PublicUser | null;
   isAuthenticated: boolean;
+  /** True while checking /api/auth/me */
   loading: boolean;
+  /** True while login/register request is in flight */
+  submitting: boolean;
   error: string | null;
   fetchUser: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
@@ -22,7 +25,8 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  loading: true,
+  loading: false,
+  submitting: false,
   error: null,
 
   clearError: () => set({ error: null }),
@@ -42,7 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (email, password) => {
-    set({ loading: true, error: null });
+    set({ submitting: true, error: null });
     try {
       const res = await apiSend<{ user: PublicUser }>("/api/auth/login", "POST", {
         email,
@@ -51,11 +55,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         user: res.user,
         isAuthenticated: true,
-        loading: false,
+        submitting: false,
       });
     } catch (error) {
       set({
-        loading: false,
+        submitting: false,
         error: error instanceof Error ? error.message : "Login failed",
         user: null,
         isAuthenticated: false,
@@ -65,7 +69,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   register: async (input) => {
-    set({ loading: true, error: null });
+    set({ submitting: true, error: null });
     try {
       const res = await apiSend<{ user: PublicUser }>(
         "/api/auth/register",
@@ -75,11 +79,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         user: res.user,
         isAuthenticated: true,
-        loading: false,
+        submitting: false,
       });
     } catch (error) {
       set({
-        loading: false,
+        submitting: false,
         error: error instanceof Error ? error.message : "Registration failed",
         user: null,
         isAuthenticated: false,
@@ -89,7 +93,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    set({ loading: true });
+    set({ submitting: true });
     try {
       await apiSend("/api/auth/logout", "POST");
     } finally {
@@ -97,6 +101,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         user: null,
         isAuthenticated: false,
         loading: false,
+        submitting: false,
         error: null,
       });
     }

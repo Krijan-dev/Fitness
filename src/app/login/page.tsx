@@ -17,7 +17,7 @@ import { useToast } from "@/components/common/Toast";
 export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
-  const loading = useAuthStore((s) => s.loading);
+  const submitting = useAuthStore((s) => s.submitting);
   const { push } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,7 +74,7 @@ export default function LoginPage() {
             Forgot password?
           </Link>
         </div>
-        <Button type="submit" className="w-full" isLoading={loading} size="lg">
+        <Button type="submit" className="w-full" isLoading={submitting} size="lg">
           Sign in
         </Button>
       </form>
