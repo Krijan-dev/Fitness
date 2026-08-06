@@ -7,7 +7,6 @@ import {
   Button,
   Input,
   Link,
-  useRouter,
   useState,
   type FormEvent,
 } from "@/components/auth/AuthShell";
@@ -15,7 +14,6 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useToast } from "@/components/common/Toast";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const register = useAuthStore((s) => s.register);
   const submitting = useAuthStore((s) => s.submitting);
   const { push } = useToast();
@@ -35,8 +33,7 @@ export default function RegisterPage() {
     try {
       await register({ name, email, password, confirmPassword });
       push("Account created successfully", "success");
-      router.push("/dashboard");
-      router.refresh();
+      window.location.assign("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     }

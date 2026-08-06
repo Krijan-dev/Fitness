@@ -7,7 +7,6 @@ import {
   Button,
   Input,
   Link,
-  useRouter,
   useState,
   type FormEvent,
 } from "@/components/auth/AuthShell";
@@ -15,7 +14,6 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useToast } from "@/components/common/Toast";
 
 export default function LoginPage() {
-  const router = useRouter();
   const login = useAuthStore((s) => s.login);
   const submitting = useAuthStore((s) => s.submitting);
   const { push } = useToast();
@@ -29,8 +27,8 @@ export default function LoginPage() {
     try {
       await login(email, password);
       push("Welcome back!", "success");
-      router.push("/dashboard");
-      router.refresh();
+      // Hard navigation so the auth cookie is included on the next request
+      window.location.assign("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     }

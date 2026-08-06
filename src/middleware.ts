@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
 const AUTH_COOKIE = "mealprep_token";
 
@@ -30,52 +31,25 @@ interface EdgePayload {
   email?: string;
   role?: string;
   name?: string;
-  exp?: number;
 }
 
-function base64UrlToBytes(input: string): Uint8Array {
-  const padded =
-    input.replace(/-/g, "+").replace(/_/g, "/") +
-    "=".repeat((4 - (input.length % 4)) % 4);
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
-}
-
-async function verifyHs256Jwt(token: string): Promise<EdgePayload | null> {
+async function verifySession(
+  token: string
+): Promise<EdgePayload | null> {
   const secret = process.env.JWT_SECRET;
-  if (!secret) return null;
+  if (!secret) {
+    console.error("JWT_SECRET is missing in middleware");
+    return null;
+  }
 
   try {
-    const [headerB64, payloadB64, signatureB64] = token.split(".");
-    if (!headerB64 || !payloadB64 || !signatureB64) return null;
-
-    const key = await crypto.subtle.importKey(
-      "raw",
-      new TextEncoder().encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"]
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(secret)
     );
-
-    const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const signature = base64UrlToBytes(signatureB64);
-    const valid = await crypto.subtle.verify(
-      "HMAC",
-      key,
-      signature.buffer as ArrayBuffer,
-      data
-    );
-    if (!valid) return null;
-
-    const payloadJson = new TextDecoder().decode(base64UrlToBytes(payloadB64));
-    const payload = JSON.parse(payloadJson) as EdgePayload;
-    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
-    if (!payload.userId) return null;
-    return payload;
+    const data = payload as EdgePayload;
+    if (!data.userId) return null;
+    return data;
   } catch {
     return null;
   }
@@ -90,13 +64,22 @@ function isProtected(pathname: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(AUTH_COOKIE)?.value;
-  const session = token ? await verifyHs256Jwt(token) : null;
+  const session = token ? await verifySession(token) : null;
 
   if (isProtected(pathname)) {
     if (!session?.userId) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
+      const response = NextResponse.redirect(loginUrl);
+      // Clear invalid cookie so the client does not loop
+      if (token) {
+        response.cookies.set(AUTH_COOKIE, "", {
+          httpOnly: true,
+          path: "/",
+          maxAge: 0,
+        });
+      }
+      return response;
     }
 
     if (pathname.startsWith("/admin") && session.role !== "admin") {
@@ -107,7 +90,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (AUTH_PAGES.includes(pathname) && session?.userId) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const next = request.nextUrl.searchParams.get("next");
+    const dest =
+      next && next.startsWith("/") && !next.startsWith("//")
+        ? next
+        : "/dashboard";
+    return NextResponse.redirect(new URL(dest, request.url));
   }
 
   return NextResponse.next();
@@ -115,6 +103,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard",
     "/dashboard/:path*",
     "/meal-calculator/:path*",
     "/calculator/:path*",
@@ -132,6 +121,7 @@ export const config = {
     "/weight-tracker/:path*",
     "/weight/:path*",
     "/settings/:path*",
+    "/admin",
     "/admin/:path*",
     "/login",
     "/register",
