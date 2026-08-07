@@ -79,12 +79,13 @@ export async function GET(request: NextRequest) {
     const stores = await googlePlacesProvider.findNearbySupermarkets(
       lat,
       lng,
-      Number.isFinite(radius) ? radius : 5000
+      Number.isFinite(radius) ? radius : 5000,
+      postcode
     );
 
     return NextResponse.json({
       data: stores,
-      source: "google-places",
+      source: "google-places-nearbysearch",
       center: { lat, lng, postcode },
     });
   } catch (err) {

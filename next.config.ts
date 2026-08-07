@@ -13,6 +13,8 @@ const groceryImageHosts = [
   "www.aldi.com.au",
   "cdn.shopify.com",
   "images.unsplash.com",
+  "maps.googleapis.com",
+  "maps.gstatic.com",
 ];
 
 const nextConfig: NextConfig = {

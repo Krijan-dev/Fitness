@@ -5,6 +5,7 @@ import { formatCurrency } from "@/utils/currency";
 import { STORE_LABELS } from "@/features/price-comparison/constants";
 import { DataSourceBadge } from "./DataSourceBadge";
 import { ProductThumbnail } from "@/components/grocery/ProductThumbnail";
+import { StoreBadge } from "@/components/grocery/StoreBadge";
 
 interface PriceOptionRowProps {
   price: StoreProductPrice;
@@ -41,9 +42,7 @@ export function PriceOptionRow({
       <ProductThumbnail src={price.imageUrl} alt={price.productName} size={56} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            {STORE_LABELS[price.store]}
-          </span>
+          <StoreBadge store={price.store} />
           <span className="text-sm font-medium">{price.productName}</span>
           <DataSourceBadge source={price.dataSource} />
           {price.isOnSpecial ? (

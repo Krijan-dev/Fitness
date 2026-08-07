@@ -1,7 +1,7 @@
 /**
  * Resolve grocery / maps credentials from env.
  * Supports a shared RapidAPI key so one marketplace subscription can feed
- * both Woolworths and Coles providers.
+ * both Woolworths and Coles providers as a fallback when direct endpoints are blocked.
  */
 
 export function getRapidApiKey(): string | undefined {
@@ -41,13 +41,14 @@ export interface GroceryProviderStatus {
 }
 
 export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
-  const woolworths = Boolean(getWoolworthsApiKey());
-  const coles = Boolean(getColesApiKey());
+  const woolworthsRapid = Boolean(getWoolworthsApiKey());
+  const colesRapid = Boolean(getColesApiKey());
   const aldi = Boolean(getApifyToken() || process.env.ALDI_CACHE_URL);
   const iga = Boolean(process.env.IGA_CACHE_URL);
   const google = Boolean(getGoogleMapsApiKey());
   const mode = process.env.PRICE_PROVIDER_MODE || "auto";
   const forceMock = mode === "mock";
+  const directEnabled = !forceMock;
 
   return [
     {
@@ -56,26 +57,26 @@ export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
       configured: google,
       live: google && !forceMock,
       hint: google
-        ? "Nearby Coles / Woolworths / ALDI / IGA"
+        ? "Nearby Search type=supermarket"
         : "Set GOOGLE_MAPS_API_KEY or NEXT_PUBLIC_GOOGLE_MAPS_API_KEY",
     },
     {
       id: "woolworths",
-      label: "Woolworths (RapidAPI)",
-      configured: woolworths,
-      live: woolworths && !forceMock,
-      hint: woolworths
-        ? "Live product search"
-        : "Set WOOLWORTHS_API_KEY or RAPIDAPI_KEY",
+      label: "Woolworths (direct + RapidAPI)",
+      configured: directEnabled,
+      live: directEnabled,
+      hint: woolworthsRapid
+        ? "Direct UI search with RapidAPI fallback"
+        : "Direct UI search; set RAPIDAPI_KEY for 403 fallback",
     },
     {
       id: "coles",
-      label: "Coles (RapidAPI)",
-      configured: coles,
-      live: coles && !forceMock,
-      hint: coles
-        ? "Live product search"
-        : "Set COLES_API_KEY or RAPIDAPI_KEY",
+      label: "Coles (direct + RapidAPI)",
+      configured: directEnabled,
+      live: directEnabled,
+      hint: colesRapid
+        ? "Direct BFF search with RapidAPI fallback"
+        : "Direct BFF search; set RAPIDAPI_KEY for 403 fallback",
     },
     {
       id: "aldi",
@@ -98,25 +99,22 @@ export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
       label: "Open Food Facts",
       configured: true,
       live: !forceMock,
-      hint: "Barcode metadata & images (no key required)",
+      hint: "Barcode metadata & images (EAN-13)",
     },
   ];
 }
 
+/**
+ * Direct Woolworths/Coles searches run whenever mode !== mock.
+ * RapidAPI / Apify keys improve reliability when direct endpoints return 403.
+ */
 export function hasAnyLivePriceProvider(): boolean {
-  if ((process.env.PRICE_PROVIDER_MODE || "auto") === "mock") return false;
-  return Boolean(
-    getWoolworthsApiKey() ||
-      getColesApiKey() ||
-      getApifyToken() ||
-      process.env.ALDI_CACHE_URL ||
-      process.env.IGA_CACHE_URL
-  );
+  return (process.env.PRICE_PROVIDER_MODE || "auto") !== "mock";
 }
 
 export function priceDataMode(): "mock" | "live" | "auto-mock" | "auto-live" {
   const mode = process.env.PRICE_PROVIDER_MODE || "auto";
   if (mode === "mock") return "mock";
   if (mode === "live") return "live";
-  return hasAnyLivePriceProvider() ? "auto-live" : "auto-mock";
+  return "auto-live";
 }

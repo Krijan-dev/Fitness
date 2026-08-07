@@ -86,6 +86,8 @@ function isAllowedRemote(url: string): boolean {
       "www.aldi.com.au",
       "cdn.shopify.com",
       "images.unsplash.com",
+      "maps.googleapis.com",
+      "maps.gstatic.com",
     ].some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
   } catch {
     return false;

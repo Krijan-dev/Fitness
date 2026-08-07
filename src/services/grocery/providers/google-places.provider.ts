@@ -1,11 +1,24 @@
 import type { GroceryProduct, NearbyStore } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { getGoogleMapsApiKey } from "../credentials";
+import {
+  buildStoreId,
+  detectChain,
+  extractPostcode,
+  haversineMeters,
+} from "../places-utils";
+
+export {
+  buildStoreId,
+  detectChain,
+  extractPostcode,
+  haversineMeters,
+} from "../places-utils";
 
 /**
- * Official Google Places API (Nearby Search New) for supermarket locations.
- * Product search methods are intentionally empty — use price providers for SKUs.
- * Docs: https://developers.google.com/maps/documentation/places/web-service/nearby-search
+ * Official Google Places API for supermarket locations.
+ * Prefers classic Nearby Search (`type=supermarket`), then Places API (New).
+ * Docs: https://developers.google.com/maps/documentation/places/web-service/search-nearby
  */
 export class GooglePlacesProvider implements GroceryProvider {
   readonly id = "google-places";
@@ -31,18 +44,43 @@ export class GooglePlacesProvider implements GroceryProvider {
   }
 
   /**
-   * Find nearby Coles, Woolworths, ALDI, and IGA using Places API (New).
-   * `includedTypes` uses Google Places `supermarket` / `grocery_store`.
+   * Find nearby Coles, Woolworths, ALDI, and IGA.
+   * Prefers classic Places Nearby Search (`type=supermarket`), then New Places API.
    */
   async findNearbySupermarkets(
     lat: number,
     lng: number,
-    radiusMeters = 5000
+    radiusMeters = 5000,
+    postcode?: string
   ): Promise<NearbyStore[]> {
     if (!this.isConfigured()) {
       return [];
     }
 
+    try {
+      const { nearbySearchSupermarkets } = await import(
+        "../google-places-nearby"
+      );
+      const classic = await nearbySearchSupermarkets({
+        lat,
+        lng,
+        radiusMeters,
+        postcode,
+      });
+      if (classic.length > 0) return classic;
+    } catch (err) {
+      console.warn("Classic Places Nearby Search failed:", err);
+    }
+
+    return this.findNearbySupermarketsNew(lat, lng, radiusMeters);
+  }
+
+  /** Places API (New) Nearby Search fallback. */
+  private async findNearbySupermarketsNew(
+    lat: number,
+    lng: number,
+    radiusMeters = 5000
+  ): Promise<NearbyStore[]> {
     const url = "https://places.googleapis.com/v1/places:searchNearby";
     const res = await fetch(url, {
       method: "POST",
@@ -141,60 +179,6 @@ export class GooglePlacesProvider implements GroceryProvider {
     if (!loc) return null;
     return { lat: loc.lat, lng: loc.lng };
   }
-}
-
-export function detectChain(name: string): NearbyStore["chain"] {
-  const n = name.toLowerCase();
-  if (n.includes("woolworth") || n.includes("woolies")) return "woolworths";
-  if (n.includes("coles")) return "coles";
-  if (n.includes("aldi")) return "aldi";
-  if (n.includes("iga")) return "iga";
-  return "other";
-}
-
-export function extractPostcode(
-  address?: string,
-  components?: Array<{
-    longText?: string;
-    shortText?: string;
-    types?: string[];
-  }>
-): string | undefined {
-  const fromComponents = components?.find((c) =>
-    c.types?.includes("postal_code")
-  );
-  if (fromComponents?.shortText || fromComponents?.longText) {
-    return fromComponents.shortText || fromComponents.longText;
-  }
-  if (!address) return undefined;
-  const match = address.match(/\b(\d{4})\b/);
-  return match?.[1];
-}
-
-/** Derive a chain-specific store id for price feeds that need location context. */
-export function buildStoreId(
-  chain: NearbyStore["chain"],
-  placeId?: string,
-  postcode?: string
-): string {
-  const suffix = placeId?.replace(/^places\//, "") ?? postcode ?? "unknown";
-  return `${chain}:${suffix}`;
-}
-
-export function haversineMeters(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
-  const R = 6371000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 export const googlePlacesProvider = new GooglePlacesProvider();
