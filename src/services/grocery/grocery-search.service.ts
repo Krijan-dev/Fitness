@@ -14,6 +14,7 @@ import { isLikelySameProduct, nameSimilarity } from "./normalizer";
 import { connectMongo } from "@/lib/mongodb";
 import { GroceryProductModel } from "@/models/GroceryProduct";
 import { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
+import { hasAnyLivePriceProvider } from "./credentials";
 
 export { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
 
@@ -22,16 +23,7 @@ function livePriceProviders(): GroceryProvider[] {
 }
 
 function shouldUseMockFallback(): boolean {
-  const mode = process.env.PRICE_PROVIDER_MODE || "auto";
-  if (mode === "mock") return true;
-  if (mode === "live") return false;
-  return !(
-    process.env.WOOLWORTHS_API_KEY ||
-    process.env.COLES_API_KEY ||
-    process.env.APIFY_API_TOKEN ||
-    process.env.ALDI_CACHE_URL ||
-    process.env.IGA_CACHE_URL
-  );
+  return !hasAnyLivePriceProvider();
 }
 
 /**

@@ -1,6 +1,7 @@
 import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { mapRapidResult } from "./mock-grocery.provider";
+import { getWoolworthsApiKey } from "../credentials";
 
 /**
  * Unofficial RapidAPI Woolworths Products API provider.
@@ -12,7 +13,7 @@ export class WoolworthsProvider implements GroceryProvider {
   readonly official = false;
 
   private get apiKey(): string | undefined {
-    return process.env.WOOLWORTHS_API_KEY || undefined;
+    return getWoolworthsApiKey();
   }
 
   private get baseUrl(): string {

@@ -2,6 +2,7 @@ import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { enrichGroceryProduct, asNumber, asString } from "../mappers";
 import { resolveProductImageUrl } from "../image-urls";
+import { getApifyToken } from "../credentials";
 
 /**
  * Unofficial Apify ALDI Australia Actor provider.
@@ -15,7 +16,7 @@ export class AldiApifyProvider implements GroceryProvider {
   readonly official = false;
 
   private get token(): string | undefined {
-    return process.env.APIFY_API_TOKEN || undefined;
+    return getApifyToken();
   }
 
   private get actorId(): string {

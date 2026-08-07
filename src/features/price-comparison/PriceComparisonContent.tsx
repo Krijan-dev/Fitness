@@ -11,6 +11,7 @@ import { BasketSummaryCard } from "@/components/prices/BasketSummaryCard";
 import { ShoppingItemPriceCard } from "@/components/prices/ShoppingItemPriceCard";
 import { BarcodeLookup } from "@/components/grocery/BarcodeLookup";
 import { NearbyStoresPanel } from "@/components/grocery/NearbyStoresPanel";
+import { GroceryDataSourceBanner } from "@/components/grocery/GroceryDataSourceBanner";
 import { useShoppingListStore } from "@/stores/shopping-list.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import { usePriceComparisonStore } from "@/stores/price-comparison.store";
@@ -53,6 +54,7 @@ export function PriceComparisonContent() {
   const [manualQuery, setManualQuery] = useState("");
   const [manualResults, setManualResults] = useState<StoreProductPrice[]>([]);
   const [manualLoading, setManualLoading] = useState(false);
+  const [dataNotice, setDataNotice] = useState<string | null>(null);
 
   const fetchPricesForItem = useCallback(
     async (itemId: string, query: string) => {
@@ -77,6 +79,9 @@ export function PriceComparisonContent() {
           ...prev,
           [itemId]: body.data as StoreProductPrice[],
         }));
+        if (typeof body.notice === "string") {
+          setDataNotice(body.notice);
+        }
         setFetchStates((prev) => ({
           ...prev,
           [itemId]: { loading: false, error: null },
@@ -169,6 +174,8 @@ export function PriceComparisonContent() {
         </div>
       </PageHeader>
 
+      <GroceryDataSourceBanner />
+
       <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_auto]">
         <Select
           label="Location"
@@ -180,8 +187,8 @@ export function PriceComparisonContent() {
           onChange={(e) => handleLocationChange(e.target.value)}
         />
         <p className="text-sm text-muted-foreground lg:max-w-xs lg:self-end">
-          Live RapidAPI / Apify providers are used when API keys are set;
-          otherwise mock AU prices are shown.
+          {dataNotice ??
+            "Location is saved in settings. Live supermarket prices require API keys in .env.local."}
         </p>
       </div>
 

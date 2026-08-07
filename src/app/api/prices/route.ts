@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { priceComparisonService } from "@/services/prices/price-comparison.service";
+import {
+  getGroceryProviderStatuses,
+  hasAnyLivePriceProvider,
+  priceDataMode,
+} from "@/services/grocery/credentials";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,17 +24,21 @@ export async function GET(request: NextRequest) {
       location
     );
 
-    const mode = process.env.PRICE_PROVIDER_MODE || "auto";
-    const hasLiveKeys = Boolean(
-      process.env.WOOLWORTHS_API_KEY ||
-        process.env.COLES_API_KEY ||
-        process.env.APIFY_API_TOKEN
-    );
+    const mode = priceDataMode();
+    const usingMock = !hasAnyLivePriceProvider();
+    const liveProviders = getGroceryProviderStatuses()
+      .filter((p) => p.live && p.id !== "google-places" && p.id !== "open-food-facts")
+      .map((p) => p.label);
 
     return NextResponse.json({
       data: products,
-      source: mode === "mock" || !hasLiveKeys ? "mock" : "live-or-cache",
+      source: usingMock ? "mock" : "live-or-cache",
+      mode,
       location,
+      providers: liveProviders,
+      notice: usingMock
+        ? "Showing sample AU prices. Add WOOLWORTHS_API_KEY / COLES_API_KEY / RAPIDAPI_KEY (and optionally APIFY_API_TOKEN) to .env.local, then restart the dev server."
+        : undefined,
     });
   } catch {
     return NextResponse.json(

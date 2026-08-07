@@ -71,6 +71,8 @@ export async function GET(request: NextRequest) {
         data: demoNearbyStores(lat, lng, postcode),
         source: "mock",
         center: { lat, lng, postcode },
+        notice:
+          "Showing sample nearby stores. Add GOOGLE_MAPS_API_KEY (or NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) to .env.local and restart the dev server for real Coles / Woolworths / ALDI / IGA locations.",
       });
     }
 
@@ -123,12 +125,12 @@ function demoNearbyStores(
     const id = `demo-${o.chain}-${postcode ?? "local"}-${i}`;
     return {
       id,
-      name: `${o.name} (demo)`,
+      name: o.name,
       chain: o.chain,
       storeId: buildStoreId(o.chain, id, postcode),
       address: postcode
-        ? `Demo address near ${postcode}`
-        : "Demo address — configure Google Maps API key for live results",
+        ? `Sample location near ${postcode} (Google Maps key not configured)`
+        : "Sample location — add GOOGLE_MAPS_API_KEY to .env.local for live results",
       postcode,
       lat: sLat,
       lng: sLng,

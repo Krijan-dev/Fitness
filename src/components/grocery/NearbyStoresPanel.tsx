@@ -14,6 +14,7 @@ export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(
     async (coords?: { lat: number; lng: number }) => {
@@ -30,9 +31,11 @@ export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
         if (!res.ok) throw new Error(body.error ?? "Failed to load stores");
         setStores(body.data ?? []);
         setSource(body.source ?? null);
+        setNotice(typeof body.notice === "string" ? body.notice : null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load stores");
         setStores([]);
+        setNotice(null);
       } finally {
         setLoading(false);
       }
@@ -73,6 +76,11 @@ export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
         Nearest Coles, Woolworths, ALDI, and IGA
         {source ? ` · source: ${source}` : ""}.
       </p>
+      {notice ? (
+        <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+          {notice}
+        </p>
+      ) : null}
       {loading ? (
         <p className="text-sm text-muted-foreground">Finding stores…</p>
       ) : error ? (

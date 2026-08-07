@@ -1,6 +1,7 @@
 import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { mapRapidResult } from "./mock-grocery.provider";
+import { getColesApiKey } from "../credentials";
 
 /**
  * Unofficial RapidAPI Coles Product Price API provider.
@@ -13,7 +14,7 @@ export class ColesProvider implements GroceryProvider {
   readonly official = false;
 
   private get apiKey(): string | undefined {
-    return process.env.COLES_API_KEY || undefined;
+    return getColesApiKey();
   }
 
   private get baseUrl(): string {

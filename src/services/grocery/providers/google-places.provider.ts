@@ -1,5 +1,6 @@
 import type { GroceryProduct, NearbyStore } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
+import { getGoogleMapsApiKey } from "../credentials";
 
 /**
  * Official Google Places API (Nearby Search New) for supermarket locations.
@@ -12,11 +13,7 @@ export class GooglePlacesProvider implements GroceryProvider {
   readonly official = true;
 
   private get apiKey(): string | undefined {
-    return (
-      process.env.GOOGLE_MAPS_API_KEY ||
-      process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
-      undefined
-    );
+    return getGoogleMapsApiKey();
   }
 
   isConfigured(): boolean {
