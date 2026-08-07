@@ -1,31 +1,18 @@
-import { type LucideIcon } from "lucide-react";
 import {
+  createElement,
   isValidElement,
   type ComponentType,
-  type ReactElement,
   type ReactNode,
 } from "react";
 import { Button } from "./Button";
 
 interface EmptyStateProps {
-  icon?: LucideIcon | ComponentType<{ className?: string }> | ReactNode;
+  /** Prefer a rendered element (`<Tags />`) or a Lucide/forwardRef component. */
+  icon?: ComponentType<{ className?: string }> | ReactNode;
   title: string;
   description?: string;
   actionLabel?: string;
   onAction?: () => void;
-}
-
-function isIconComponent(
-  value: unknown
-): value is ComponentType<{ className?: string }> {
-  if (typeof value === "function") return true;
-  // Lucide / forwardRef components are objects with $$typeof + render
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "$$typeof" in value &&
-    "render" in value
-  );
 }
 
 export function EmptyState({
@@ -35,15 +22,7 @@ export function EmptyState({
   actionLabel,
   onAction,
 }: EmptyStateProps) {
-  let iconNode: ReactNode = null;
-  if (isValidElement(icon)) {
-    iconNode = icon;
-  } else if (isIconComponent(icon)) {
-    const Icon = icon;
-    iconNode = <Icon className="h-6 w-6" />;
-  } else if (icon) {
-    iconNode = icon as ReactElement;
-  }
+  const iconNode = resolveIcon(icon);
 
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface/40 px-6 py-16 text-center">
@@ -62,5 +41,29 @@ export function EmptyState({
         </Button>
       ) : null}
     </div>
+  );
+}
+
+function resolveIcon(icon: EmptyStateProps["icon"]): ReactNode {
+  if (icon == null || icon === false) return null;
+  if (isValidElement(icon)) return icon;
+
+  // Functions and React.forwardRef objects (Lucide icons) — never render raw
+  if (typeof icon === "function" || isForwardRefComponent(icon)) {
+    return createElement(icon as ComponentType<{ className?: string }>, {
+      className: "h-6 w-6",
+      "aria-hidden": true,
+    });
+  }
+
+  return null;
+}
+
+function isForwardRefComponent(value: unknown): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "$$typeof" in value &&
+    "render" in (value as object)
   );
 }

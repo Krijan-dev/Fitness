@@ -248,7 +248,7 @@ export function PriceComparisonContent() {
 
       {unpurchasedItems.length === 0 ? (
         <EmptyState
-          icon={Tags}
+          icon={<Tags className="h-6 w-6" aria-hidden />}
           title="No shopping-list items to compare"
           description="Add unpurchased items to your shopping list, or use product search / barcode above."
           actionLabel="Go to shopping list"
