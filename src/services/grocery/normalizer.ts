@@ -24,6 +24,7 @@ export function normalizeProductName(name: string): string {
     .toLowerCase()
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/(\d+(?:\.\d+)?)\s*(kg|g|ml|l|lt|litre|liter)\b/gi, "$1 $2")
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length > 0 && !FILLER_WORDS.has(w))

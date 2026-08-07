@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { withAdmin } from "@/lib/route-auth";
 import { connectMongo } from "@/lib/mongodb";
 import { GroceryProductModel } from "@/models/GroceryProduct";
 import { PriceHistoryModel } from "@/models/PriceHistory";
 import { normalizeProductName, parseSizeString } from "@/services/grocery/normalizer";
+import { handleApiError, jsonOk, jsonError } from "@/lib/api";
 
 /**
  * CSV upload for manual price updates.
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       const form = await request.formData();
       const file = form.get("file");
       if (!file || !(file instanceof File)) {
-        return NextResponse.json({ error: "file is required" }, { status: 400 });
+        return jsonError("file is required", 400);
       }
       csvText = await file.text();
     } else {
@@ -30,14 +31,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (!csvText.trim()) {
-      return NextResponse.json({ error: "Empty CSV" }, { status: 400 });
+      return jsonError("Empty CSV", 400);
     }
 
     const rows = parseCsv(csvText);
     if (rows.length < 2) {
-      return NextResponse.json(
-        { error: "CSV needs a header row and at least one data row" },
-        { status: 400 }
+      return jsonError(
+        "CSV needs a header row and at least one data row",
+        400
       );
     }
 
@@ -51,10 +52,13 @@ export async function POST(request: NextRequest) {
       if (row.every((c) => !c.trim())) continue;
       const store = row[idx("store")]?.trim().toLowerCase();
       const name = row[idx("name")]?.trim();
-      const currentPrice = Number(row[idx("currentprice")] ?? row[idx("current_price")]);
+      const currentPrice = Number(
+        row[idx("currentprice")] ?? row[idx("current_price")]
+      );
       if (!store || !name || !Number.isFinite(currentPrice)) continue;
 
-      const regularPriceRaw = row[idx("regularprice")] ?? row[idx("regular_price")];
+      const regularPriceRaw =
+        row[idx("regularprice")] ?? row[idx("regular_price")];
       const regularPrice = regularPriceRaw ? Number(regularPriceRaw) : undefined;
       const size = row[idx("size")]?.trim() || undefined;
       const barcode = row[idx("barcode")]?.trim() || undefined;
@@ -108,13 +112,9 @@ export async function POST(request: NextRequest) {
       upserted += 1;
     }
 
-    return NextResponse.json({
-      data: { upserted },
-    });
+    return jsonOk({ data: { upserted } });
   } catch (err) {
-    console.error(err);
-    const message = err instanceof Error ? err.message : "Upload failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleApiError(err);
   }
 }
 

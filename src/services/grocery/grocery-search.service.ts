@@ -17,7 +17,7 @@ function livePriceProviders(): GroceryProvider[] {
   return [woolworthsProvider, colesProvider, aldiApifyProvider];
 }
 
-function useMockFallback(): boolean {
+function shouldUseMockFallback(): boolean {
   const mode = process.env.PRICE_PROVIDER_MODE || "auto";
   if (mode === "mock") return true;
   if (mode === "live") return false;
@@ -38,7 +38,7 @@ export async function searchGroceryProducts(
   const q = query.trim();
   if (!q) return { products: [], source: "empty" };
 
-  if (useMockFallback()) {
+  if (shouldUseMockFallback()) {
     const products = await mockGroceryProvider.searchProducts(q);
     return { products, source: "mock" };
   }
@@ -178,7 +178,7 @@ export async function lookupBarcode(barcode: string): Promise<{
     }
   }
 
-  if (!metadata && storeMatches.length === 0 && useMockFallback()) {
+  if (!metadata && storeMatches.length === 0 && shouldUseMockFallback()) {
     const mock = await mockGroceryProvider.getProductByBarcode(code);
     if (mock) {
       return { metadata: mock, storeMatches: [mock], source: "mock" };

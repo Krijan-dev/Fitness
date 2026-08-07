@@ -23,11 +23,13 @@ export class GooglePlacesProvider implements GroceryProvider {
     return Boolean(this.apiKey);
   }
 
-  async searchProducts(_query: string): Promise<GroceryProduct[]> {
+  async searchProducts(query: string): Promise<GroceryProduct[]> {
+    void query;
     return [];
   }
 
-  async getProductByBarcode(_barcode: string): Promise<GroceryProduct | null> {
+  async getProductByBarcode(barcode: string): Promise<GroceryProduct | null> {
+    void barcode;
     return null;
   }
 

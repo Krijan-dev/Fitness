@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { withAdmin } from "@/lib/route-auth";
 import { getGrocerySyncStatus } from "@/services/grocery/refresh.service";
 import { connectMongo } from "@/lib/mongodb";
 import { GroceryProductModel } from "@/models/GroceryProduct";
+import { handleApiError, jsonOk } from "@/lib/api";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
       GroceryProductModel.countDocuments({ isOnSpecial: true }),
     ]);
 
-    return NextResponse.json({
+    return jsonOk({
       data: {
         ...status,
         productCount: total,
@@ -22,7 +23,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed";
-    return NextResponse.json({ error: message }, { status: 401 });
+    return handleApiError(err);
   }
 }

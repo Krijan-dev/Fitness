@@ -113,20 +113,21 @@ export default function AdminGroceryPage() {
       <PageHeader
         title="Grocery management"
         description="Synchronised supermarket products, weekly catalogue refresh, and manual price edits."
-      >
-        <div className="flex flex-wrap gap-2">
-          <Link href="/admin/grocery/upload">
-            <Button variant="secondary">
-              <Upload className="h-4 w-4" />
-              Upload CSV
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/grocery/upload">
+              <Button variant="secondary">
+                <Upload className="h-4 w-4" />
+                Upload CSV
+              </Button>
+            </Link>
+            <Button onClick={() => void triggerRefresh()} disabled={refreshing}>
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              Trigger weekly refresh
             </Button>
-          </Link>
-          <Button onClick={() => void triggerRefresh()} disabled={refreshing}>
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-            Trigger weekly refresh
-          </Button>
-        </div>
-      </PageHeader>
+          </div>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

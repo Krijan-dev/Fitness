@@ -65,14 +65,15 @@ export default function AdminGroceryUploadPage() {
       <PageHeader
         title="Upload grocery CSV"
         description="Manually update supermarket prices. Columns: store, name, currentPrice, regularPrice, size, barcode, isOnSpecial, catalogueExpiresAt."
-      >
-        <Link href="/admin/grocery">
-          <Button variant="secondary">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-        </Link>
-      </PageHeader>
+        actions={
+          <Link href="/admin/grocery">
+            <Button variant="secondary">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </Link>
+        }
+      />
 
       <Card>
         <CardHeader>

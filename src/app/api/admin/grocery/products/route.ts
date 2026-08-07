@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { withAdmin } from "@/lib/route-auth";
 import { connectMongo } from "@/lib/mongodb";
 import { GroceryProductModel } from "@/models/GroceryProduct";
 import { PriceHistoryModel } from "@/models/PriceHistory";
 import { normalizeProductName } from "@/services/grocery/normalizer";
+import { handleApiError, jsonOk, jsonError } from "@/lib/api";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,10 +21,11 @@ export async function GET(request: NextRequest) {
     const filter: Record<string, unknown> = {};
     if (store) filter.store = store;
     if (q) {
+      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       filter.$or = [
-        { name: { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" } },
+        { name: { $regex: escaped, $options: "i" } },
         { barcode: q },
-        { brand: { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" } },
+        { brand: { $regex: escaped, $options: "i" } },
       ];
     }
 
@@ -36,17 +38,15 @@ export async function GET(request: NextRequest) {
       GroceryProductModel.countDocuments(filter),
     ]);
 
-    return NextResponse.json({
-      data: items.map((doc) => ({
-        id: String(doc._id),
-        ...doc,
-        _id: undefined,
-      })),
+    return jsonOk({
+      data: items.map((doc) => {
+        const { _id, ...rest } = doc;
+        return { id: String(_id), ...rest };
+      }),
       pagination: { page, limit, total },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed";
-    return NextResponse.json({ error: message }, { status: 401 });
+    return handleApiError(err);
   }
 }
 
@@ -65,7 +65,7 @@ export async function PATCH(request: NextRequest) {
     };
 
     if (!body.id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
+      return jsonError("id is required", 400);
     }
 
     const updates: Record<string, unknown> = {
@@ -94,7 +94,7 @@ export async function PATCH(request: NextRequest) {
     );
 
     if (!doc) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      return jsonError("Product not found", 404);
     }
 
     if (typeof doc.currentPrice === "number") {
@@ -111,9 +111,8 @@ export async function PATCH(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ data: doc });
+    return jsonOk({ data: doc });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Update failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return handleApiError(err);
   }
 }

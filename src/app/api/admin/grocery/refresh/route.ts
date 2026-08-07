@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { withAdmin } from "@/lib/route-auth";
+import { handleApiError, jsonOk } from "@/lib/api";
 import {
   getGrocerySyncStatus,
   runWeeklyGroceryRefresh,
@@ -9,13 +10,9 @@ export async function GET(request: NextRequest) {
   try {
     await withAdmin(request);
     const status = await getGrocerySyncStatus();
-    return NextResponse.json({ data: status });
+    return jsonOk({ data: status });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unauthorized";
-    const status = message.toLowerCase().includes("admin") || message.toLowerCase().includes("auth")
-      ? 401
-      : 500;
-    return NextResponse.json({ error: message }, { status });
+    return handleApiError(err);
   }
 }
 
@@ -31,16 +28,8 @@ export async function POST(request: NextRequest) {
       triggeredBy: session.email ?? session.userId,
     });
 
-    return NextResponse.json({ data: status });
+    return jsonOk({ data: status });
   } catch (err) {
-    console.error(err);
-    const message = err instanceof Error ? err.message : "Refresh failed";
-    const statusCode =
-      message.toLowerCase().includes("forbidden") ||
-      message.toLowerCase().includes("unauthorized") ||
-      message.toLowerCase().includes("token")
-        ? 401
-        : 500;
-    return NextResponse.json({ error: message }, { status: statusCode });
+    return handleApiError(err);
   }
 }
