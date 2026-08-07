@@ -1,13 +1,31 @@
 import { type LucideIcon } from "lucide-react";
-import { type ReactElement, type ReactNode } from "react";
+import {
+  isValidElement,
+  type ComponentType,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { Button } from "./Button";
 
 interface EmptyStateProps {
-  icon?: LucideIcon | ReactNode;
+  icon?: LucideIcon | ComponentType<{ className?: string }> | ReactNode;
   title: string;
   description?: string;
   actionLabel?: string;
   onAction?: () => void;
+}
+
+function isIconComponent(
+  value: unknown
+): value is ComponentType<{ className?: string }> {
+  if (typeof value === "function") return true;
+  // Lucide / forwardRef components are objects with $$typeof + render
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "$$typeof" in value &&
+    "render" in value
+  );
 }
 
 export function EmptyState({
@@ -18,8 +36,10 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   let iconNode: ReactNode = null;
-  if (typeof icon === "function") {
-    const Icon = icon as LucideIcon;
+  if (isValidElement(icon)) {
+    iconNode = icon;
+  } else if (isIconComponent(icon)) {
+    const Icon = icon;
     iconNode = <Icon className="h-6 w-6" />;
   } else if (icon) {
     iconNode = icon as ReactElement;
