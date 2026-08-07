@@ -1,6 +1,7 @@
 import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { enrichGroceryProduct, asNumber, asString } from "../mappers";
+import { resolveProductImageUrl } from "../image-urls";
 import mockPrices from "@/data/mock-prices.json";
 import type { StoreProductPrice } from "@/types/price";
 
@@ -19,7 +20,10 @@ export class MockGroceryProvider implements GroceryProvider {
     return (mockPrices as StoreProductPrice[])
       .filter((p) => {
         const hay = `${p.query} ${p.productName} ${p.brand ?? ""}`.toLowerCase();
-        return hay.includes(q) || q.split(/\s+/).some((w) => w.length > 2 && hay.includes(w));
+        return (
+          hay.includes(q) ||
+          q.split(/\s+/).some((w) => w.length > 2 && hay.includes(w))
+        );
       })
       .map((p) =>
         enrichGroceryProduct({
@@ -40,6 +44,7 @@ export class MockGroceryProvider implements GroceryProvider {
           lastUpdated: p.lastUpdated,
           dataSource: "mock",
           providerId: this.id,
+          barcode: p.barcode,
         })
       );
   }
@@ -48,7 +53,7 @@ export class MockGroceryProvider implements GroceryProvider {
     const code = barcode.trim();
     if (!code) return null;
     const match = (mockPrices as StoreProductPrice[]).find(
-      (p) => (p as StoreProductPrice & { barcode?: string }).barcode === code
+      (p) => p.barcode === code
     );
     if (!match) return null;
     const results = await this.searchProducts(match.query);
@@ -72,17 +77,26 @@ export function mapRapidResult(
   const currentPrice =
     asNumber(row.current_price) ??
     asNumber(row.price) ??
-    asNumber(row.CurrentPrice);
+    asNumber(row.CurrentPrice) ??
+    asNumber(row.Price);
   const regularPrice =
     asNumber(row.was_price) ??
     asNumber(row.regular_price) ??
-    asNumber(row.WasPrice);
+    asNumber(row.WasPrice) ??
+    (asNumber(row.WasPriceInCents) != null
+      ? asNumber(row.WasPriceInCents)! / 100
+      : undefined);
   const barcode =
     asString(row.barcode) ?? asString(row.Barcode) ?? asString(row.ean);
+  const stockStatus =
+    asString(row.stock_status) ??
+    asString(row.availability) ??
+    asString(row.Availability);
 
   const isOnSpecial =
     Boolean(row.is_special) ||
     Boolean(row.on_special) ||
+    Boolean(row.IsOnSpecial) ||
     (regularPrice != null &&
       currentPrice != null &&
       regularPrice > currentPrice);
@@ -94,23 +108,38 @@ export function mapRapidResult(
     );
   }
 
+  const imageUrl = resolveProductImageUrl({ store, row, barcode });
+
+  const availability =
+    stockStatus?.toLowerCase().includes("out")
+      ? ("out-of-stock" as const)
+      : stockStatus
+        ? ("in-stock" as const)
+        : ("unknown" as const);
+
   return enrichGroceryProduct({
-    id: `${store}-${barcode ?? asString(row.id) ?? name}-${currentPrice ?? 0}`,
+    id: `${store}-${barcode ?? asString(row.stockcode) ?? asString(row.id) ?? name}-${currentPrice ?? 0}`,
     name,
-    brand: asString(row.product_brand) ?? asString(row.brand),
+    brand: asString(row.product_brand) ?? asString(row.brand) ?? asString(row.Brand),
     barcode,
     store,
     currentPrice,
     regularPrice,
-    size: asString(row.product_size) ?? asString(row.size) ?? asString(row.pack_size),
-    imageUrl: asString(row.image_url) ?? asString(row.image),
-    productUrl: asString(row.url) ?? asString(row.product_url),
+    size:
+      asString(row.product_size) ??
+      asString(row.size) ??
+      asString(row.pack_size) ??
+      asString(row.PackageSize),
+    imageUrl,
+    productUrl: asString(row.url) ?? asString(row.product_url) ?? asString(row.Url),
     isOnSpecial,
     discountPercentage,
+    availability,
     lastUpdated: new Date().toISOString(),
     dataSource: "live-api",
     providerId,
-    catalogueExpiresAt: asString(row.special_end_date) ?? asString(row.catalogue_end),
+    catalogueExpiresAt:
+      asString(row.special_end_date) ?? asString(row.catalogue_end),
     raw: row,
   });
 }

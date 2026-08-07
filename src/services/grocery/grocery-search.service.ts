@@ -4,6 +4,7 @@ import {
   woolworthsProvider,
   colesProvider,
   aldiApifyProvider,
+  igaProvider,
   openFoodFactsProvider,
   mockGroceryProvider,
   type GroceryProvider,
@@ -12,25 +13,30 @@ import { toStoreProductPrice } from "./mappers";
 import { isLikelySameProduct, nameSimilarity } from "./normalizer";
 import { connectMongo } from "@/lib/mongodb";
 import { GroceryProductModel } from "@/models/GroceryProduct";
+import { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
+
+export { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
 
 function livePriceProviders(): GroceryProvider[] {
-  return [woolworthsProvider, colesProvider, aldiApifyProvider];
+  return [woolworthsProvider, colesProvider, aldiApifyProvider, igaProvider];
 }
 
 function shouldUseMockFallback(): boolean {
   const mode = process.env.PRICE_PROVIDER_MODE || "auto";
   if (mode === "mock") return true;
   if (mode === "live") return false;
-  // auto: mock when no supermarket keys configured
   return !(
     process.env.WOOLWORTHS_API_KEY ||
     process.env.COLES_API_KEY ||
-    process.env.APIFY_API_TOKEN
+    process.env.APIFY_API_TOKEN ||
+    process.env.ALDI_CACHE_URL ||
+    process.env.IGA_CACHE_URL
   );
 }
 
 /**
  * Search across live providers + mock fallback, optionally enriching from Mongo cache.
+ * Results are enriched with Open Food Facts images when supermarket payloads omit them.
  */
 export async function searchGroceryProducts(
   query: string
@@ -46,13 +52,22 @@ export async function searchGroceryProducts(
   const results: GroceryProduct[] = [];
   const sources: string[] = [];
 
-  // Prefer Mongo cache for soft matches
   try {
     await connectMongo();
     const cached = await GroceryProductModel.find({
       $or: [
-        { name: { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" } },
-        { normalizedName: { $regex: q.toLowerCase().replace(/\s+/g, ".*"), $options: "i" } },
+        {
+          name: {
+            $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+            $options: "i",
+          },
+        },
+        {
+          normalizedName: {
+            $regex: q.toLowerCase().replace(/\s+/g, ".*"),
+            $options: "i",
+          },
+        },
         { barcode: q },
       ],
     })
@@ -102,7 +117,8 @@ export async function searchGroceryProducts(
             "function"
             ? (provider as { isConfigured: () => boolean }).isConfigured()
             : true;
-        if (!configured) return;
+        // IGA always contributes mock rows when unconfigured
+        if (!configured && provider.id !== "iga-cache") return;
         const products = await provider.searchProducts(q);
         results.push(...products);
         if (products.length) sources.push(provider.id);
@@ -114,10 +130,14 @@ export async function searchGroceryProducts(
 
   if (results.length === 0) {
     const products = await mockGroceryProvider.searchProducts(q);
-    return { products, source: "mock-fallback" };
+    return {
+      products: await enrichMissingImages(products),
+      source: "mock-fallback",
+    };
   }
 
-  return { products: dedupeProducts(results), source: sources.join(",") || "live" };
+  const enriched = await enrichMissingImages(dedupeProducts(results));
+  return { products: enriched, source: sources.join(",") || "live" };
 }
 
 export async function searchStorePrices(
@@ -128,7 +148,7 @@ export async function searchStorePrices(
   const prices = products
     .map((p) => toStoreProductPrice(p, query, location))
     .filter((p): p is StoreProductPrice => p != null)
-    .sort((a, b) => a.currentPrice - b.currentPrice);
+    .sort(compareByUnitThenShelfPrice);
 
   return { data: prices, source };
 }
@@ -159,21 +179,33 @@ export async function lookupBarcode(barcode: string): Promise<{
           "function"
           ? (provider as { isConfigured: () => boolean }).isConfigured()
           : true;
-      if (!configured) continue;
+      if (!configured && provider.id !== "iga-cache") continue;
       const hit = await provider.getProductByBarcode(code);
-      if (hit) storeMatches.push(hit);
+      if (hit) {
+        if (!hit.imageUrl && metadata?.imageUrl) {
+          storeMatches.push({ ...hit, imageUrl: metadata.imageUrl });
+        } else {
+          storeMatches.push(hit);
+        }
+      }
     } catch (err) {
       console.error(`Barcode via ${provider.id} failed:`, err);
     }
   }
 
-  // Name-based matching against live/mock search using OFF product name
   if (metadata?.name && storeMatches.length === 0) {
     const { products } = await searchGroceryProducts(metadata.name);
     for (const p of products) {
       if (p.store === "open-food-facts") continue;
-      if (isLikelySameProduct(metadata.name, p.name) || nameSimilarity(metadata.name, p.name) > 0.4) {
-        storeMatches.push(p);
+      if (
+        isLikelySameProduct(metadata.name, p.name) ||
+        nameSimilarity(metadata.name, p.name) > 0.4
+      ) {
+        storeMatches.push(
+          !p.imageUrl && metadata.imageUrl
+            ? { ...p, imageUrl: metadata.imageUrl }
+            : p
+        );
       }
     }
   }
@@ -190,6 +222,57 @@ export async function lookupBarcode(barcode: string): Promise<{
     storeMatches: dedupeProducts(storeMatches),
     source: metadata || storeMatches.length ? "mixed" : "none",
   };
+}
+
+/** Fill missing supermarket images from Open Food Facts barcode / name search. */
+async function enrichMissingImages(
+  products: GroceryProduct[]
+): Promise<GroceryProduct[]> {
+  const needsImage = products.filter((p) => !p.imageUrl);
+  if (needsImage.length === 0) return products;
+
+  const imageByBarcode = new Map<string, string>();
+  const imageByName = new Map<string, string>();
+
+  await Promise.all(
+    needsImage.slice(0, 8).map(async (product) => {
+      try {
+        if (product.barcode) {
+          const off = await openFoodFactsProvider.getProductByBarcode(
+            product.barcode
+          );
+          if (off?.imageUrl) {
+            imageByBarcode.set(product.barcode, off.imageUrl);
+            return;
+          }
+        }
+        if (product.name) {
+          const hits = await openFoodFactsProvider.searchProducts(product.name);
+          const best = hits.find(
+            (h) =>
+              h.imageUrl &&
+              (isLikelySameProduct(product.name, h.name) ||
+                nameSimilarity(product.name, h.name) > 0.45)
+          );
+          if (best?.imageUrl) {
+            imageByName.set(product.normalizedName ?? product.name, best.imageUrl);
+          }
+        }
+      } catch {
+        // Soft-fail image enrichment
+      }
+    })
+  );
+
+  return products.map((p) => {
+    if (p.imageUrl) return p;
+    const fromBarcode = p.barcode ? imageByBarcode.get(p.barcode) : undefined;
+    const fromName = imageByName.get(p.normalizedName ?? p.name);
+    if (fromBarcode || fromName) {
+      return { ...p, imageUrl: fromBarcode ?? fromName };
+    }
+    return p;
+  });
 }
 
 function dedupeProducts(products: GroceryProduct[]): GroceryProduct[] {

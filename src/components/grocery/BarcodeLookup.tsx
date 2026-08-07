@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ScanBarcode, Search } from "lucide-react";
 import { Button } from "@/components/common/Button";
+import { ProductThumbnail } from "@/components/grocery/ProductThumbnail";
 import type { GroceryProduct } from "@/types/grocery";
 import type { StoreProductPrice } from "@/types/price";
 import { groceryToPriceOption } from "@/components/grocery/grocery-client-mappers";
@@ -60,7 +61,8 @@ export function BarcodeLookup({
         <h3 className="text-sm font-semibold">Barcode lookup</h3>
       </div>
       <p className="text-xs text-muted-foreground">
-        Uses Open Food Facts for product metadata, then matches supermarket prices.
+        Uses Open Food Facts for product metadata and images, then matches
+        supermarket prices.
       </p>
       <div className="flex flex-wrap gap-2">
         <input
@@ -81,13 +83,20 @@ export function BarcodeLookup({
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {metadata ? (
-        <div className="rounded-lg bg-muted/40 p-3 text-sm">
-          <p className="font-medium">{metadata.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {metadata.brand ? `${metadata.brand} · ` : ""}
-            {metadata.barcode}
-            {metadata.size ? ` · ${metadata.size}` : ""}
-          </p>
+        <div className="flex items-center gap-3 rounded-lg bg-muted/40 p-3 text-sm">
+          <ProductThumbnail
+            src={metadata.imageUrl}
+            alt={metadata.name}
+            size={48}
+          />
+          <div className="min-w-0">
+            <p className="font-medium truncate">{metadata.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {metadata.brand ? `${metadata.brand} · ` : ""}
+              {metadata.barcode}
+              {metadata.size ? ` · ${metadata.size}` : ""}
+            </p>
+          </div>
         </div>
       ) : null}
       {matches.length > 0 ? (
@@ -95,15 +104,16 @@ export function BarcodeLookup({
           {matches.map((m) => (
             <li
               key={m.id}
-              className="flex justify-between gap-2 rounded-lg border border-border px-3 py-2"
+              className="flex items-center gap-3 rounded-lg border border-border px-3 py-2"
             >
-              <span>
+              <ProductThumbnail src={m.imageUrl} alt={m.name} size={40} />
+              <span className="min-w-0 flex-1 truncate">
                 {m.store} · {m.name}
                 {m.isOnSpecial ? (
                   <span className="ml-2 text-xs text-success">Special</span>
                 ) : null}
               </span>
-              <span className="font-medium">
+              <span className="shrink-0 font-medium">
                 {m.currentPrice != null ? formatCurrency(m.currentPrice) : "—"}
               </span>
             </li>

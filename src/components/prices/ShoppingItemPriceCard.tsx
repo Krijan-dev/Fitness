@@ -47,7 +47,20 @@ export function ShoppingItemPriceCard({
       ) : (
         <div className="space-y-2">
           {prices
-            .sort((a, b) => a.currentPrice - b.currentPrice)
+            .slice()
+            .sort((a, b) => {
+              const au = a.unitPrice;
+              const bu = b.unitPrice;
+              if (
+                au != null &&
+                bu != null &&
+                Number.isFinite(au) &&
+                Number.isFinite(bu)
+              ) {
+                return au - bu;
+              }
+              return a.currentPrice - b.currentPrice;
+            })
             .map((price) => (
               <PriceOptionRow
                 key={price.id}

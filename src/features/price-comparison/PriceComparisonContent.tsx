@@ -19,6 +19,8 @@ import {
   buildItemMatches,
   calculateBasketSummary,
 } from "@/features/price-comparison/basket-calculator";
+import { ProductThumbnail } from "@/components/grocery/ProductThumbnail";
+import { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
 import type { StoreProductPrice } from "@/types/price";
 
 interface FetchState {
@@ -211,33 +213,38 @@ export function PriceComparisonContent() {
           <ul className="space-y-2 text-sm">
             {manualResults
               .slice()
-              .sort((a, b) => a.currentPrice - b.currentPrice)
+              .sort(compareByUnitThenShelfPrice)
               .slice(0, 12)
               .map((p) => (
                 <li
                   key={p.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-border px-3 py-2"
                 >
-                  <span>
-                    <span className="font-medium">{p.store}</span> · {p.productName}
-                    {p.isOnSpecial ? (
-                      <span className="ml-2 text-xs text-success">Special</span>
-                    ) : null}
-                    {p.unitPrice != null ? (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        ${p.unitPrice.toFixed(2)} {p.unitLabel}
+                  <ProductThumbnail
+                    src={p.imageUrl}
+                    alt={p.productName}
+                    size={48}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      <span className="uppercase text-[10px] tracking-wide text-muted-foreground mr-2">
+                        {p.store}
                       </span>
-                    ) : null}
-                    {p.catalogueExpiresAt ? (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        until{" "}
-                        {new Date(p.catalogueExpiresAt).toLocaleDateString(
-                          "en-AU"
-                        )}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="font-semibold">
+                      {p.productName}
+                      {p.isOnSpecial ? (
+                        <span className="ml-2 text-xs text-success">Special</span>
+                      ) : null}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.unitPrice != null
+                        ? `${p.unitPrice.toFixed(2)} ${p.unitLabel ?? ""}`
+                        : p.size ?? ""}
+                      {p.catalogueExpiresAt
+                        ? ` · until ${new Date(p.catalogueExpiresAt).toLocaleDateString("en-AU")}`
+                        : ""}
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-semibold">
                     ${p.currentPrice.toFixed(2)}
                   </span>
                 </li>

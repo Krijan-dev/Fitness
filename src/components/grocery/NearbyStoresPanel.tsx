@@ -70,7 +70,7 @@ export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Nearest Coles, Woolworths, and ALDI
+        Nearest Coles, Woolworths, ALDI, and IGA
         {source ? ` · source: ${source}` : ""}.
       </p>
       {loading ? (
@@ -89,6 +89,12 @@ export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
               <div>
                 <p className="font-medium">{store.name}</p>
                 <p className="text-xs text-muted-foreground">{store.address}</p>
+                {store.storeId ? (
+                  <p className="text-[10px] text-muted-foreground/80">
+                    Store ID {store.storeId}
+                    {store.postcode ? ` · ${store.postcode}` : ""}
+                  </p>
+                ) : null}
               </div>
               <span className="shrink-0 text-xs font-medium text-primary">
                 {(store.distanceMeters / 1000).toFixed(1)} km

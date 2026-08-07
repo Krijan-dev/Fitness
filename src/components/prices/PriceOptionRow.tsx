@@ -4,6 +4,7 @@ import type { StoreProductPrice } from "@/types/price";
 import { formatCurrency } from "@/utils/currency";
 import { STORE_LABELS } from "@/features/price-comparison/constants";
 import { DataSourceBadge } from "./DataSourceBadge";
+import { ProductThumbnail } from "@/components/grocery/ProductThumbnail";
 
 interface PriceOptionRowProps {
   price: StoreProductPrice;
@@ -37,8 +38,12 @@ export function PriceOptionRow({
         className="mt-1 accent-primary"
         aria-label={`Select ${price.productName} from ${STORE_LABELS[price.store]}`}
       />
+      <ProductThumbnail src={price.imageUrl} alt={price.productName} size={56} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {STORE_LABELS[price.store]}
+          </span>
           <span className="text-sm font-medium">{price.productName}</span>
           <DataSourceBadge source={price.dataSource} />
           {price.isOnSpecial ? (
@@ -48,9 +53,9 @@ export function PriceOptionRow({
           ) : null}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          {STORE_LABELS[price.store]}
-          {price.brand ? ` · ${price.brand}` : ""}
-          {price.size ? ` · ${price.size}` : ""}
+          {price.brand ? `${price.brand}` : ""}
+          {price.brand && price.size ? " · " : ""}
+          {price.size ?? ""}
         </p>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">
@@ -58,7 +63,7 @@ export function PriceOptionRow({
           </span>
           {price.regularPrice && price.regularPrice > price.currentPrice ? (
             <span className="line-through">
-              {formatCurrency(price.regularPrice)}
+              Was {formatCurrency(price.regularPrice)}
             </span>
           ) : null}
           {price.unitPrice ? (

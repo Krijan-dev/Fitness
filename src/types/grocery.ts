@@ -26,15 +26,29 @@ export interface GroceryProduct {
   quantityGrams?: number;
   /** Canonical volume in millilitres when parseable */
   quantityMl?: number;
+  /** Supermarket stockcode / SKU used for CDN image fallbacks */
+  stockCode?: string;
+  /** Location-specific store identifier when known */
+  storeId?: string;
   providerId?: string;
   raw?: Record<string, unknown>;
 }
 
+export type NearbyStoreChain =
+  | "coles"
+  | "woolworths"
+  | "aldi"
+  | "iga"
+  | "other";
+
 export interface NearbyStore {
   id: string;
   name: string;
-  chain: "coles" | "woolworths" | "aldi" | "other";
+  chain: NearbyStoreChain;
+  /** Stable chain store id derived from Places id / stock feed when available */
+  storeId?: string;
   address: string;
+  postcode?: string;
   lat: number;
   lng: number;
   distanceMeters: number;

@@ -34,7 +34,8 @@ export class GooglePlacesProvider implements GroceryProvider {
   }
 
   /**
-   * Find nearby Coles, Woolworths, and ALDI using Places API (New) Nearby Search.
+   * Find nearby Coles, Woolworths, ALDI, and IGA using Places API (New).
+   * `includedTypes` uses Google Places `supermarket` / `grocery_store`.
    */
   async findNearbySupermarkets(
     lat: number,
@@ -52,7 +53,7 @@ export class GooglePlacesProvider implements GroceryProvider {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": this.apiKey!,
         "X-Goog-FieldMask":
-          "places.id,places.displayName,places.formattedAddress,places.location,places.types,places.currentOpeningHours.openNow",
+          "places.id,places.displayName,places.formattedAddress,places.location,places.types,places.currentOpeningHours.openNow,places.addressComponents",
       },
       body: JSON.stringify({
         includedTypes: ["supermarket", "grocery_store"],
@@ -79,6 +80,11 @@ export class GooglePlacesProvider implements GroceryProvider {
         formattedAddress?: string;
         location?: { latitude?: number; longitude?: number };
         currentOpeningHours?: { openNow?: boolean };
+        addressComponents?: Array<{
+          longText?: string;
+          shortText?: string;
+          types?: string[];
+        }>;
       }>;
     };
 
@@ -92,15 +98,24 @@ export class GooglePlacesProvider implements GroceryProvider {
       const placeLng = place.location?.longitude;
       if (placeLat == null || placeLng == null) continue;
 
+      const postcode = extractPostcode(
+        place.formattedAddress,
+        place.addressComponents
+      );
+      const placeId = place.id;
+      const storeId = buildStoreId(chain, placeId, postcode);
+
       stores.push({
-        id: place.id ?? `${name}-${placeLat}-${placeLng}`,
+        id: placeId ?? `${name}-${placeLat}-${placeLng}`,
         name,
         chain,
+        storeId,
         address: place.formattedAddress ?? "",
+        postcode,
         lat: placeLat,
         lng: placeLng,
         distanceMeters: haversineMeters(lat, lng, placeLat, placeLng),
-        placeId: place.id,
+        placeId,
         openNow: place.currentOpeningHours?.openNow,
       });
     }
@@ -131,12 +146,42 @@ export class GooglePlacesProvider implements GroceryProvider {
   }
 }
 
-function detectChain(name: string): NearbyStore["chain"] {
+export function detectChain(name: string): NearbyStore["chain"] {
   const n = name.toLowerCase();
   if (n.includes("woolworth") || n.includes("woolies")) return "woolworths";
   if (n.includes("coles")) return "coles";
   if (n.includes("aldi")) return "aldi";
+  if (n.includes("iga")) return "iga";
   return "other";
+}
+
+export function extractPostcode(
+  address?: string,
+  components?: Array<{
+    longText?: string;
+    shortText?: string;
+    types?: string[];
+  }>
+): string | undefined {
+  const fromComponents = components?.find((c) =>
+    c.types?.includes("postal_code")
+  );
+  if (fromComponents?.shortText || fromComponents?.longText) {
+    return fromComponents.shortText || fromComponents.longText;
+  }
+  if (!address) return undefined;
+  const match = address.match(/\b(\d{4})\b/);
+  return match?.[1];
+}
+
+/** Derive a chain-specific store id for price feeds that need location context. */
+export function buildStoreId(
+  chain: NearbyStore["chain"],
+  placeId?: string,
+  postcode?: string
+): string {
+  const suffix = placeId?.replace(/^places\//, "") ?? postcode ?? "unknown";
+  return `${chain}:${suffix}`;
 }
 
 export function haversineMeters(

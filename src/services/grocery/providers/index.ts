@@ -3,6 +3,7 @@ export { MockGroceryProvider, mockGroceryProvider } from "./mock-grocery.provide
 export { WoolworthsProvider, woolworthsProvider } from "./woolworths.provider";
 export { ColesProvider, colesProvider } from "./coles.provider";
 export { AldiApifyProvider, aldiApifyProvider } from "./aldi-apify.provider";
+export { IgaProvider, igaProvider } from "./iga.provider";
 export {
   OpenFoodFactsProvider,
   openFoodFactsProvider,

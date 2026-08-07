@@ -1,6 +1,7 @@
 import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { enrichGroceryProduct, asNumber, asString } from "../mappers";
+import { resolveProductImageUrl } from "../image-urls";
 
 /**
  * Unofficial Apify ALDI Australia Actor provider.
@@ -18,14 +19,18 @@ export class AldiApifyProvider implements GroceryProvider {
   }
 
   private get actorId(): string {
-    // Apify API uses ~ instead of /
     const raw =
       process.env.APIFY_ACTOR_ID || "solidcode/aldi-com-au-scraper";
     return raw.replace("/", "~");
   }
 
+  /** Optional pre-scraped JSON cache URL for weekly catalogue (preferred over live Actor runs). */
+  private get cacheUrl(): string | undefined {
+    return process.env.ALDI_CACHE_URL || undefined;
+  }
+
   isConfigured(): boolean {
-    return Boolean(this.token);
+    return Boolean(this.token || this.cacheUrl);
   }
 
   async searchProducts(query: string): Promise<GroceryProduct[]> {
@@ -33,7 +38,19 @@ export class AldiApifyProvider implements GroceryProvider {
     const q = query.trim();
     if (!q) return [];
 
-    const url = `https://api.apify.com/v2/acts/${this.actorId}/run-sync-get-dataset-items?token=${encodeURIComponent(this.token!)}`;
+    if (this.cacheUrl) {
+      try {
+        const cached = await this.fetchCache();
+        return filterByQuery(cached, q);
+      } catch (err) {
+        console.error("ALDI cache fetch failed:", err);
+        if (!this.token) return [];
+      }
+    }
+
+    if (!this.token) return [];
+
+    const url = `https://api.apify.com/v2/acts/${this.actorId}/run-sync-get-dataset-items?token=${encodeURIComponent(this.token)}`;
 
     const res = await fetch(url, {
       method: "POST",
@@ -59,9 +76,22 @@ export class AldiApifyProvider implements GroceryProvider {
   }
 
   async getProductByBarcode(barcode: string): Promise<GroceryProduct | null> {
-    // ALDI Actor is search/URL oriented; barcode rarely available.
     const results = await this.searchProducts(barcode);
     return results.find((p) => p.barcode === barcode.trim()) ?? null;
+  }
+
+  private async fetchCache(): Promise<GroceryProduct[]> {
+    const res = await fetch(this.cacheUrl!, { next: { revalidate: 3600 } });
+    if (!res.ok) throw new Error(`ALDI cache HTTP ${res.status}`);
+    const body = (await res.json()) as unknown;
+    const rows = Array.isArray(body)
+      ? body
+      : Array.isArray((body as { items?: unknown }).items)
+        ? (body as { items: unknown[] }).items
+        : [];
+    return rows
+      .filter((x): x is Record<string, unknown> => !!x && typeof x === "object")
+      .map((row) => this.mapItem(row));
   }
 
   private mapItem(row: Record<string, unknown>): GroceryProduct {
@@ -78,6 +108,7 @@ export class AldiApifyProvider implements GroceryProvider {
       asNumber(row.wasPrice) ??
       asNumber(row.was_price) ??
       asNumber(row.regularPrice);
+    const barcode = asString(row.barcode) ?? asString(row.ean);
     const isOnSpecial =
       Boolean(row.onSpecial) ||
       Boolean(row.isSpecial) ||
@@ -90,17 +121,14 @@ export class AldiApifyProvider implements GroceryProvider {
       id: `aldi-${asString(row.id) ?? asString(row.url) ?? name}-${currentPrice ?? 0}`,
       name,
       brand: asString(row.brand),
-      barcode: asString(row.barcode) ?? asString(row.ean),
+      barcode,
       store: "aldi",
       currentPrice,
       regularPrice,
       unitPrice: asNumber(row.unitPrice) ?? asNumber(row.pricePerUnit),
       unitLabel: asString(row.unitPriceText) ?? asString(row.unitLabel),
       size: asString(row.size) ?? asString(row.packSize) ?? asString(row.pack_size),
-      imageUrl:
-        asString(row.image) ??
-        asString(row.imageUrl) ??
-        asString(row.thumbnailUrl),
+      imageUrl: resolveProductImageUrl({ store: "aldi", row, barcode }),
       productUrl: asString(row.url) ?? asString(row.productUrl),
       isOnSpecial,
       catalogueExpiresAt:
@@ -108,11 +136,22 @@ export class AldiApifyProvider implements GroceryProvider {
         asString(row.catalogueEndDate) ??
         asString(row.onSaleUntil),
       lastUpdated: new Date().toISOString(),
-      dataSource: "live-api",
+      dataSource: this.cacheUrl && !this.token ? "cached" : "live-api",
       providerId: this.id,
       raw: row,
     });
   }
+}
+
+function filterByQuery(products: GroceryProduct[], q: string): GroceryProduct[] {
+  const needle = q.toLowerCase();
+  return products.filter((p) => {
+    const hay = `${p.name} ${p.brand ?? ""} ${p.barcode ?? ""}`.toLowerCase();
+    return (
+      hay.includes(needle) ||
+      needle.split(/\s+/).some((w) => w.length > 2 && hay.includes(w))
+    );
+  });
 }
 
 export const aldiApifyProvider = new AldiApifyProvider();

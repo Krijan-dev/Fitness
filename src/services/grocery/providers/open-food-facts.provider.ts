@@ -1,6 +1,7 @@
 import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { enrichGroceryProduct, asString } from "../mappers";
+import { resolveProductImageUrl } from "../image-urls";
 
 /**
  * Official Open Food Facts API — barcode metadata (not live shelf prices).
@@ -85,18 +86,20 @@ export class OpenFoodFactsProvider implements GroceryProvider {
       "Unknown product";
 
     const quantity = asString(row.quantity) ?? asString(row.product_quantity);
+    const barcode = asString(row.code) ?? barcodeFallback;
 
     return enrichGroceryProduct({
-      id: `off-${asString(row.code) ?? barcodeFallback ?? name}`,
+      id: `off-${barcode ?? name}`,
       name,
       brand: asString(row.brands)?.split(",")[0]?.trim(),
-      barcode: asString(row.code) ?? barcodeFallback,
+      barcode,
       store: "open-food-facts",
       size: quantity,
-      imageUrl:
-        asString(row.image_front_url) ??
-        asString(row.image_url) ??
-        asString(row.image_small_url),
+      imageUrl: resolveProductImageUrl({
+        store: "open-food-facts",
+        row,
+        barcode,
+      }),
       productUrl: asString(row.url),
       lastUpdated: new Date().toISOString(),
       dataSource: "live-api",

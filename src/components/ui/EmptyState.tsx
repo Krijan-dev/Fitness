@@ -52,7 +52,6 @@ function resolveIcon(icon: EmptyStateProps["icon"]): ReactNode {
   if (typeof icon === "function" || isForwardRefComponent(icon)) {
     return createElement(icon as ComponentType<{ className?: string }>, {
       className: "h-6 w-6",
-      "aria-hidden": true,
     });
   }
 

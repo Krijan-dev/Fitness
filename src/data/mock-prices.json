@@ -6,16 +6,17 @@
     "brand": "Coles",
     "size": "1kg",
     "store": "coles",
-    "currentPrice": 12.50,
-    "regularPrice": 14.00,
-    "unitPrice": 12.50,
+    "currentPrice": 12.5,
+    "regularPrice": 14,
+    "unitPrice": 12.5,
     "unitLabel": "per kg",
     "isOnSpecial": true,
     "discountPercentage": 11,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
   },
   {
     "id": "price-2",
@@ -24,15 +25,16 @@
     "brand": "Woolworths",
     "size": "1kg",
     "store": "woolworths",
-    "currentPrice": 13.00,
-    "regularPrice": 13.00,
-    "unitPrice": 13.00,
+    "currentPrice": 13,
+    "regularPrice": 13,
+    "unitPrice": 13,
     "unitLabel": "per kg",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
   },
   {
     "id": "price-3",
@@ -49,7 +51,8 @@
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
   },
   {
     "id": "price-4",
@@ -58,16 +61,17 @@
     "brand": "Coles",
     "size": "1kg",
     "store": "coles",
-    "currentPrice": 6.50,
-    "regularPrice": 7.00,
-    "unitPrice": 6.50,
+    "currentPrice": 6.5,
+    "regularPrice": 7,
+    "unitPrice": 6.5,
     "unitLabel": "per kg",
     "isOnSpecial": true,
     "discountPercentage": 7,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&h=200&fit=crop"
   },
   {
     "id": "price-5",
@@ -76,15 +80,16 @@
     "brand": "Woolworths",
     "size": "1kg",
     "store": "woolworths",
-    "currentPrice": 6.80,
-    "regularPrice": 6.80,
-    "unitPrice": 6.80,
+    "currentPrice": 6.8,
+    "regularPrice": 6.8,
+    "unitPrice": 6.8,
     "unitLabel": "per kg",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&h=200&fit=crop"
   },
   {
     "id": "price-6",
@@ -101,7 +106,8 @@
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&h=200&fit=crop"
   },
   {
     "id": "price-7",
@@ -110,16 +116,17 @@
     "brand": "Coles",
     "size": "each",
     "store": "coles",
-    "currentPrice": 2.50,
-    "regularPrice": 3.00,
-    "unitPrice": 2.50,
+    "currentPrice": 2.5,
+    "regularPrice": 3,
+    "unitPrice": 2.5,
     "unitLabel": "per item",
     "isOnSpecial": true,
     "discountPercentage": 17,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=200&h=200&fit=crop"
   },
   {
     "id": "price-8",
@@ -128,15 +135,16 @@
     "brand": "Woolworths",
     "size": "each",
     "store": "woolworths",
-    "currentPrice": 2.80,
-    "regularPrice": 2.80,
-    "unitPrice": 2.80,
+    "currentPrice": 2.8,
+    "regularPrice": 2.8,
+    "unitPrice": 2.8,
     "unitLabel": "per item",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=200&h=200&fit=crop"
   },
   {
     "id": "price-9",
@@ -145,15 +153,16 @@
     "brand": "Woolworths",
     "size": "900g",
     "store": "woolworths",
-    "currentPrice": 4.20,
-    "regularPrice": 4.20,
+    "currentPrice": 4.2,
+    "regularPrice": 4.2,
     "unitPrice": 4.67,
     "unitLabel": "per kg",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
   },
   {
     "id": "price-10",
@@ -162,16 +171,17 @@
     "brand": "Coles",
     "size": "1kg",
     "store": "coles",
-    "currentPrice": 3.90,
-    "regularPrice": 4.50,
-    "unitPrice": 3.90,
+    "currentPrice": 3.9,
+    "regularPrice": 4.5,
+    "unitPrice": 3.9,
     "unitLabel": "per kg",
     "isOnSpecial": true,
     "discountPercentage": 13,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
   },
   {
     "id": "price-11",
@@ -188,7 +198,8 @@
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
   },
   {
     "id": "price-12",
@@ -197,16 +208,17 @@
     "brand": "Coles",
     "size": "per kg",
     "store": "coles",
-    "currentPrice": 3.90,
-    "regularPrice": 4.50,
-    "unitPrice": 3.90,
+    "currentPrice": 3.9,
+    "regularPrice": 4.5,
+    "unitPrice": 3.9,
     "unitLabel": "per kg",
     "isOnSpecial": true,
     "discountPercentage": 13,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200&h=200&fit=crop"
   },
   {
     "id": "price-13",
@@ -215,15 +227,16 @@
     "brand": "Woolworths",
     "size": "per kg",
     "store": "woolworths",
-    "currentPrice": 4.00,
-    "regularPrice": 4.00,
-    "unitPrice": 4.00,
+    "currentPrice": 4,
+    "regularPrice": 4,
+    "unitPrice": 4,
     "unitLabel": "per kg",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200&h=200&fit=crop"
   },
   {
     "id": "price-14",
@@ -232,15 +245,16 @@
     "brand": "IGA",
     "size": "1kg",
     "store": "iga",
-    "currentPrice": 12.80,
-    "regularPrice": 12.80,
-    "unitPrice": 12.80,
+    "currentPrice": 12.8,
+    "regularPrice": 12.8,
+    "unitPrice": 12.8,
     "unitLabel": "per kg",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
   },
   {
     "id": "price-15",
@@ -249,15 +263,16 @@
     "brand": "Harris Farm",
     "size": "each",
     "store": "harris-farm",
-    "currentPrice": 3.50,
-    "regularPrice": 3.50,
-    "unitPrice": 3.50,
+    "currentPrice": 3.5,
+    "regularPrice": 3.5,
+    "unitPrice": 3.5,
     "unitLabel": "per item",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=200&h=200&fit=crop"
   },
   {
     "id": "price-16",
@@ -266,14 +281,15 @@
     "brand": "Costco",
     "size": "2kg",
     "store": "costco",
-    "currentPrice": 6.50,
-    "regularPrice": 6.50,
+    "currentPrice": 6.5,
+    "regularPrice": 6.5,
     "unitPrice": 3.25,
     "unitLabel": "per kg",
     "isOnSpecial": false,
     "availability": "in-stock",
     "location": "Canberra",
     "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z"
+    "lastUpdated": "2026-03-20T10:00:00.000Z",
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
   }
 ]
