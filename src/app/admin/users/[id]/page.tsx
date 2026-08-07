@@ -6,9 +6,12 @@ import { useParams } from "next/navigation";
 import { apiGet, apiSend } from "@/lib/api-client";
 import { Button } from "@/components/common/Button";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { Input } from "@/components/common/Input";
+import { Modal } from "@/components/common/Modal";
 import { LoadingState } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { useToast } from "@/components/common/Toast";
+import { Select } from "@/components/ui/Select";
 import type { Recipe } from "@/types/recipe";
 import type { MealEntry, WeeklyMealPlan } from "@/types/meal";
 import type { ShoppingItem } from "@/types/shopping";
@@ -35,6 +38,11 @@ interface UserDetail {
   settings: UserSettings;
 }
 
+const ROLE_OPTIONS = [
+  { value: "user", label: "User" },
+  { value: "admin", label: "Admin" },
+];
+
 export default function AdminUserDetailPage() {
   const params = useParams<{ id: string }>();
   const { push } = useToast();
@@ -42,11 +50,18 @@ export default function AdminUserDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"user" | "admin">("user");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     void apiGet<{ data: UserDetail }>(`/api/admin/users/${params.id}`)
-      .then((res) => setData(res.data))
+      .then((res) => {
+        setData(res.data);
+        setSelectedRole(res.data.user.role === "admin" ? "admin" : "user");
+      })
       .catch((err) =>
         setError(err instanceof Error ? err.message : "Failed to load user")
       )
@@ -59,6 +74,56 @@ export default function AdminUserDetailPage() {
       await apiSend(`/api/admin/users/${params.id}`, "DELETE");
       push("User deleted", "success");
       window.location.href = "/admin/users";
+    } catch (err) {
+      push(err instanceof Error ? err.message : "Failed", "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveRole() {
+    if (!data) return;
+    if (selectedRole === data.user.role) {
+      push("Role is already set to that value", "success");
+      return;
+    }
+    setBusy(true);
+    try {
+      await apiSend(`/api/admin/users/${params.id}`, "PATCH", {
+        action: "role",
+        role: selectedRole,
+      });
+      setData({
+        ...data,
+        user: { ...data.user, role: selectedRole },
+      });
+      push(`Role updated to ${selectedRole}`, "success");
+    } catch (err) {
+      push(err instanceof Error ? err.message : "Failed", "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function confirmReset() {
+    if (newPassword.length < 8) {
+      push("Password must be at least 8 characters", "error");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      push("Passwords do not match", "error");
+      return;
+    }
+    setBusy(true);
+    try {
+      await apiSend(`/api/admin/users/${params.id}`, "PATCH", {
+        action: "reset-password",
+        password: newPassword,
+      });
+      push("Password reset successfully", "success");
+      setResetOpen(false);
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (err) {
       push(err instanceof Error ? err.message : "Failed", "error");
     } finally {
@@ -88,14 +153,25 @@ export default function AdminUserDetailPage() {
           </h1>
           <p className="text-sm text-zinc-400">{user.email}</p>
         </div>
-        <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
-          Delete user
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setNewPassword("");
+              setConfirmPassword("");
+              setResetOpen(true);
+            }}
+          >
+            Reset password
+          </Button>
+          <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
+            Delete user
+          </Button>
+        </div>
       </div>
 
       <Section title="Profile">
         <dl className="grid gap-3 sm:grid-cols-2 text-sm">
-          <Item label="Role" value={user.role} />
           <Item
             label="Status"
             value={user.disabled ? "Disabled" : "Active"}
@@ -117,6 +193,24 @@ export default function AdminUserDetailPage() {
             }
           />
         </dl>
+
+        <div className="mt-6 max-w-sm space-y-3 border-t border-white/10 pt-5">
+          <Select
+            label="Role"
+            value={selectedRole}
+            options={ROLE_OPTIONS}
+            onChange={(e) =>
+              setSelectedRole(e.target.value as "user" | "admin")
+            }
+          />
+          <Button
+            onClick={() => void saveRole()}
+            isLoading={busy}
+            disabled={selectedRole === user.role}
+          >
+            Save role
+          </Button>
+        </div>
       </Section>
 
       <Section title={`Recipes (${data.recipes.length})`}>
@@ -151,7 +245,8 @@ export default function AdminUserDetailPage() {
         <ReadOnlyList
           empty="No shopping items"
           items={data.shopping.map(
-            (i) => `${i.name} · ${i.quantity}${i.unit} · ${i.purchased ? "bought" : "open"}`
+            (i) =>
+              `${i.name} · ${i.quantity}${i.unit} · ${i.purchased ? "bought" : "open"}`
           )}
         />
       </Section>
@@ -159,9 +254,7 @@ export default function AdminUserDetailPage() {
       <Section title={`Pantry (${data.pantry.length})`}>
         <ReadOnlyList
           empty="No pantry items"
-          items={data.pantry.map(
-            (i) => `${i.name} · ${i.quantity}${i.unit}`
-          )}
+          items={data.pantry.map((i) => `${i.name} · ${i.quantity}${i.unit}`)}
         />
       </Section>
 
@@ -204,6 +297,52 @@ export default function AdminUserDetailPage() {
         isDestructive
         isLoading={busy}
       />
+
+      <Modal
+        isOpen={resetOpen}
+        onClose={() => {
+          setResetOpen(false);
+          setNewPassword("");
+          setConfirmPassword("");
+        }}
+        title="Reset password"
+        description={`Enter a new password for ${user.name} (${user.email}).`}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <Input
+            label="New password"
+            type="password"
+            autoComplete="new-password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            hint="At least 8 characters"
+          />
+          <Input
+            label="Confirm new password"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setResetOpen(false);
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
+              disabled={busy}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => void confirmReset()} isLoading={busy}>
+              Reset password
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

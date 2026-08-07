@@ -7,9 +7,11 @@ import { Button } from "@/components/common/Button";
 import { Input } from "@/components/common/Input";
 import { SearchInput } from "@/components/common/SearchInput";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { Modal } from "@/components/common/Modal";
 import { LoadingState } from "@/components/common/LoadingState";
 import { useToast } from "@/components/common/Toast";
 import { useDebounce } from "@/hooks/useDebounce";
+import { Select } from "@/components/ui/Select";
 
 interface AdminUser {
   id: string;
@@ -20,6 +22,11 @@ interface AdminUser {
   lastActivityAt: string | null;
   disabled: boolean;
 }
+
+const ROLE_OPTIONS = [
+  { value: "user", label: "User" },
+  { value: "admin", label: "Admin" },
+];
 
 export default function AdminUsersPage() {
   const { push } = useToast();
@@ -32,6 +39,9 @@ export default function AdminUsersPage() {
   const [pendingDelete, setPendingDelete] = useState<AdminUser | null>(null);
   const [resetUser, setResetUser] = useState<AdminUser | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [roleUser, setRoleUser] = useState<AdminUser | null>(null);
+  const [selectedRole, setSelectedRole] = useState<"user" | "admin">("user");
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -56,15 +66,31 @@ export default function AdminUsersPage() {
     void load();
   }, [load]);
 
-  async function changeRole(user: AdminUser) {
-    const role = user.role === "admin" ? "user" : "admin";
+  function openRoleDialog(user: AdminUser) {
+    setRoleUser(user);
+    setSelectedRole(user.role);
+  }
+
+  function openResetDialog(user: AdminUser) {
+    setResetUser(user);
+    setNewPassword("");
+    setConfirmPassword("");
+  }
+
+  async function saveRole() {
+    if (!roleUser) return;
+    if (selectedRole === roleUser.role) {
+      setRoleUser(null);
+      return;
+    }
     setBusy(true);
     try {
-      await apiSend(`/api/admin/users/${user.id}`, "PATCH", {
+      await apiSend(`/api/admin/users/${roleUser.id}`, "PATCH", {
         action: "role",
-        role,
+        role: selectedRole,
       });
-      push(`Role updated to ${role}`, "success");
+      push(`Role updated to ${selectedRole}`, "success");
+      setRoleUser(null);
       await load();
     } catch (error) {
       push(error instanceof Error ? error.message : "Failed", "error");
@@ -105,8 +131,13 @@ export default function AdminUsersPage() {
   }
 
   async function confirmReset() {
-    if (!resetUser || newPassword.length < 8) {
+    if (!resetUser) return;
+    if (newPassword.length < 8) {
       push("Password must be at least 8 characters", "error");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      push("Passwords do not match", "error");
       return;
     }
     setBusy(true);
@@ -115,9 +146,10 @@ export default function AdminUsersPage() {
         action: "reset-password",
         password: newPassword,
       });
-      push("Password reset", "success");
+      push("Password reset successfully", "success");
       setResetUser(null);
       setNewPassword("");
+      setConfirmPassword("");
     } catch (error) {
       push(error instanceof Error ? error.message : "Failed", "error");
     } finally {
@@ -196,17 +228,17 @@ export default function AdminUsersPage() {
                         <button
                           type="button"
                           className="rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-white/5"
-                          onClick={() => void changeRole(user)}
+                          onClick={() => openRoleDialog(user)}
                           disabled={busy}
                         >
-                          Role
+                          Change role
                         </button>
                         <button
                           type="button"
                           className="rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-white/5"
-                          onClick={() => setResetUser(user)}
+                          onClick={() => openResetDialog(user)}
                         >
-                          Reset pw
+                          Reset password
                         </button>
                         <button
                           type="button"
@@ -266,30 +298,90 @@ export default function AdminUsersPage() {
         isLoading={busy}
       />
 
-      <ConfirmDialog
+      <Modal
+        isOpen={Boolean(roleUser)}
+        onClose={() => setRoleUser(null)}
+        title="Change role"
+        description={
+          roleUser
+            ? `Choose a role for ${roleUser.name} (${roleUser.email}).`
+            : undefined
+        }
+        size="sm"
+      >
+        <div className="space-y-4">
+          <Select
+            label="Role"
+            value={selectedRole}
+            options={ROLE_OPTIONS}
+            onChange={(e) =>
+              setSelectedRole(e.target.value as "user" | "admin")
+            }
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => setRoleUser(null)}
+              disabled={busy}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => void saveRole()} isLoading={busy}>
+              Save
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
         isOpen={Boolean(resetUser)}
         onClose={() => {
           setResetUser(null);
           setNewPassword("");
+          setConfirmPassword("");
         }}
-        onConfirm={() => void confirmReset()}
         title="Reset password"
-        description={`Set a new password for ${resetUser?.email}.`}
-        confirmLabel="Reset"
-        isLoading={busy}
-      />
-      {resetUser ? (
-        <div className="fixed inset-x-0 bottom-6 z-[60] mx-auto w-full max-w-md px-4">
-          <div className="rounded-xl border border-white/10 bg-[#0f172a] p-4 shadow-2xl">
-            <Input
-              label="New password"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
+        description={
+          resetUser
+            ? `Enter a new password for ${resetUser.name} (${resetUser.email}).`
+            : undefined
+        }
+        size="sm"
+      >
+        <div className="space-y-4">
+          <Input
+            label="New password"
+            type="password"
+            autoComplete="new-password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            hint="At least 8 characters"
+          />
+          <Input
+            label="Confirm new password"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setResetUser(null);
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
+              disabled={busy}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => void confirmReset()} isLoading={busy}>
+              Reset password
+            </Button>
           </div>
         </div>
-      ) : null}
+      </Modal>
     </div>
   );
 }
