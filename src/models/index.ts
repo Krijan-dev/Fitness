@@ -6,3 +6,6 @@ export { ShoppingItem } from "./ShoppingItem";
 export { PantryItem } from "./PantryItem";
 export { WeightEntry } from "./WeightEntry";
 export { UserSettings } from "./UserSettings";
+export { GroceryProductModel } from "./GroceryProduct";
+export { PriceHistoryModel } from "./PriceHistory";
+export { GrocerySyncMetaModel } from "./GrocerySyncMeta";

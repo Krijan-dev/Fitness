@@ -73,6 +73,15 @@ export function PriceOptionRow({
             <span>{price.availability.replace("-", " ")}</span>
           ) : null}
           <span>Updated {updated}</span>
+          {price.catalogueExpiresAt ? (
+            <span>
+              Catalogue until{" "}
+              {new Date(price.catalogueExpiresAt).toLocaleDateString("en-AU", {
+                day: "numeric",
+                month: "short",
+              })}
+            </span>
+          ) : null}
         </div>
         {price.productUrl ? (
           <a

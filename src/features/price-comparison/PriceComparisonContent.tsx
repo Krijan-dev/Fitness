@@ -9,6 +9,8 @@ import { Button } from "@/components/common/Button";
 import { EmptyState } from "@/components/common/EmptyState";
 import { BasketSummaryCard } from "@/components/prices/BasketSummaryCard";
 import { ShoppingItemPriceCard } from "@/components/prices/ShoppingItemPriceCard";
+import { BarcodeLookup } from "@/components/grocery/BarcodeLookup";
+import { NearbyStoresPanel } from "@/components/grocery/NearbyStoresPanel";
 import { useShoppingListStore } from "@/stores/shopping-list.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import { usePriceComparisonStore } from "@/stores/price-comparison.store";
@@ -46,6 +48,9 @@ export function PriceComparisonContent() {
     {}
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [manualQuery, setManualQuery] = useState("");
+  const [manualResults, setManualResults] = useState<StoreProductPrice[]>([]);
+  const [manualLoading, setManualLoading] = useState(false);
 
   const fetchPricesForItem = useCallback(
     async (itemId: string, query: string) => {
@@ -115,6 +120,23 @@ export function PriceComparisonContent() {
     setPriceMap({});
   };
 
+  const searchManual = async () => {
+    const q = manualQuery.trim();
+    if (!q) return;
+    setManualLoading(true);
+    try {
+      const params = new URLSearchParams({ query: q, location });
+      const response = await fetch(`/api/prices?${params}`);
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error ?? "Search failed");
+      setManualResults(body.data as StoreProductPrice[]);
+    } catch {
+      setManualResults([]);
+    } finally {
+      setManualLoading(false);
+    }
+  };
+
   const anyLoading =
     isRefreshing ||
     Object.values(fetchStates).some((s) => s.loading);
@@ -123,7 +145,7 @@ export function PriceComparisonContent() {
     <>
       <PageHeader
         title="Price Comparison"
-        description="Compare supermarket prices for your shopping list and find the cheapest basket."
+        description="Compare Coles, Woolworths, and ALDI prices, highlight specials, and find the cheapest basket."
       >
         <div className="flex flex-wrap gap-2">
           <Link href="/shopping-list">
@@ -140,7 +162,7 @@ export function PriceComparisonContent() {
             <RefreshCw
               className={`h-4 w-4 ${anyLoading ? "animate-spin" : ""}`}
             />
-            Refresh prices
+            Find cheapest basket
           </Button>
         </div>
       </PageHeader>
@@ -156,16 +178,79 @@ export function PriceComparisonContent() {
           onChange={(e) => handleLocationChange(e.target.value)}
         />
         <p className="text-sm text-muted-foreground lg:max-w-xs lg:self-end">
-          Location is saved in your settings. Prices shown are mock data until
-          live providers are configured.
+          Live RapidAPI / Apify providers are used when API keys are set;
+          otherwise mock AU prices are shown.
         </p>
+      </div>
+
+      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <BarcodeLookup
+          location={location}
+          onMatchedPrices={(prices) => setManualResults(prices)}
+        />
+        <NearbyStoresPanel location={location} />
+      </div>
+
+      <div className="mb-8 rounded-xl border border-border bg-card p-4 space-y-3">
+        <h3 className="text-sm font-semibold">Search products across stores</h3>
+        <div className="flex flex-wrap gap-2">
+          <input
+            value={manualQuery}
+            onChange={(e) => setManualQuery(e.target.value)}
+            placeholder="e.g. greek yoghurt"
+            className="flex-1 min-w-[180px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void searchManual();
+            }}
+          />
+          <Button onClick={() => void searchManual()} disabled={manualLoading}>
+            {manualLoading ? "Searching…" : "Search"}
+          </Button>
+        </div>
+        {manualResults.length > 0 ? (
+          <ul className="space-y-2 text-sm">
+            {manualResults
+              .slice()
+              .sort((a, b) => a.currentPrice - b.currentPrice)
+              .slice(0, 12)
+              .map((p) => (
+                <li
+                  key={p.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
+                >
+                  <span>
+                    <span className="font-medium">{p.store}</span> · {p.productName}
+                    {p.isOnSpecial ? (
+                      <span className="ml-2 text-xs text-success">Special</span>
+                    ) : null}
+                    {p.unitPrice != null ? (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        ${p.unitPrice.toFixed(2)} {p.unitLabel}
+                      </span>
+                    ) : null}
+                    {p.catalogueExpiresAt ? (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        until{" "}
+                        {new Date(p.catalogueExpiresAt).toLocaleDateString(
+                          "en-AU"
+                        )}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="font-semibold">
+                    ${p.currentPrice.toFixed(2)}
+                  </span>
+                </li>
+              ))}
+          </ul>
+        ) : null}
       </div>
 
       {unpurchasedItems.length === 0 ? (
         <EmptyState
           icon={Tags}
-          title="No items to compare"
-          description="Add unpurchased items to your shopping list to compare prices across supermarkets."
+          title="No shopping-list items to compare"
+          description="Add unpurchased items to your shopping list, or use product search / barcode above."
           actionLabel="Go to shopping list"
           onAction={() => window.location.assign("/shopping-list")}
         />
@@ -178,10 +263,10 @@ export function PriceComparisonContent() {
           ) : null}
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Product matches</h2>
+            <h2 className="text-lg font-semibold">Shopping list matches</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Select the correct product match for each item. Defaults to the
-              cheapest option.
+              cheapest option. Specials and unit prices are highlighted when available.
             </p>
             {itemMatches.map((match) => (
               <ShoppingItemPriceCard

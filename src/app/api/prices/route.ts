@@ -6,7 +6,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const query = searchParams.get("query");
     const location = searchParams.get("location") || "Canberra";
-    const providerMode = process.env.PRICE_PROVIDER_MODE || "mock";
 
     if (!query || query.trim().length === 0) {
       return NextResponse.json(
@@ -15,21 +14,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (providerMode !== "mock") {
-      return NextResponse.json(
-        { error: "Live price providers are not yet configured. Use mock mode." },
-        { status: 503 }
-      );
-    }
-
     const products = await priceComparisonService.searchAllStores(
       query.trim(),
       location
     );
 
+    const mode = process.env.PRICE_PROVIDER_MODE || "auto";
+    const hasLiveKeys = Boolean(
+      process.env.WOOLWORTHS_API_KEY ||
+        process.env.COLES_API_KEY ||
+        process.env.APIFY_API_TOKEN
+    );
+
     return NextResponse.json({
       data: products,
-      source: "mock",
+      source: mode === "mock" || !hasLiveKeys ? "mock" : "live-or-cache",
       location,
     });
   } catch {
