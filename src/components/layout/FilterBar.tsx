@@ -9,9 +9,9 @@ interface FilterBarProps {
 export function FilterBar({ children, className = "" }: FilterBarProps) {
   return (
     <div
-      className={`rounded-xl border border-border/80 bg-card/60 p-4 sm:p-5 ${className}`}
+      className={`rounded-2xl border border-border bg-card/80 p-4 shadow-card sm:p-5 ${className}`}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
         {children}
       </div>
     </div>

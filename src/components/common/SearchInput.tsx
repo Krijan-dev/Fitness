@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import type { KeyboardEvent } from "react";
 import { Input } from "./Input";
 
 interface SearchInputProps {
@@ -7,6 +8,7 @@ interface SearchInputProps {
   placeholder?: string;
   label?: string;
   className?: string;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export function SearchInput({
@@ -15,6 +17,7 @@ export function SearchInput({
   placeholder = "Search...",
   label,
   className = "",
+  onKeyDown,
 }: SearchInputProps) {
   return (
     <div className={`relative ${className}`}>
@@ -27,6 +30,7 @@ export function SearchInput({
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         className="pl-9"
         aria-label={label || placeholder}

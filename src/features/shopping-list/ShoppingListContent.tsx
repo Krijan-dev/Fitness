@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { ShoppingItemRow } from "@/components/shopping/ShoppingItemRow";
 import { ShoppingItemModal } from "@/components/shopping/ShoppingItemModal";
+import { ShoppingQuickAdd } from "@/components/shopping/ShoppingQuickAdd";
 import { useShoppingListStore } from "@/stores/shopping-list.store";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
@@ -45,6 +46,7 @@ export function ShoppingListContent() {
   const [deleteItem, setDeleteItem] = useState<ShoppingItem | null>(null);
   const [clearOpen, setClearOpen] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   const filteredItems = useMemo(
     () => filterShoppingItems(items, debouncedSearch, filter),
@@ -70,6 +72,13 @@ export function ShoppingListContent() {
     showMessage("Purchased items removed.");
   };
 
+  const handleQuickAdd = (data: Omit<ShoppingItem, "id">) => {
+    addItem(data);
+    setSearch("");
+    setQuickAddOpen(false);
+    showMessage(`Added ${data.quantity} ${data.unit} of ${data.name}.`);
+  };
+
   return (
     <>
       <PageHeader
@@ -92,7 +101,7 @@ export function ShoppingListContent() {
 
       {actionMessage ? (
         <div
-          className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
           role="status"
         >
           {actionMessage}
@@ -112,26 +121,42 @@ export function ShoppingListContent() {
         </div>
       </PageSection>
 
-      <FilterBar>
-        <div className="flex-1 min-w-[200px]">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search items..."
-            label="Search"
+      <FilterBar className="relative overflow-visible">
+        <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-end">
+          <div className="min-w-0 flex-1">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search list or type a new item…"
+              label="Search / add"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setQuickAddOpen(true);
+                }
+              }}
+            />
+          </div>
+          <ShoppingQuickAdd
+            suggestedName={search}
+            open={quickAddOpen}
+            onOpenChange={setQuickAddOpen}
+            onAdd={handleQuickAdd}
           />
+          <div className="w-full lg:w-44">
+            <Select
+              label="Show"
+              value={filter}
+              options={SHOPPING_FILTER_OPTIONS.map((o) => ({
+                value: o.value,
+                label: o.label,
+              }))}
+              onChange={(e) =>
+                setFilter(e.target.value as ShoppingFilterOption)
+              }
+            />
+          </div>
         </div>
-        <Select
-          label="Show"
-          value={filter}
-          options={SHOPPING_FILTER_OPTIONS.map((o) => ({
-            value: o.value,
-            label: o.label,
-          }))}
-          onChange={(e) =>
-            setFilter(e.target.value as ShoppingFilterOption)
-          }
-        />
       </FilterBar>
 
       <PageSection>
@@ -160,15 +185,19 @@ export function ShoppingListContent() {
 
       {filteredItems.length === 0 ? (
         <EmptyState
-          icon={ShoppingCart}
-          title={items.length === 0 ? "No shopping items yet" : "No matching items"}
+          icon={<ShoppingCart className="h-6 w-6" aria-hidden />}
+          title={
+            items.length === 0 ? "No shopping items yet" : "No matching items"
+          }
           description={
             items.length === 0
-              ? "Add items manually or generate from recipes and your meal plan."
-              : "Try adjusting your search or filter."
+              ? "Type an item in search and tap Add item to set the quantity."
+              : search.trim()
+                ? `Nothing matches “${search.trim()}”. Use Add item beside search to add it with a quantity.`
+                : "Try adjusting your search or filter."
           }
-          actionLabel={items.length === 0 ? "Add item" : undefined}
-          onAction={items.length === 0 ? () => setAddOpen(true) : undefined}
+          actionLabel={search.trim() ? `Add “${search.trim()}”` : "Add item"}
+          onAction={() => setQuickAddOpen(true)}
         />
       ) : (
         <div className="space-y-6">
