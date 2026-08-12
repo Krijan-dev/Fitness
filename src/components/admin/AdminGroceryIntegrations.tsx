@@ -23,6 +23,12 @@ interface IntegrationsPayload {
   liveCount: number;
   needsWorkCount: number;
   summary: string;
+  aldiCatalogue?: {
+    productCount: number;
+    lastSyncedAt: string | null;
+    nextWednesdayRefreshAt: string;
+    isDue: boolean;
+  } | null;
 }
 
 /**
@@ -108,6 +114,14 @@ export function AdminGroceryIntegrations() {
                 <p className="font-medium text-foreground">{p.label}</p>
                 {p.health === "needs-setup" ? (
                   <p className="mt-0.5 text-xs text-muted-foreground">{p.hint}</p>
+                ) : p.id === "aldi" && data.aldiCatalogue ? (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {data.aldiCatalogue.productCount} products stored
+                    {data.aldiCatalogue.lastSyncedAt
+                      ? ` · last sync ${new Date(data.aldiCatalogue.lastSyncedAt).toLocaleDateString()}`
+                      : " · not synced yet"}
+                    {data.aldiCatalogue.isDue ? " · Wednesday refresh due" : ""}
+                  </p>
                 ) : null}
               </div>
               <Badge

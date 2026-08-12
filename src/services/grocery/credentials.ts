@@ -85,13 +85,13 @@ export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
     },
     {
       id: "aldi",
-      label: "ALDI (Apify / cache)",
+      label: "ALDI (Mongo catalogue)",
       configured: aldi,
       live: aldi && !forceMock,
       hint: aldi
         ? getApifyDatasetId() || process.env.ALDI_CACHE_URL
-          ? "Apify dataset catalogue"
-          : "Apify Actor live runs"
+          ? "Full catalogue synced weekly (Wed) into Mongo — searches never hit Apify"
+          : "Weekly Actor sync into Mongo — prefer APIFY_DATASET_ID to avoid Actor credit use"
         : "Set APIFY_API_TOKEN + APIFY_DATASET_ID (or ALDI_CACHE_URL)",
     },
     {

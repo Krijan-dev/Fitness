@@ -7,6 +7,7 @@ import {
   hasAnyLivePriceProvider,
   priceDataMode,
 } from "@/services/grocery/credentials";
+import { getAldiCatalogueStatus } from "@/services/grocery/aldi-catalogue.service";
 
 /**
  * Admin-only grocery integration health.
@@ -28,6 +29,16 @@ export async function GET(request: NextRequest) {
     const live = providers.filter((p) => p.health === "live");
     const needsWork = providers.filter((p) => p.health === "needs-setup");
 
+    let aldiCatalogue: Awaited<ReturnType<typeof getAldiCatalogueStatus>> | null =
+      null;
+    try {
+      if (process.env.MONGODB_URI) {
+        aldiCatalogue = await getAldiCatalogueStatus();
+      }
+    } catch {
+      aldiCatalogue = null;
+    }
+
     return jsonOk({
       data: {
         mode: priceDataMode(),
@@ -36,6 +47,7 @@ export async function GET(request: NextRequest) {
         providers,
         liveCount: live.length,
         needsWorkCount: needsWork.length,
+        aldiCatalogue,
         summary:
           needsWork.length === 0
             ? "All grocery integrations look live."

@@ -1,8 +1,10 @@
 import {
   extractAldiPricing,
   resolveAldiAssetImage,
-  AldiApifyProvider,
-} from "../providers/aldi-apify.provider";
+  filterAldiProductsByQuery,
+  mapAldiApifyItem,
+} from "../aldi-mapper";
+import type { GroceryProduct } from "@/types/grocery";
 
 const sampleRow = {
   sku: "000000000000380281",
@@ -44,13 +46,55 @@ describe("ALDI Apify dataset mapping", () => {
   });
 
   it("maps a full dataset row to a GroceryProduct", () => {
-    const provider = new AldiApifyProvider();
-    const product = provider.mapItem(sampleRow);
+    const product = mapAldiApifyItem(sampleRow);
     expect(product.store).toBe("aldi");
     expect(product.name).toContain("Grapes");
     expect(product.currentPrice).toBe(8.49);
     expect(product.isOnSpecial).toBe(true);
     expect(product.imageUrl).toContain("dm.apac.cms.aldi.cx");
     expect(product.productUrl).toContain("aldi.com.au/product/");
+    expect(product.dataSource).toBe("cached");
+  });
+});
+
+describe("ALDI catalogue local filter", () => {
+  const catalogue: GroceryProduct[] = [
+    {
+      id: "aldi-1",
+      name: "Full Cream Milk 2L",
+      store: "aldi",
+      currentPrice: 2.89,
+      lastUpdated: new Date().toISOString(),
+      dataSource: "cached",
+    },
+    {
+      id: "aldi-2",
+      name: "Free Range Eggs 12pk",
+      store: "aldi",
+      currentPrice: 4.49,
+      lastUpdated: new Date().toISOString(),
+      dataSource: "cached",
+    },
+    {
+      id: "aldi-3",
+      name: "Almond Milk Unsweetened 1L",
+      brand: "Emporium",
+      store: "aldi",
+      currentPrice: 1.99,
+      lastUpdated: new Date().toISOString(),
+      dataSource: "cached",
+    },
+  ];
+
+  it("matches products from stored catalogue without Apify", () => {
+    const milk = filterAldiProductsByQuery(catalogue, "milk");
+    expect(milk.map((p) => p.id)).toEqual(
+      expect.arrayContaining(["aldi-1", "aldi-3"])
+    );
+    expect(milk.every((p) => p.dataSource === "cached")).toBe(true);
+  });
+
+  it("returns empty for unrelated queries", () => {
+    expect(filterAldiProductsByQuery(catalogue, "xylophone")).toEqual([]);
   });
 });
