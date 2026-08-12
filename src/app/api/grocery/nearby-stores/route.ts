@@ -5,8 +5,11 @@ import {
 } from "@/services/grocery/providers/google-places.provider";
 import type { NearbyStore } from "@/types/grocery";
 
-/** City centroids used when geocoding is unavailable or address is a known location option */
-const CITY_COORDS: Record<string, { lat: number; lng: number; postcode?: string }> = {
+/** City centroids used when geocoding is unavailable */
+const CITY_COORDS: Record<
+  string,
+  { lat: number; lng: number; postcode?: string }
+> = {
   Canberra: { lat: -35.2809, lng: 149.13, postcode: "2600" },
   Sydney: { lat: -33.8688, lng: 151.2093, postcode: "2000" },
   Melbourne: { lat: -37.8136, lng: 144.9631, postcode: "3000" },
@@ -17,62 +20,54 @@ const CITY_COORDS: Record<string, { lat: number; lng: number; postcode?: string 
   Darwin: { lat: -12.4634, lng: 130.8456, postcode: "0800" },
 };
 
+/**
+ * Stores near the user's saved settings location (city / postcode).
+ * No geolocation required — location comes from the client query params.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-    const latParam = searchParams.get("lat");
-    const lngParam = searchParams.get("lng");
     const address = searchParams.get("address") || searchParams.get("location");
     const postcodeParam = searchParams.get("postcode") || undefined;
     const radius = Number(searchParams.get("radius") || 5000);
 
-    let lat = latParam ? Number(latParam) : NaN;
-    let lng = lngParam ? Number(lngParam) : NaN;
+    let lat = NaN;
+    let lng = NaN;
     let postcode = postcodeParam;
 
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      if (address && CITY_COORDS[address]) {
-        lat = CITY_COORDS[address].lat;
-        lng = CITY_COORDS[address].lng;
-        postcode = postcode ?? CITY_COORDS[address].postcode;
-      } else if (address && googlePlacesProvider.isConfigured()) {
-        const geo = await googlePlacesProvider.geocode(
-          postcode
-            ? `${address} ${postcode}, Australia`
-            : `${address}, Australia`
-        );
-        if (geo) {
-          lat = geo.lat;
-          lng = geo.lng;
-        }
-      } else if (postcode && googlePlacesProvider.isConfigured()) {
-        const geo = await googlePlacesProvider.geocode(
-          `${postcode}, Australia`
-        );
-        if (geo) {
-          lat = geo.lat;
-          lng = geo.lng;
-        }
+    if (address && CITY_COORDS[address]) {
+      lat = CITY_COORDS[address].lat;
+      lng = CITY_COORDS[address].lng;
+      postcode = postcode ?? CITY_COORDS[address].postcode;
+    } else if (address && googlePlacesProvider.isConfigured()) {
+      const geo = await googlePlacesProvider.geocode(
+        postcode
+          ? `${address} ${postcode}, Australia`
+          : `${address}, Australia`
+      );
+      if (geo) {
+        lat = geo.lat;
+        lng = geo.lng;
+      }
+    } else if (postcode && googlePlacesProvider.isConfigured()) {
+      const geo = await googlePlacesProvider.geocode(`${postcode}, Australia`);
+      if (geo) {
+        lat = geo.lat;
+        lng = geo.lng;
       }
     }
 
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      return NextResponse.json(
-        {
-          error:
-            "Provide lat/lng, postcode, or a known Australian city (e.g. Canberra). Configure GOOGLE_MAPS_API_KEY for geocoding.",
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        data: [],
+        center: null,
+      });
     }
 
     if (!googlePlacesProvider.isConfigured()) {
       return NextResponse.json({
-        data: demoNearbyStores(lat, lng, postcode),
-        source: "mock",
+        data: areaPlaceholderStores(lat, lng, address || "your area", postcode),
         center: { lat, lng, postcode },
-        notice:
-          "Showing sample nearby stores. Add GOOGLE_MAPS_API_KEY (or NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) to .env.local and restart the dev server for real Coles / Woolworths / ALDI / IGA locations.",
       });
     }
 
@@ -85,21 +80,22 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: stores,
-      source: "google-places-nearbysearch",
       center: { lat, lng, postcode },
     });
   } catch (err) {
     console.error(err);
     return NextResponse.json(
-      { error: "Nearby store lookup failed" },
+      { error: "Store lookup failed" },
       { status: 500 }
     );
   }
 }
 
-function demoNearbyStores(
+/** Soft placeholders when Maps isn’t configured — no env/setup messaging. */
+function areaPlaceholderStores(
   lat: number,
   lng: number,
+  area: string,
   postcode?: string
 ): NearbyStore[] {
   const offsets: Array<{
@@ -123,15 +119,15 @@ function demoNearbyStores(
           (o.dLng * 111_000 * Math.cos((lat * Math.PI) / 180)) ** 2
       )
     );
-    const id = `demo-${o.chain}-${postcode ?? "local"}-${i}`;
+    const id = `area-${o.chain}-${postcode ?? "local"}-${i}`;
     return {
       id,
       name: o.name,
       chain: o.chain,
       storeId: buildStoreId(o.chain, id, postcode),
       address: postcode
-        ? `Sample location near ${postcode} (Google Maps key not configured)`
-        : "Sample location — add GOOGLE_MAPS_API_KEY to .env.local for live results",
+        ? `Near ${area} ${postcode}`
+        : `Near ${area}`,
       postcode,
       lat: sLat,
       lng: sLng,

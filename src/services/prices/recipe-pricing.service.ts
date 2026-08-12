@@ -83,8 +83,7 @@ export async function priceThemealdbMeal(
     ingredients: lines,
     storeTotals,
     cheapestStore: cheapest,
-    sourceNote:
-      "Recipe data from free TheMealDB. Ingredient prices from Coles, Woolworths, and ALDI search, with staple fallbacks when a live match is unavailable.",
+    sourceNote: "Ingredient costs compared across Coles, Woolworths, and ALDI.",
   };
 }
 

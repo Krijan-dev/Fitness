@@ -45,8 +45,7 @@ export function RecipePricingResultView({
         </div>
       ) : (
         <p className="text-xs text-muted-foreground">
-          {ingredients.length} ingredients · priced for {result.location}.{" "}
-          {sourceNote}
+          {ingredients.length} ingredients · priced for {result.location}
         </p>
       )}
 

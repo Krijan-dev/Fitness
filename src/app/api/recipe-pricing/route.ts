@@ -6,10 +6,10 @@ import {
 import { priceThemealdbMeal } from "@/services/prices/recipe-pricing.service";
 
 /**
- * Free Recipe Pricing API (TheMealDB — no paid keys).
+ * Recipe pricing API (TheMealDB + AU store totals).
  *
  * GET ?q=chicken           → search meals
- * GET ?mealId=52772&location=Canberra → price ingredients across Coles/WW/ALDI
+ * GET ?mealId=52772&location=Canberra → price ingredients
  */
 export async function GET(request: NextRequest) {
   try {
@@ -22,16 +22,12 @@ export async function GET(request: NextRequest) {
       const meal = await getThemealdbMealById(mealId);
       if (!meal) {
         return NextResponse.json(
-          { error: "Meal not found on TheMealDB." },
+          { error: "Meal not found." },
           { status: 404 }
         );
       }
       const pricing = await priceThemealdbMeal(meal, location);
-      return NextResponse.json({
-        data: pricing,
-        provider: "themealdb",
-        billing: "free",
-      });
+      return NextResponse.json({ data: pricing });
     }
 
     if (!q || !q.trim()) {
@@ -42,12 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     const meals = await searchThemealdbMeals(q.trim());
-    return NextResponse.json({
-      data: meals,
-      provider: "themealdb",
-      billing: "free",
-      endpoint: "https://www.themealdb.com/api/json/v1/1/search.php",
-    });
+    return NextResponse.json({ data: meals });
   } catch (error) {
     console.error("Recipe pricing API error:", error);
     return NextResponse.json(

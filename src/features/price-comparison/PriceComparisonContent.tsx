@@ -10,8 +10,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { BasketSummaryCard } from "@/components/prices/BasketSummaryCard";
 import { ShoppingItemPriceCard } from "@/components/prices/ShoppingItemPriceCard";
 import { BarcodeLookup } from "@/components/grocery/BarcodeLookup";
-import { NearbyStoresPanel } from "@/components/grocery/NearbyStoresPanel";
-import { GroceryDataSourceBanner } from "@/components/grocery/GroceryDataSourceBanner";
+import { AreaStoresPanel } from "@/components/grocery/AreaStoresPanel";
 import { useShoppingListStore } from "@/stores/shopping-list.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import { usePriceComparisonStore } from "@/stores/price-comparison.store";
@@ -46,6 +45,7 @@ export function PriceComparisonContent() {
   );
 
   const location = settings.location.city;
+  const postcode = settings.location.postcode;
 
   const [priceMap, setPriceMap] = useState<Record<string, StoreProductPrice[]>>(
     {}
@@ -57,7 +57,6 @@ export function PriceComparisonContent() {
   const [manualQuery, setManualQuery] = useState("");
   const [manualResults, setManualResults] = useState<StoreProductPrice[]>([]);
   const [manualLoading, setManualLoading] = useState(false);
-  const [dataNotice, setDataNotice] = useState<string | null>(null);
 
   const fetchPricesForItem = useCallback(
     async (itemId: string, query: string) => {
@@ -82,9 +81,6 @@ export function PriceComparisonContent() {
           ...prev,
           [itemId]: body.data as StoreProductPrice[],
         }));
-        if (typeof body.notice === "string") {
-          setDataNotice(body.notice);
-        }
         setFetchStates((prev) => ({
           ...prev,
           [itemId]: { loading: false, error: null },
@@ -180,8 +176,6 @@ export function PriceComparisonContent() {
         </div>
       </PageHeader>
 
-      <GroceryDataSourceBanner />
-
       {/* Hero search + location */}
       <section className="mb-8 overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
@@ -190,8 +184,9 @@ export function PriceComparisonContent() {
               Search products across stores
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {dataNotice ??
-                "Find matching products with thumbnails, unit rates, and best-price highlights."}
+              Find matching products with unit rates and best-price highlights.
+              Prices use your saved location
+              {postcode ? ` (${location} ${postcode})` : ` (${location})`}.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground">
@@ -332,7 +327,7 @@ export function PriceComparisonContent() {
           location={location}
           onMatchedPrices={(prices) => setManualResults(prices)}
         />
-        <NearbyStoresPanel location={location} />
+        <AreaStoresPanel city={location} postcode={postcode} />
       </div>
 
       {unpurchasedItems.length === 0 ? (

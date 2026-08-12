@@ -24,7 +24,6 @@ function extractMealId(recipeId: string): string | null {
 
 /**
  * Inline Coles / Woolworths / ALDI pricing on Discover recipe detail.
- * Only runs for TheMealDB recipes (free public meal ids).
  */
 export function DiscoverRecipePricing({
   recipeId,
