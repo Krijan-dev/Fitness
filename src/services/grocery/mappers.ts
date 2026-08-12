@@ -6,6 +6,7 @@ import {
   normalizeProductName,
   parseSizeString,
 } from "./normalizer";
+import { stapleImageForQuery } from "./image-urls";
 
 const STORE_NAMES: StoreName[] = [
   "coles",
@@ -35,6 +36,11 @@ export function toStoreProductPrice(
       ? { unitPrice: product.unitPrice, unitLabel: product.unitLabel ?? "per unit" }
       : computeComparableUnitPrice(product.currentPrice, product.size);
 
+  const imageUrl =
+    product.imageUrl ||
+    stapleImageForQuery(query) ||
+    stapleImageForQuery(product.name);
+
   return {
     id: product.id,
     query,
@@ -50,7 +56,7 @@ export function toStoreProductPrice(
     discountPercentage: product.discountPercentage,
     availability: product.availability,
     productUrl: product.productUrl,
-    imageUrl: product.imageUrl,
+    imageUrl,
     location,
     dataSource: product.dataSource,
     lastUpdated: product.lastUpdated,

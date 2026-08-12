@@ -1,5 +1,6 @@
 import type { StoreName } from "@/types/common";
 import type { StoreProductPrice } from "@/types/price";
+import { stapleImageForQuery } from "@/services/grocery/image-urls";
 
 /**
  * Typical AU supermarket shelf prices for common recipe staples.
@@ -400,6 +401,7 @@ export function getRecipeStaplePrices(): StoreProductPrice[] {
         location: "Australia",
         dataSource: "mock",
         lastUpdated: now,
+        imageUrl: stapleImageForQuery(staple.query),
       });
     }
   }
@@ -465,6 +467,7 @@ export function findStaplePrice(
     location: "Australia",
     dataSource: "mock",
     lastUpdated: new Date().toISOString(),
+    imageUrl: stapleImageForQuery(best.staple.query),
   };
 }
 
