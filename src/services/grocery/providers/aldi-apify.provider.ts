@@ -4,6 +4,8 @@ import { enrichGroceryProduct, asNumber, asString } from "../mappers";
 import { resolveProductImageUrl } from "../image-urls";
 import { getApifyToken } from "../credentials";
 import { fetchWithTimeout, APIFY_TIMEOUT_MS } from "../http-headers";
+import { nameSimilarity, normalizeProductName } from "../normalizer";
+import { mockGroceryProvider } from "./mock-grocery.provider";
 
 /**
  * Unofficial Apify ALDI Australia provider.
@@ -42,7 +44,11 @@ export class AldiApifyProvider implements GroceryProvider {
   }
 
   async searchProducts(query: string): Promise<GroceryProduct[]> {
-    if (!this.isConfigured()) return [];
+    if (!this.isConfigured()) {
+      return (await mockGroceryProvider.searchProducts(query)).filter(
+        (p) => p.store === "aldi"
+      );
+    }
     const q = query.trim();
     if (!q) return [];
 
@@ -50,38 +56,64 @@ export class AldiApifyProvider implements GroceryProvider {
     if (datasetUrl) {
       try {
         const cached = await this.fetchDataset(datasetUrl);
-        return filterByQuery(cached, q);
+        const matched = filterByQuery(cached, q);
+        if (matched.length > 0) return matched;
       } catch (err) {
         console.error("ALDI Apify dataset fetch failed:", err);
-        if (!this.token) return [];
+        if (!this.token) {
+          return (await mockGroceryProvider.searchProducts(q)).filter(
+            (p) => p.store === "aldi"
+          );
+        }
       }
     }
 
-    if (!this.token) return [];
-
-    const url = `https://api.apify.com/v2/acts/${this.actorId}/run-sync-get-dataset-items?token=${encodeURIComponent(this.token)}`;
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        searchTerms: [q],
-        maxResults: 25,
-        sortBy: "relevance",
-      }),
-      next: { revalidate: 0 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Apify ALDI run failed (${res.status})`);
+    if (!this.token) {
+      return (await mockGroceryProvider.searchProducts(q)).filter(
+        (p) => p.store === "aldi"
+      );
     }
 
-    const items = (await res.json()) as unknown;
-    if (!Array.isArray(items)) return [];
+    try {
+      const url = `https://api.apify.com/v2/acts/${this.actorId}/run-sync-get-dataset-items?token=${encodeURIComponent(this.token)}`;
 
-    return items
-      .filter((x): x is Record<string, unknown> => !!x && typeof x === "object")
-      .map((row) => this.mapItem(row));
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          searchTerms: [q],
+          maxResults: 25,
+          sortBy: "relevance",
+        }),
+        next: { revalidate: 0 },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Apify ALDI run failed (${res.status})`);
+      }
+
+      const items = (await res.json()) as unknown;
+      if (!Array.isArray(items)) {
+        return (await mockGroceryProvider.searchProducts(q)).filter(
+          (p) => p.store === "aldi"
+        );
+      }
+
+      const mapped = items
+        .filter(
+          (x): x is Record<string, unknown> => !!x && typeof x === "object"
+        )
+        .map((row) => this.mapItem(row));
+      if (mapped.length > 0) return mapped;
+    } catch (err) {
+      console.warn(
+        `ALDI live search skipped: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+
+    return (await mockGroceryProvider.searchProducts(q)).filter(
+      (p) => p.store === "aldi"
+    );
   }
 
   async getProductByBarcode(barcode: string): Promise<GroceryProduct | null> {
@@ -261,14 +293,28 @@ function unitLabelFromComparison(display?: string): string | undefined {
 }
 
 function filterByQuery(products: GroceryProduct[], q: string): GroceryProduct[] {
-  const needle = q.toLowerCase();
-  return products.filter((p) => {
-    const hay = `${p.name} ${p.brand ?? ""} ${p.barcode ?? ""}`.toLowerCase();
-    return (
-      hay.includes(needle) ||
-      needle.split(/\s+/).some((w) => w.length > 2 && hay.includes(w))
-    );
-  });
+  const needle = normalizeProductName(q);
+  if (!needle) return [];
+  const tokens = needle.split(/\s+/).filter((t) => t.length > 2);
+
+  const scored = products
+    .map((p) => {
+      const hay = normalizeProductName(
+        `${p.name} ${p.brand ?? ""} ${p.barcode ?? ""}`
+      );
+      let score = 0;
+      if (hay.includes(needle) || needle.includes(hay)) score = 90;
+      else {
+        const hits = tokens.filter((t) => hay.includes(t)).length;
+        score = hits * 35;
+        score += nameSimilarity(q, p.name) * 40;
+      }
+      return { p, score };
+    })
+    .filter((x) => x.score >= 35)
+    .sort((a, b) => b.score - a.score);
+
+  return scored.map((x) => x.p);
 }
 
 export const aldiApifyProvider = new AldiApifyProvider();

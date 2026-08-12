@@ -63,7 +63,8 @@ export class ColesProvider implements GroceryProvider {
 
     if (this.rapidApiKey) {
       try {
-        return await this.searchRapidApi(q);
+        const rapid = await this.searchRapidApi(q);
+        if (rapid.length > 0) return rapid;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.warn(`Coles RapidAPI search skipped: ${message}`);
