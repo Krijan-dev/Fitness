@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, ShoppingBag, X } from "lucide-react";
 import type { ShoppingItem } from "@/types/shopping";
 import type { ShoppingCategory } from "@/types/common";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +12,6 @@ import { parseNumericInput } from "@/features/meal-calculator/validation";
 import { WEIGHT_UNITS, UNIT_LABELS } from "@/utils/units";
 
 interface ShoppingQuickAddProps {
-  /** Prefill from the current search query */
   suggestedName?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -20,7 +19,7 @@ interface ShoppingQuickAddProps {
 }
 
 /**
- * Search-adjacent quick add: open a quantity panel to choose how much to buy.
+ * Inline quantity picker shown after tapping Add beside search.
  */
 export function ShoppingQuickAdd({
   suggestedName = "",
@@ -44,6 +43,8 @@ export function ShoppingQuickAdd({
     }
   }, [open, suggestedName]);
 
+  if (!open) return null;
+
   const handleAdd = () => {
     if (!name.trim()) {
       setError("Enter an item name.");
@@ -64,119 +65,91 @@ export function ShoppingQuickAdd({
     onOpenChange(false);
   };
 
-  const addLabel = suggestedName.trim()
-    ? `Add “${truncate(suggestedName.trim(), 22)}”`
-    : "Add item";
-
   return (
-    <div className="relative w-full sm:w-auto sm:min-w-[10.5rem]">
-      <div className="flex flex-col gap-1.5">
-        <span className="block text-sm font-medium text-muted-foreground sm:invisible sm:h-5">
-          &nbsp;
-        </span>
-        <Button
-          type="button"
-          className="w-full rounded-xl sm:w-auto"
-          onClick={() => onOpenChange(true)}
-          aria-expanded={open}
-          aria-controls="shopping-quick-add-panel"
-        >
-          <Plus className="h-4 w-4" />
-          {addLabel}
-        </Button>
-      </div>
-
-      {open ? (
-        <div
-          id="shopping-quick-add-panel"
-          className="fixed inset-x-4 bottom-24 z-40 rounded-2xl border border-border bg-card p-4 shadow-soft sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-[calc(100%+0.75rem)] sm:z-20 sm:w-[22rem]"
-          role="dialog"
-          aria-label="Choose quantity to buy"
-        >
-          <div className="mb-3 flex items-start justify-between gap-2">
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                How much do you want to buy?
-              </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Set the quantity, then add it to your list.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
+    <div
+      id="shopping-quick-add-panel"
+      className="rounded-2xl border-2 border-emerald-500 bg-emerald-50/50 p-4 shadow-emerald-ring sm:p-5"
+      role="dialog"
+      aria-label="Choose quantity to buy"
+    >
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 rounded-xl bg-emerald-600 p-2 text-white">
+            <ShoppingBag className="h-4 w-4" aria-hidden />
           </div>
-
-          <div className="space-y-3">
-            <Input
-              label="Item"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. chicken breast"
-              autoFocus={!suggestedName.trim()}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Quantity"
-                type="number"
-                min={0}
-                step="any"
-                value={quantity}
-                onChange={(e) => setQuantity(parseNumericInput(e.target.value))}
-                autoFocus={Boolean(suggestedName.trim())}
-              />
-              <Select
-                label="Unit"
-                value={unit}
-                options={WEIGHT_UNITS.map((u) => ({
-                  value: u,
-                  label: UNIT_LABELS[u],
-                }))}
-                onChange={(e) => setUnit(e.target.value)}
-              />
-            </div>
-            <Select
-              label="Category"
-              value={category}
-              options={SHOPPING_CATEGORY_OPTIONS.map((o) => ({
-                value: o.value,
-                label: o.label,
-              }))}
-              onChange={(e) =>
-                setCategory(e.target.value as ShoppingCategory)
-              }
-            />
-            {error ? (
-              <p className="text-sm text-destructive">{error}</p>
-            ) : null}
-            <div className="flex justify-end gap-2 pt-1">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="button" size="sm" onClick={handleAdd}>
-                <Plus className="h-4 w-4" />
-                Add to list
-              </Button>
-            </div>
+          <div>
+            <p className="text-base font-semibold text-slate-900">
+              How much do you want to buy?
+            </p>
+            <p className="mt-0.5 text-sm text-slate-600">
+              Choose quantity and unit, then add it to your list.
+            </p>
           </div>
         </div>
-      ) : null}
+        <button
+          type="button"
+          onClick={() => onOpenChange(false)}
+          className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-slate-800"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <Input
+          label="Item"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. chicken breast"
+          autoFocus={!suggestedName.trim()}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            label="Quantity"
+            type="number"
+            min={0}
+            step="any"
+            value={quantity}
+            onChange={(e) => setQuantity(parseNumericInput(e.target.value))}
+            autoFocus={Boolean(suggestedName.trim())}
+          />
+          <Select
+            label="Unit"
+            value={unit}
+            options={WEIGHT_UNITS.map((u) => ({
+              value: u,
+              label: UNIT_LABELS[u],
+            }))}
+            onChange={(e) => setUnit(e.target.value)}
+          />
+        </div>
+        <Select
+          label="Category"
+          value={category}
+          options={SHOPPING_CATEGORY_OPTIONS.map((o) => ({
+            value: o.value,
+            label: o.label,
+          }))}
+          onChange={(e) => setCategory(e.target.value as ShoppingCategory)}
+        />
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="button" onClick={handleAdd}>
+            <Plus className="h-4 w-4" />
+            Add to list
+          </Button>
+        </div>
+      </div>
     </div>
   );
-}
-
-function truncate(value: string, max: number): string {
-  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
 }
 
 function guessCategory(name: string): ShoppingCategory {

@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus, ShoppingCart, Tags } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { FilterBar } from "@/components/layout/FilterBar";
 import { PageSection } from "@/components/layout/PageSection";
 import { SearchInput } from "@/components/common/SearchInput";
 import { Select } from "@/components/common/Select";
@@ -41,12 +40,11 @@ export function ShoppingListContent() {
   const [filter, setFilter] = useState<ShoppingFilterOption>("unpurchased");
   const debouncedSearch = useDebounce(search, 300);
 
-  const [addOpen, setAddOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [editItem, setEditItem] = useState<ShoppingItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<ShoppingItem | null>(null);
   const [clearOpen, setClearOpen] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   const filteredItems = useMemo(
     () => filterShoppingItems(items, debouncedSearch, filter),
@@ -92,7 +90,7 @@ export function ShoppingListContent() {
               Find cheapest basket
             </Button>
           </Link>
-          <Button onClick={() => setAddOpen(true)}>
+          <Button onClick={() => setQuickAddOpen(true)}>
             <Plus className="h-4 w-4" />
             Add item
           </Button>
@@ -121,14 +119,24 @@ export function ShoppingListContent() {
         </div>
       </PageSection>
 
-      <FilterBar className="relative overflow-visible">
-        <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-end">
+      {/* Prominent search + add row */}
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
+        <div className="mb-3">
+          <h2 className="text-base font-semibold text-foreground">
+            Search or add items
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Type a name, then tap <span className="font-medium text-emerald-700">Add item</span> to choose how much to buy.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1">
             <SearchInput
               value={search}
               onChange={setSearch}
-              placeholder="Search list or type a new item…"
-              label="Search / add"
+              placeholder="e.g. greek yoghurt, chicken breast…"
+              label="Search list"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -137,13 +145,23 @@ export function ShoppingListContent() {
               }}
             />
           </div>
-          <ShoppingQuickAdd
-            suggestedName={search}
-            open={quickAddOpen}
-            onOpenChange={setQuickAddOpen}
-            onAdd={handleQuickAdd}
-          />
-          <div className="w-full lg:w-44">
+          <div className="w-full sm:w-auto sm:pb-0">
+            <span className="mb-1.5 block text-sm font-medium text-muted-foreground sm:invisible">
+              Add
+            </span>
+            <Button
+              type="button"
+              size="lg"
+              className="h-[50px] w-full rounded-xl sm:w-auto sm:min-w-[10rem]"
+              onClick={() => setQuickAddOpen(true)}
+            >
+              <Plus className="h-5 w-5" />
+              {search.trim()
+                ? `Add “${search.trim().slice(0, 18)}${search.trim().length > 18 ? "…" : ""}”`
+                : "Add item"}
+            </Button>
+          </div>
+          <div className="w-full sm:w-44">
             <Select
               label="Show"
               value={filter}
@@ -157,7 +175,18 @@ export function ShoppingListContent() {
             />
           </div>
         </div>
-      </FilterBar>
+
+        {quickAddOpen ? (
+          <div className="mt-4">
+            <ShoppingQuickAdd
+              suggestedName={search}
+              open={quickAddOpen}
+              onOpenChange={setQuickAddOpen}
+              onAdd={handleQuickAdd}
+            />
+          </div>
+        ) : null}
+      </section>
 
       <PageSection>
         <div className="flex flex-wrap gap-2">
@@ -221,16 +250,6 @@ export function ShoppingListContent() {
           ))}
         </div>
       )}
-
-      <ShoppingItemModal
-        item={null}
-        isOpen={addOpen}
-        onClose={() => setAddOpen(false)}
-        onSave={(data) => {
-          addItem(data);
-          showMessage("Item added.");
-        }}
-      />
 
       <ShoppingItemModal
         item={editItem}
