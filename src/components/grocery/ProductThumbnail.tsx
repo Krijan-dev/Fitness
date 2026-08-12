@@ -15,6 +15,8 @@ interface ProductThumbnailProps {
 
 /**
  * Product thumbnail with skeleton shimmer and local placeholder on error.
+ * Remote CDNs use unoptimized images so they still load when Next image
+ * config is incomplete (e.g. after a partial Windows/OneDrive pull).
  */
 export function ProductThumbnail({
   src,
@@ -59,38 +61,10 @@ export function ProductThumbnail({
             setFailed(true);
             setLoaded(true);
           }}
-          unoptimized={
-            showPlaceholder ||
-            resolvedSrc.startsWith("/images/") ||
-            !isAllowedRemote(resolvedSrc)
-          }
+          unoptimized
           priority={priority}
         />
       )}
     </div>
   );
-}
-
-function isAllowedRemote(url: string): boolean {
-  try {
-    const host = new URL(url).hostname;
-    return [
-      "cdn0.woolworths.media",
-      "cdn1.woolworths.media",
-      "www.woolworths.com.au",
-      "cdn.productimages.coles.com.au",
-      "www.coles.com.au",
-      "productimages.coles.com.au",
-      "images.openfoodfacts.org",
-      "static.openfoodfacts.org",
-      "www.aldi.com.au",
-      "dm.apac.cms.aldi.cx",
-      "cdn.shopify.com",
-      "images.unsplash.com",
-      "maps.googleapis.com",
-      "maps.gstatic.com",
-    ].some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
-  } catch {
-    return false;
-  }
 }

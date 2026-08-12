@@ -11,6 +11,7 @@ const groceryImageHosts = [
   "static.openfoodfacts.org",
   "world.openfoodfacts.org",
   "www.themealdb.com",
+  "themealdb.com",
   "www.aldi.com.au",
   "dm.apac.cms.aldi.cx",
   "cdn.shopify.com",
@@ -24,11 +25,19 @@ const nextConfig: NextConfig = {
   // the `.next` folder while `next dev` is running (causes missing CSS / 500 errors).
   distDir: process.env.BUILD_DIST_DIR || ".next",
   images: {
-    remotePatterns: groceryImageHosts.map((hostname) => ({
-      protocol: "https" as const,
-      hostname,
-      pathname: "/**",
-    })),
+    remotePatterns: [
+      ...groceryImageHosts.map((hostname) => ({
+        protocol: "https" as const,
+        hostname,
+        pathname: "/**",
+      })),
+      // Wildcard for TheMealDB / CDN edge hosts
+      {
+        protocol: "https" as const,
+        hostname: "**.themealdb.com",
+        pathname: "/**",
+      },
+    ],
   },
 };
 

@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { StoreBadge } from "@/components/grocery/StoreBadge";
 import { ProductThumbnail } from "@/components/grocery/ProductThumbnail";
+import { SafeRemoteImage } from "@/components/common/SafeRemoteImage";
 import { formatCurrency } from "@/utils/currency";
 import type { RecipePricingResult } from "@/services/prices/recipe-pricing.service";
 import type { StoreName } from "@/types/common";
@@ -26,12 +26,11 @@ export function RecipePricingResultView({
         <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center">
           {meal.thumbnail ? (
             <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-xl sm:h-28 sm:w-40">
-              <Image
+              <SafeRemoteImage
                 src={meal.thumbnail}
                 alt={meal.name}
                 fill
                 className="object-cover"
-                unoptimized
               />
             </div>
           ) : null}

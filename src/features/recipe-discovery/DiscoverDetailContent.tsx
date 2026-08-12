@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowLeft,
   BookmarkPlus,
@@ -16,6 +15,7 @@ import { Card, CardHeader, CardTitle } from "@/components/common/Card";
 import { Input } from "@/components/common/Input";
 import { LoadingState } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
+import { SafeRemoteImage } from "@/components/common/SafeRemoteImage";
 import { AddToPlannerModal } from "@/components/recipes/AddToPlannerModal";
 import { NutritionSummary } from "@/components/meals/NutritionSummary";
 import type { DiscoveredRecipe } from "@/types/recipe";
@@ -147,15 +147,18 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <div className="relative h-48 sm:h-64 rounded-xl overflow-hidden bg-muted">
-            {recipe.imageUrl ? (
-              <Image
-                src={recipe.imageUrl}
-                alt={recipe.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 66vw"
-              />
-            ) : null}
+            <SafeRemoteImage
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 66vw"
+              fallback={
+                <div className="flex h-full w-full items-center justify-center text-4xl font-semibold text-muted-foreground/40">
+                  {recipe.title.charAt(0)}
+                </div>
+              }
+            />
           </div>
 
           <PageHeader title={recipe.title} description={recipe.description} />

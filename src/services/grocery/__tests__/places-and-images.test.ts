@@ -20,8 +20,8 @@ describe("places utils", () => {
 });
 
 describe("image placeholders", () => {
-  it("uses /images/placeholder.png", () => {
-    expect(PRODUCT_IMAGE_PLACEHOLDER).toBe("/images/placeholder.png");
+  it("uses /images/placeholder-product.svg", () => {
+    expect(PRODUCT_IMAGE_PLACEHOLDER).toBe("/images/placeholder-product.svg");
   });
 
   it("extracts and builds woolworths CDN urls", () => {

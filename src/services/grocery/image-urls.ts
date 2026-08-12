@@ -139,4 +139,4 @@ function normalizeImageUrl(value: string): string {
   return value;
 }
 
-export const PRODUCT_IMAGE_PLACEHOLDER = "/images/placeholder.png";
+export const PRODUCT_IMAGE_PLACEHOLDER = "/images/placeholder-product.svg";
