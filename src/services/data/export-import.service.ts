@@ -4,8 +4,15 @@ import type { ShoppingItem } from "@/types/shopping";
 import type { PantryItem } from "@/types/pantry";
 import type { WeightEntry } from "@/types/weight";
 import type { UserSettings } from "@/types/settings";
-import { localStorageService } from "@/services/storage/localStorage.service";
-import { STORAGE_KEYS } from "@/services/storage/storage.keys";
+import { useRecipeStore } from "@/stores/recipe.store";
+import { useDailyTrackerStore } from "@/stores/daily-tracker.store";
+import { useMealPlannerStore } from "@/stores/meal-planner.store";
+import { useShoppingListStore } from "@/stores/shopping-list.store";
+import { usePantryStore } from "@/stores/pantry.store";
+import { useWeightStore } from "@/stores/weight.store";
+import { useSettingsStore } from "@/stores/settings.store";
+import { usePriceComparisonStore } from "@/stores/price-comparison.store";
+import { apiSend, syncInBackground } from "@/lib/api-client";
 
 export const EXPORT_VERSION = "1.0";
 
@@ -26,37 +33,14 @@ export function collectExportData(): AppExportData {
   return {
     version: EXPORT_VERSION,
     exportedAt: new Date().toISOString(),
-    recipes: localStorageService.getItem<Recipe[]>(STORAGE_KEYS.RECIPES) ?? [],
-    dailyMeals:
-      localStorageService.getItem<MealEntry[]>(STORAGE_KEYS.DAILY_TRACKER) ?? [],
-    mealPlan:
-      localStorageService.getItem<WeeklyMealPlan>(STORAGE_KEYS.MEAL_PLANNER) ?? {
-        id: "",
-        weekStart: "",
-        meals: [],
-      },
-    shoppingList:
-      localStorageService.getItem<ShoppingItem[]>(STORAGE_KEYS.SHOPPING_LIST) ?? [],
-    pantry: localStorageService.getItem<PantryItem[]>(STORAGE_KEYS.PANTRY) ?? [],
-    weightEntries:
-      localStorageService.getItem<WeightEntry[]>(STORAGE_KEYS.WEIGHT_TRACKER) ?? [],
-    settings:
-      localStorageService.getItem<UserSettings>(STORAGE_KEYS.SETTINGS) ?? {
-        profile: {},
-        nutritionGoals: {
-          dailyCalorieGoal: 2200,
-          dailyProteinGoal: 150,
-          dailyCarbGoal: 250,
-          dailyFatGoal: 70,
-        },
-        units: "metric",
-        location: { country: "Australia", state: "", city: "Canberra" },
-        theme: "dark",
-      },
-    priceSelections:
-      localStorageService.getItem<Record<string, string>>(
-        STORAGE_KEYS.PRICE_SELECTIONS
-      ) ?? {},
+    recipes: useRecipeStore.getState().recipes,
+    dailyMeals: useDailyTrackerStore.getState().meals,
+    mealPlan: useMealPlannerStore.getState().plan,
+    shoppingList: useShoppingListStore.getState().items,
+    pantry: usePantryStore.getState().items,
+    weightEntries: useWeightStore.getState().entries,
+    settings: useSettingsStore.getState().settings,
+    priceSelections: usePriceComparisonStore.getState().selections,
   };
 }
 
@@ -95,21 +79,48 @@ export function validateImportData(raw: unknown): AppExportData | null {
 }
 
 export function applyImportData(data: AppExportData): void {
-  localStorageService.setItem(STORAGE_KEYS.RECIPES, data.recipes);
-  localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, data.dailyMeals);
-  localStorageService.setItem(STORAGE_KEYS.MEAL_PLANNER, data.mealPlan);
-  localStorageService.setItem(STORAGE_KEYS.SHOPPING_LIST, data.shoppingList);
-  localStorageService.setItem(STORAGE_KEYS.PANTRY, data.pantry);
-  localStorageService.setItem(STORAGE_KEYS.WEIGHT_TRACKER, data.weightEntries);
-  localStorageService.setItem(STORAGE_KEYS.SETTINGS, data.settings);
-  localStorageService.setItem(STORAGE_KEYS.PRICE_SELECTIONS, data.priceSelections);
+  useRecipeStore.setState({ recipes: data.recipes, hydrated: true });
+  useDailyTrackerStore.setState({ meals: data.dailyMeals, hydrated: true });
+  useMealPlannerStore.setState({ plan: data.mealPlan, hydrated: true });
+  useShoppingListStore.setState({ items: data.shoppingList, hydrated: true });
+  usePantryStore.setState({ items: data.pantry, hydrated: true });
+  useWeightStore.setState({ entries: data.weightEntries, hydrated: true });
+  useSettingsStore.setState({ settings: data.settings, hydrated: true });
+  usePriceComparisonStore.setState({
+    selections: data.priceSelections,
+    hydrated: true,
+  });
+
+  syncInBackground(async () => {
+    await Promise.all([
+      apiSend("/api/recipes", "PUT", { recipes: data.recipes }),
+      apiSend("/api/tracker", "PUT", { meals: data.dailyMeals }),
+      apiSend("/api/planner", "PUT", {
+        weekStart: data.mealPlan.weekStart,
+        meals: data.mealPlan.meals,
+        clientId: data.mealPlan.id,
+        id: data.mealPlan.id,
+      }),
+      apiSend("/api/shopping", "PUT", { items: data.shoppingList }),
+      apiSend("/api/pantry", "PUT", { items: data.pantry }),
+      apiSend("/api/weights", "PUT", { entries: data.weightEntries }),
+      apiSend("/api/settings", "PUT", {
+        settings: data.settings,
+        priceSelections: data.priceSelections,
+      }),
+    ]);
+  });
 }
 
 export function clearAllAppData(): void {
-  const keys = Object.values(STORAGE_KEYS);
-  for (const key of keys) {
-    localStorageService.removeItem(key);
-  }
+  useRecipeStore.getState().reset();
+  useDailyTrackerStore.getState().reset();
+  useMealPlannerStore.getState().reset();
+  useShoppingListStore.getState().reset();
+  usePantryStore.getState().reset();
+  useWeightStore.getState().reset();
+  useSettingsStore.getState().reset();
+  usePriceComparisonStore.getState().reset();
 }
 
 export function downloadJsonExport(data: AppExportData) {

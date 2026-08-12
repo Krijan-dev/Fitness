@@ -13,8 +13,9 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import type { Recipe } from "@/types/recipe";
-import { Card } from "@/components/common/Card";
-import { Button } from "@/components/common/Button";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import {
   formatCategoryLabel,
   getPerServingNutrition,
@@ -44,31 +45,38 @@ export function RecipeCard({
 }: RecipeCardProps) {
   const perServing = getPerServingNutrition(recipe);
   const placeholderGradient =
-    CATEGORY_PLACEHOLDER_COLORS[recipe.category] ??
-    "from-muted to-muted";
+    CATEGORY_PLACEHOLDER_COLORS[recipe.category] ?? "from-muted to-muted";
 
   return (
-    <Card padding="none" className="overflow-hidden">
+    <Card
+      padding="none"
+      hover
+      className="overflow-hidden group"
+    >
       <div
-        className={`relative h-36 bg-gradient-to-br ${placeholderGradient} flex items-center justify-center`}
+        className={`relative h-44 bg-gradient-to-br ${placeholderGradient} flex items-center justify-center`}
       >
         {recipe.imageUrl ? (
           <Image
             src={recipe.imageUrl}
             alt={recipe.name}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
-          <span className="text-4xl font-bold text-muted-foreground/40">
+          <span className="text-5xl font-semibold text-muted-foreground/30">
             {recipe.name.charAt(0).toUpperCase()}
           </span>
         )}
+        <div className="absolute left-3 top-3 flex gap-2">
+          <Badge tone="success">{Math.round(perServing.calories)} kcal</Badge>
+          <Badge tone="info">{perServing.protein.toFixed(0)}g protein</Badge>
+        </div>
         <button
           type="button"
           onClick={() => onToggleFavourite(recipe)}
-          className="absolute top-3 right-3 rounded-full bg-card/90 p-2 transition-colors hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="absolute top-3 right-3 rounded-full bg-card/90 p-2.5 transition-all hover:bg-card hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={
             recipe.isFavourite ? "Remove from favourites" : "Add to favourites"
           }
@@ -83,40 +91,30 @@ export function RecipeCard({
         </button>
       </div>
 
-      <div className="p-4">
-        <div className="mb-2 flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="font-semibold text-foreground truncate">
-              {recipe.name}
-            </h3>
-            <p className="text-xs text-muted-foreground capitalize">
-              {formatCategoryLabel(recipe.category)}
-            </p>
-          </div>
+      <div className="p-5">
+        <div className="mb-3 min-w-0">
+          <h3 className="truncate text-base font-semibold tracking-tight text-foreground">
+            {recipe.name}
+          </h3>
+          <p className="text-xs text-muted-foreground capitalize">
+            {formatCategoryLabel(recipe.category)} · {recipe.servings} servings
+          </p>
         </div>
 
-        <dl className="mb-4 grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <dt className="text-muted-foreground">Calories</dt>
-            <dd className="font-medium">{Math.round(perServing.calories)}</dd>
+        <dl className="mb-4 grid grid-cols-3 gap-2 text-sm">
+          <div className="rounded-xl bg-muted/60 px-2.5 py-2">
+            <dt className="text-[11px] text-text-muted">Carbs</dt>
+            <dd className="font-medium">{perServing.carbs.toFixed(0)}g</dd>
           </div>
-          <div>
-            <dt className="text-muted-foreground">Protein</dt>
-            <dd className="font-medium">{perServing.protein.toFixed(1)}g</dd>
+          <div className="rounded-xl bg-muted/60 px-2.5 py-2">
+            <dt className="text-[11px] text-text-muted">Fat</dt>
+            <dd className="font-medium">{perServing.fat.toFixed(0)}g</dd>
           </div>
-          <div>
-            <dt className="text-muted-foreground">Carbs</dt>
-            <dd className="font-medium">{perServing.carbs.toFixed(1)}g</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Fat</dt>
-            <dd className="font-medium">{perServing.fat.toFixed(1)}g</dd>
+          <div className="rounded-xl bg-muted/60 px-2.5 py-2">
+            <dt className="text-[11px] text-text-muted">Serve</dt>
+            <dd className="font-medium">{recipe.servingSize}g</dd>
           </div>
         </dl>
-
-        <p className="mb-4 text-xs text-muted-foreground">
-          {recipe.servingSize}g serving · {recipe.servings} servings
-        </p>
 
         <div className="flex flex-wrap gap-2">
           <Link href={`/recipes/${recipe.id}`}>

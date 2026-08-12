@@ -37,8 +37,8 @@ export const DATA_SOURCE_LABELS: Record<DataSource, string> = {
 };
 
 export const DATA_SOURCE_STYLES: Record<DataSource, string> = {
-  "live-api": "bg-success/15 text-success",
-  cached: "bg-primary/15 text-primary",
-  mock: "bg-muted text-muted-foreground",
-  manual: "bg-warning/15 text-warning",
+  "live-api": "bg-emerald-50 text-emerald-700",
+  cached: "bg-sky-50 text-sky-700",
+  mock: "bg-slate-100 text-slate-600",
+  manual: "bg-amber-50 text-amber-700",
 };

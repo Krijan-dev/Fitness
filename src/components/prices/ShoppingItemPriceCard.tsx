@@ -2,7 +2,7 @@
 
 import type { ItemPriceMatch } from "@/features/price-comparison/basket-calculator";
 import { Card, CardHeader, CardTitle } from "@/components/common/Card";
-import { LoadingState } from "@/components/common/LoadingState";
+import { PriceRowSkeleton } from "@/components/ui/Skeleton";
 import { PriceOptionRow } from "./PriceOptionRow";
 import { formatCurrency } from "@/utils/currency";
 
@@ -23,20 +23,41 @@ export function ShoppingItemPriceCard({
 }: ShoppingItemPriceCardProps) {
   const { shoppingItem, prices, cheapestPrice } = match;
 
+  const sorted = prices.slice().sort((a, b) => {
+    const au = a.unitPrice;
+    const bu = b.unitPrice;
+    if (
+      au != null &&
+      bu != null &&
+      Number.isFinite(au) &&
+      Number.isFinite(bu)
+    ) {
+      return au - bu;
+    }
+    return a.currentPrice - b.currentPrice;
+  });
+
   return (
-    <Card>
+    <Card hover>
       <CardHeader>
-        <CardTitle className="text-base">{shoppingItem.name}</CardTitle>
+        <CardTitle className="text-base">
+          {shoppingItem.name}
+        </CardTitle>
         <p className="text-sm text-muted-foreground">
           {shoppingItem.quantity} {shoppingItem.unit}
-          {cheapestPrice
-            ? ` · Cheapest ${formatCurrency(cheapestPrice.currentPrice)}`
-            : ""}
+          {cheapestPrice ? (
+            <>
+              {" · "}
+              <span className="font-semibold text-emerald-600">
+                Cheapest {formatCurrency(cheapestPrice.currentPrice)}
+              </span>
+            </>
+          ) : null}
         </p>
       </CardHeader>
 
       {isLoading ? (
-        <LoadingState message="Searching stores..." />
+        <PriceRowSkeleton count={3} />
       ) : error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : prices.length === 0 ? (
@@ -46,16 +67,15 @@ export function ShoppingItemPriceCard({
         </p>
       ) : (
         <div className="space-y-2">
-          {prices
-            .sort((a, b) => a.currentPrice - b.currentPrice)
-            .map((price) => (
-              <PriceOptionRow
-                key={price.id}
-                price={price}
-                isSelected={selectedPriceId === price.id}
-                onSelect={() => onSelectPrice(price.id)}
-              />
-            ))}
+          {sorted.map((price) => (
+            <PriceOptionRow
+              key={price.id}
+              price={price}
+              isBestPrice={cheapestPrice?.id === price.id}
+              isSelected={selectedPriceId === price.id}
+              onSelect={() => onSelectPrice(price.id)}
+            />
+          ))}
         </div>
       )}
     </Card>

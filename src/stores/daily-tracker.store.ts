@@ -1,15 +1,13 @@
 import { create } from "zustand";
 import type { MealEntry } from "@/types/meal";
-import { localStorageService } from "@/services/storage/localStorage.service";
-import { STORAGE_KEYS } from "@/services/storage/storage.keys";
-import mockDailyMeals from "@/data/mock-daily-meals.json";
+import { apiGet, apiSend, syncInBackground } from "@/lib/api-client";
 import { generateId } from "@/utils/ids";
 import { formatDate } from "@/utils/date";
 
 interface DailyTrackerState {
   meals: MealEntry[];
   hydrated: boolean;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
   addMeal: (meal: Omit<MealEntry, "id">) => void;
   updateMeal: (id: string, updates: Partial<MealEntry>) => void;
   removeMeal: (id: string) => void;
@@ -19,51 +17,61 @@ interface DailyTrackerState {
   reset: () => void;
 }
 
-function loadMeals(): MealEntry[] {
-  const stored = localStorageService.getItem<MealEntry[]>(STORAGE_KEYS.DAILY_TRACKER);
-  if (stored && Array.isArray(stored)) {
-    return stored;
-  }
-  return mockDailyMeals as MealEntry[];
+function persistMeals(meals: MealEntry[]) {
+  syncInBackground(() => apiSend("/api/tracker", "PUT", { meals }));
 }
 
 export const useDailyTrackerStore = create<DailyTrackerState>((set, get) => ({
   meals: [],
   hydrated: false,
 
-  hydrate: () => {
+  hydrate: async () => {
     if (get().hydrated) return;
-    set({ meals: loadMeals(), hydrated: true });
+    try {
+      const res = await apiGet<{ data: MealEntry[] }>("/api/tracker");
+      set({ meals: res.data, hydrated: true });
+    } catch (error) {
+      console.error("Failed to hydrate tracker", error);
+      set({ meals: [], hydrated: true });
+    }
   },
 
   addMeal: (meal) => {
     const newMeal: MealEntry = { ...meal, id: generateId() };
     const meals = [...get().meals, newMeal];
-    localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, meals);
     set({ meals });
+    syncInBackground(() => apiSend("/api/tracker", "POST", newMeal));
   },
 
   updateMeal: (id, updates) => {
     const meals = get().meals.map((m) =>
       m.id === id ? { ...m, ...updates } : m
     );
-    localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, meals);
     set({ meals });
+    syncInBackground(() =>
+      apiSend("/api/tracker", "PATCH", { id, ...updates })
+    );
   },
 
   removeMeal: (id) => {
     const meals = get().meals.filter((m) => m.id !== id);
-    localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, meals);
     set({ meals });
+    syncInBackground(() =>
+      apiSend(`/api/tracker?id=${encodeURIComponent(id)}`, "DELETE")
+    );
   },
 
   duplicateMeal: (id) => {
     const meal = get().meals.find((m) => m.id === id);
     if (!meal) return;
-    const copy: MealEntry = { ...meal, id: generateId(), name: `${meal.name} (copy)` };
+    const copy: MealEntry = {
+      ...meal,
+      id: generateId(),
+      name: `${meal.name} (copy)`,
+    };
     const meals = [...get().meals, copy];
-    localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, meals);
     set({ meals });
+    syncInBackground(() => apiSend("/api/tracker", "POST", copy));
   },
 
   copyMealsFromDate: (fromDate, toDate) => {
@@ -75,20 +83,23 @@ export const useDailyTrackerStore = create<DailyTrackerState>((set, get) => ({
         date: toDate,
       }));
     const meals = [...get().meals, ...copies];
-    localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, meals);
     set({ meals });
+    for (const copy of copies) {
+      syncInBackground(() => apiSend("/api/tracker", "POST", copy));
+    }
   },
 
   clearDay: (date) => {
     const meals = get().meals.filter((m) => m.date !== date);
-    localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, meals);
     set({ meals });
+    syncInBackground(() =>
+      apiSend(`/api/tracker?date=${encodeURIComponent(date)}`, "DELETE")
+    );
   },
 
   reset: () => {
-    const meals = mockDailyMeals as MealEntry[];
-    localStorageService.setItem(STORAGE_KEYS.DAILY_TRACKER, meals);
-    set({ meals });
+    set({ meals: [] });
+    persistMeals([]);
   },
 }));
 

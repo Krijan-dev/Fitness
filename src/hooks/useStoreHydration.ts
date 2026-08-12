@@ -1,20 +1,35 @@
 "use client";
 
 import { useLayoutEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { hydrateAllStores } from "@/services/storage/hydrate-stores";
 
 /**
  * Hydrates persisted Zustand stores on the client before showing app content.
- * Uses local React state so the UI always re-renders after hydration (Zustand
- * `hydrated` flags alone can miss the first paint on initial load).
  */
 export function useStoreHydration(): boolean {
-  const [isReady, setIsReady] = useState(false);
+  const pathname = usePathname();
+  const skip =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/admin");
+  const [isReady, setIsReady] = useState(skip);
 
   useLayoutEffect(() => {
-    hydrateAllStores();
-    setIsReady(true);
-  }, []);
+    if (skip) {
+      setIsReady(true);
+      return;
+    }
+    let cancelled = false;
+    setIsReady(false);
+    void hydrateAllStores().finally(() => {
+      if (!cancelled) setIsReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [skip]);
 
   return isReady;
 }

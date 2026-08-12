@@ -7,7 +7,10 @@ export interface Recipe {
   name: string;
   category: RecipeCategory;
   description?: string;
+  cuisine?: string;
+  difficulty?: "easy" | "medium" | "hard";
   ingredients: Ingredient[];
+  instructions?: string;
   totalNutrition: Nutrition;
   cookedWeight?: number;
   servingSize: number;
@@ -17,6 +20,9 @@ export interface Recipe {
   notes?: string;
   isFavourite: boolean;
   imageUrl?: string;
+  ownerType?: "admin" | "user";
+  visibility?: "private" | "public";
+  status?: "draft" | "published";
   createdAt: string;
   updatedAt: string;
 }

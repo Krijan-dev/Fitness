@@ -47,7 +47,7 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/recipes/${id}`);
+        const response = await fetch(`/api/discover/${id}`);
         if (!response.ok) {
           throw new Error("Not found");
         }

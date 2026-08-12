@@ -8,6 +8,7 @@ import {
   mockCostcoProvider,
   mockHarrisFarmProvider,
 } from "./mock-price.provider";
+import { searchStorePrices } from "@/services/grocery/grocery-search.service";
 
 export class PriceComparisonService {
   private providers: PriceProvider[];
@@ -20,8 +21,15 @@ export class PriceComparisonService {
     query: string,
     location: string
   ): Promise<StoreProductPrice[]> {
-    const results: StoreProductPrice[] = [];
+    // Prefer unified grocery search (live + cache + mock)
+    try {
+      const { data } = await searchStorePrices(query, location);
+      if (data.length > 0) return data;
+    } catch (err) {
+      console.error("Grocery search failed, falling back to mock providers:", err);
+    }
 
+    const results: StoreProductPrice[] = [];
     for (const provider of this.providers) {
       try {
         const products = await provider.searchProducts(query, location);
@@ -30,7 +38,6 @@ export class PriceComparisonService {
         console.error(`Provider ${provider.storeName} failed:`, error);
       }
     }
-
     return results;
   }
 }

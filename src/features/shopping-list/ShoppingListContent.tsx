@@ -80,7 +80,7 @@ export function ShoppingListContent() {
           <Link href="/price-comparison">
             <Button variant="secondary">
               <Tags className="h-4 w-4" />
-              Compare prices
+              Find cheapest basket
             </Button>
           </Link>
           <Button onClick={() => setAddOpen(true)}>

@@ -2,43 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fresh Minimal / Emerald Clean — light-first design system */
 :root,
-[data-theme="dark"] {
-  --background: #0a0a0f;
-  --foreground: #f4f4f5;
-  --card: #12121a;
-  --card-foreground: #f4f4f5;
-  --border: #27272f;
-  --muted: #1a1a24;
-  --muted-foreground: #a1a1aa;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --accent: #1e1e2e;
-  --accent-foreground: #f4f4f5;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --radius: 0.75rem;
-}
-
 [data-theme="light"] {
-  --background: #f4f4f5;
-  --foreground: #18181b;
+  --background: #ffffff;
+  --background-muted: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-hover: #f1f5f9;
   --card: #ffffff;
-  --card-foreground: #18181b;
-  --border: #e4e4e7;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --primary: #4f46e5;
+  --card-foreground: #0f172a;
+  --border: #f1f5f9;
+  --border-strong: #e2e8f0;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --text-muted: #94a3b8;
+  --primary: #059669;
+  --primary-hover: #047857;
   --primary-foreground: #ffffff;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
+  --primary-soft: #ecfdf5;
+  --primary-soft-foreground: #047857;
+  --secondary: #0f172a;
+  --secondary-foreground: #ffffff;
+  --accent: #059669;
+  --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --success: #16a34a;
+  --success: #059669;
   --warning: #d97706;
-  --radius: 0.75rem;
+  --ring: #059669;
+  --radius: 1rem;
+  --sidebar: rgba(255, 255, 255, 0.88);
+  --glow: rgba(5, 150, 105, 0.18);
+  --shadow-soft: 0 10px 40px -24px rgba(15, 23, 42, 0.18);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="dark"] {
+  --background: #0b1220;
+  --background-muted: #0f172a;
+  --foreground: #f8fafc;
+  --surface: #111827;
+  --surface-elevated: #1a2234;
+  --surface-hover: #243045;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --border: #1e293b;
+  --border-strong: #334155;
+  --muted: #1a2234;
+  --muted-foreground: #94a3b8;
+  --text-muted: #64748b;
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-foreground: #042f2e;
+  --primary-soft: rgba(16, 185, 129, 0.14);
+  --primary-soft-foreground: #6ee7b7;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #0f172a;
+  --accent: #10b981;
+  --accent-foreground: #042f2e;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --ring: #10b981;
+  --radius: 1rem;
+  --sidebar: rgba(17, 24, 39, 0.82);
+  --glow: rgba(16, 185, 129, 0.22);
+  --shadow-soft: 0 10px 40px -20px rgba(0, 0, 0, 0.55);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -52,37 +85,108 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle page backdrop */
 .app-shell-bg {
-  background-image: radial-gradient(
-    ellipse 80% 50% at 50% -20%,
-    color-mix(in srgb, var(--primary) 12%, transparent),
-    transparent
-  );
+  background-color: var(--background-muted);
+  background-image:
+    radial-gradient(
+      ellipse 70% 45% at 8% -8%,
+      color-mix(in srgb, var(--primary) 10%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 45% 35% at 96% 0%,
+      color-mix(in srgb, var(--primary) 6%, transparent),
+      transparent
+    );
 }
 
-/* Prevent horizontal overflow on mobile */
+.surface-card {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(10px);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.surface-card-hover:hover,
+.surface-card.hoverable:hover {
+  box-shadow: var(--shadow-soft);
+  border-color: color-mix(in srgb, var(--border-strong) 80%, var(--primary) 20%);
+}
+
+.pill {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.pill-slate {
+  @apply bg-slate-100 text-slate-700;
+}
+
+.pill-emerald {
+  @apply bg-emerald-50 text-emerald-700;
+}
+
+.pill-best {
+  @apply bg-emerald-600 text-white shadow-sm;
+}
+
+.focus-emerald {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+}
+
+.product-grid {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.skeleton-shimmer {
+  @apply animate-pulse rounded-xl bg-slate-200;
+}
+
+.page-enter {
+  animation: page-fade 0.35s ease-out;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 html,
 body {
   overflow-x: hidden;
   max-width: 100vw;
 }
 
-/* Dialog backdrop */
 dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
 }
 
-/* Focus visible for keyboard navigation */
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+::selection {
+  background: color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+[data-theme="dark"] .pill-slate {
+  @apply bg-slate-800 text-slate-200;
+}
+
+[data-theme="dark"] .pill-emerald {
+  @apply bg-emerald-500/15 text-emerald-300;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+  @apply bg-slate-700/80;
 }

@@ -19,4 +19,7 @@ export interface StoreProductPrice {
   location?: string;
   dataSource: DataSource;
   lastUpdated: string;
+  /** Specials / catalogue end date when known */
+  catalogueExpiresAt?: string;
+  barcode?: string;
 }

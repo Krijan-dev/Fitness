@@ -15,7 +15,7 @@ export function TopBar() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border/80 bg-background/80 backdrop-blur-md px-4 lg:px-8">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-4 lg:px-8">
         <div className="flex items-center gap-3 lg:hidden">
           <Button
             variant="ghost"
@@ -89,9 +89,9 @@ export function TopBar() {
                           <Link
                             href={item.href}
                             onClick={() => setMenuOpen(false)}
-                            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                               isActive
-                                ? "bg-primary/15 text-primary"
+                                ? "bg-emerald-50 text-emerald-700"
                                 : "text-muted-foreground hover:bg-muted"
                             }`}
                           >

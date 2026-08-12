@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import type { UserSettings } from "@/types/settings";
-import { localStorageService } from "@/services/storage/localStorage.service";
-import { STORAGE_KEYS } from "@/services/storage/storage.keys";
+import { apiGet, apiSend, syncInBackground } from "@/lib/api-client";
 import {
   DEFAULT_CALORIE_GOAL,
   DEFAULT_PROTEIN_GOAL,
@@ -9,7 +8,7 @@ import {
   DEFAULT_FAT_GOAL,
 } from "@/utils/constants";
 
-const defaultSettings: UserSettings = {
+export const defaultSettings: UserSettings = {
   profile: {
     displayName: "User",
     heightCm: 178,
@@ -29,13 +28,13 @@ const defaultSettings: UserSettings = {
     city: "Canberra",
     postcode: "2600",
   },
-  theme: "dark",
+  theme: "light",
 };
 
 interface SettingsState {
   settings: UserSettings;
   hydrated: boolean;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
   updateSettings: (updates: Partial<UserSettings>) => void;
   updateProfile: (updates: Partial<UserSettings["profile"]>) => void;
   updateNutritionGoals: (
@@ -45,27 +44,52 @@ interface SettingsState {
   reset: () => void;
 }
 
-function loadSettings(): UserSettings {
-  const stored = localStorageService.getItem<UserSettings>(STORAGE_KEYS.SETTINGS);
-  if (stored) {
-    return { ...defaultSettings, ...stored };
-  }
-  return defaultSettings;
+function persistSettings(
+  settings: UserSettings,
+  priceSelections?: Record<string, string>
+) {
+  syncInBackground(() =>
+    apiSend("/api/settings", "PUT", { settings, priceSelections })
+  );
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: defaultSettings,
   hydrated: false,
 
-  hydrate: () => {
+  hydrate: async () => {
     if (get().hydrated) return;
-    set({ settings: loadSettings(), hydrated: true });
+    try {
+      const res = await apiGet<{
+        data: {
+          settings: UserSettings;
+          priceSelections: Record<string, string>;
+        };
+      }>("/api/settings");
+      const settings: UserSettings = {
+        ...defaultSettings,
+        ...res.data.settings,
+      };
+      set({
+        settings,
+        hydrated: true,
+      });
+      const { usePriceComparisonStore } = await import(
+        "@/stores/price-comparison.store"
+      );
+      usePriceComparisonStore
+        .getState()
+        .hydrateFromServer(res.data.priceSelections || {});
+    } catch (error) {
+      console.error("Failed to hydrate settings", error);
+      set({ settings: defaultSettings, hydrated: true });
+    }
   },
 
   updateSettings: (updates) => {
     const settings = { ...get().settings, ...updates };
-    localStorageService.setItem(STORAGE_KEYS.SETTINGS, settings);
     set({ settings });
+    persistSettings(settings);
   },
 
   updateProfile: (updates) => {
@@ -73,8 +97,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       ...get().settings,
       profile: { ...get().settings.profile, ...updates },
     };
-    localStorageService.setItem(STORAGE_KEYS.SETTINGS, settings);
     set({ settings });
+    persistSettings(settings);
   },
 
   updateNutritionGoals: (updates) => {
@@ -82,8 +106,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       ...get().settings,
       nutritionGoals: { ...get().settings.nutritionGoals, ...updates },
     };
-    localStorageService.setItem(STORAGE_KEYS.SETTINGS, settings);
     set({ settings });
+    persistSettings(settings);
   },
 
   updateLocation: (updates) => {
@@ -91,12 +115,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       ...get().settings,
       location: { ...get().settings.location, ...updates },
     };
-    localStorageService.setItem(STORAGE_KEYS.SETTINGS, settings);
     set({ settings });
+    persistSettings(settings);
   },
 
   reset: () => {
-    localStorageService.setItem(STORAGE_KEYS.SETTINGS, defaultSettings);
     set({ settings: defaultSettings });
+    persistSettings(defaultSettings, {});
   },
 }));
