@@ -16,7 +16,12 @@ const userSettingsSchema = new Schema(
     theme: {
       type: String,
       enum: ["dark", "light", "system"],
-      default: "dark",
+      default: "light",
+    },
+    /** Bumped when product design defaults change (e.g. emerald light theme). */
+    preferencesVersion: {
+      type: Number,
+      default: 2,
     },
     units: {
       type: String,

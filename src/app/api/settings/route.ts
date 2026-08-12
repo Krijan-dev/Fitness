@@ -6,10 +6,28 @@ import { settingsToDb, toClientSettings } from "@/lib/mappers";
 import { jsonOk, handleApiError } from "@/lib/api";
 import type { UserSettings as UserSettingsType } from "@/types/settings";
 
+/** Emerald Clean redesign — migrate old dark-default prefs once. */
+const CURRENT_PREFERENCES_VERSION = 2;
+
+async function migratePreferencesIfNeeded(
+  doc: InstanceType<typeof UserSettings> | null
+) {
+  if (!doc) return doc;
+  const version =
+    typeof doc.preferencesVersion === "number" ? doc.preferencesVersion : 1;
+  if (version >= CURRENT_PREFERENCES_VERSION) return doc;
+
+  doc.theme = "light";
+  doc.preferencesVersion = CURRENT_PREFERENCES_VERSION;
+  await doc.save();
+  return doc;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await withAuth(request);
-    const doc = await UserSettings.findOne({ userId: session.userId });
+    let doc = await UserSettings.findOne({ userId: session.userId });
+    doc = await migratePreferencesIfNeeded(doc);
     const settings = toClientSettings(doc);
     const priceSelections =
       (settings as UserSettingsType & { priceSelections?: Record<string, string> })
@@ -59,7 +77,10 @@ export async function PUT(request: NextRequest) {
     const doc = await UserSettings.findOneAndUpdate(
       { userId: session.userId },
       {
-        $set: settingsToDb(merged, priceSelections),
+        $set: {
+          ...settingsToDb(merged, priceSelections),
+          preferencesVersion: CURRENT_PREFERENCES_VERSION,
+        },
         $setOnInsert: { userId: session.userId },
       },
       { upsert: true, new: true }

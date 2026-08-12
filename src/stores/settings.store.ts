@@ -66,8 +66,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           priceSelections: Record<string, string>;
         };
       }>("/api/settings");
+      const settings: UserSettings = {
+        ...defaultSettings,
+        ...res.data.settings,
+      };
       set({
-        settings: { ...defaultSettings, ...res.data.settings },
+        settings,
         hydrated: true,
       });
       const { usePriceComparisonStore } = await import(
