@@ -1,13 +1,12 @@
-import type { DiscoveredRecipe, RecipeSearchParams } from "@/types/recipe";
-import type { Ingredient } from "@/types/ingredient";
-import type { RecipeProvider } from "./recipe-provider.interface";
 import {
   getThemealdbMealById,
   searchThemealdbMeals,
   type ThemealdbMeal,
 } from "./themealdb.client";
 import { THEMEALDB_BASE_URL } from "./themealdb.client";
-import { generateId } from "@/utils/ids";
+import { enrichThemealdbNutrition } from "./themealdb-nutrition";
+import type { DiscoveredRecipe, RecipeSearchParams } from "@/types/recipe";
+import type { RecipeProvider } from "./recipe-provider.interface";
 
 /**
  * Free TheMealDB recipe provider — no API key / billing.
@@ -130,17 +129,8 @@ export function mealToDiscovered(meal: ThemealdbMeal): DiscoveredRecipe {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const ingredients: Ingredient[] = meal.ingredients.map((ing) => ({
-    id: generateId(),
-    name: ing.cleanedName || ing.rawName,
-    quantity: 1,
-    unit: "item",
-    caloriesPer100g: 0,
-    proteinPer100g: 0,
-    carbsPer100g: 0,
-    fatPer100g: 0,
-    notes: ing.measure ? `Measure: ${ing.measure}` : undefined,
-  }));
+  const servings = 4;
+  const nutrition = enrichThemealdbNutrition(meal, servings);
 
   const dietaryTags: string[] = [];
   const cat = (meal.category || "").toLowerCase();
@@ -165,13 +155,12 @@ export function mealToDiscovered(meal: ThemealdbMeal): DiscoveredRecipe {
     mealType: meal.category,
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
-    servings: 4,
-    // TheMealDB does not provide nutrition — zeros until enriched elsewhere
-    caloriesPerServing: 0,
-    proteinPerServing: 0,
-    carbsPerServing: 0,
-    fatPerServing: 0,
-    ingredients,
+    servings,
+    caloriesPerServing: nutrition.caloriesPerServing,
+    proteinPerServing: nutrition.proteinPerServing,
+    carbsPerServing: nutrition.carbsPerServing,
+    fatPerServing: nutrition.fatPerServing,
+    ingredients: nutrition.ingredients,
     instructions,
     dietaryTags,
     difficulty: "medium",

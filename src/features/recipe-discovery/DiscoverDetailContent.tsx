@@ -20,6 +20,7 @@ import { AddToPlannerModal } from "@/components/recipes/AddToPlannerModal";
 import { NutritionSummary } from "@/components/meals/NutritionSummary";
 import type { DiscoveredRecipe } from "@/types/recipe";
 import { useDiscoverActions } from "@/features/recipe-discovery/useDiscoverActions";
+import { DiscoverRecipePricing } from "@/features/recipe-discovery/DiscoverRecipePricing";
 import {
   getTotalCookTime,
   scaleIngredients,
@@ -247,7 +248,11 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
             <NutritionSummary
               title="Per serving"
               nutrition={perServingNutrition}
-              subtitle="Per single serving at published nutrition"
+              subtitle={
+                recipe.source?.toLowerCase().includes("themealdb")
+                  ? "Estimated from ingredient data (TheMealDB has no nutrition API)"
+                  : "Per single serving at published nutrition"
+              }
             />
           ) : null}
 
@@ -257,6 +262,11 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
               nutrition={batchNutrition}
             />
           ) : null}
+
+          <DiscoverRecipePricing
+            recipeId={recipe.id}
+            recipeSource={recipe.source}
+          />
 
           <Card>
             <CardHeader>
@@ -282,6 +292,12 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
                 <dd className="font-semibold">{recipe.fatPerServing}g</dd>
               </div>
             </dl>
+            {recipe.source?.toLowerCase().includes("themealdb") ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                Nutrition is estimated from local ingredient data — not
+                laboratory values.
+              </p>
+            ) : null}
           </Card>
 
           <Card>
