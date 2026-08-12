@@ -38,7 +38,6 @@ export type NearbyStoreChain =
   | "coles"
   | "woolworths"
   | "aldi"
-  | "iga"
   | "other";
 
 export interface NearbyStore {

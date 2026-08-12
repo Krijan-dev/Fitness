@@ -5,7 +5,6 @@ export function detectChain(name: string): NearbyStore["chain"] {
   if (n.includes("woolworth") || n.includes("woolies")) return "woolworths";
   if (n.includes("coles")) return "coles";
   if (n.includes("aldi")) return "aldi";
-  if (n.includes("iga")) return "iga";
   return "other";
 }
 

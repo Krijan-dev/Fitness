@@ -4,7 +4,6 @@ import {
   mockColesProvider,
   mockWoolworthsProvider,
   mockAldiProvider,
-  mockIGAProvider,
   mockCostcoProvider,
   mockHarrisFarmProvider,
 } from "./mock-price.provider";
@@ -26,7 +25,10 @@ export class PriceComparisonService {
       const { data } = await searchStorePrices(query, location);
       if (data.length > 0) return data;
     } catch (err) {
-      console.error("Grocery search failed, falling back to mock providers:", err);
+      console.error(
+        "Grocery search failed, falling back to mock providers:",
+        err
+      );
     }
 
     const results: StoreProductPrice[] = [];
@@ -46,7 +48,6 @@ export const priceComparisonService = new PriceComparisonService([
   mockColesProvider,
   mockWoolworthsProvider,
   mockAldiProvider,
-  mockIGAProvider,
   mockCostcoProvider,
   mockHarrisFarmProvider,
 ]);

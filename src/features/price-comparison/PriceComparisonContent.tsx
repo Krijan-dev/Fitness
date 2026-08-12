@@ -10,7 +10,6 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { BasketSummaryCard } from "@/components/prices/BasketSummaryCard";
 import { ShoppingItemPriceCard } from "@/components/prices/ShoppingItemPriceCard";
 import { BarcodeLookup } from "@/components/grocery/BarcodeLookup";
-import { AreaStoresPanel } from "@/components/grocery/AreaStoresPanel";
 import { useShoppingListStore } from "@/stores/shopping-list.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import { usePriceComparisonStore } from "@/stores/price-comparison.store";
@@ -45,7 +44,6 @@ export function PriceComparisonContent() {
   );
 
   const location = settings.location.city;
-  const postcode = settings.location.postcode;
 
   const [priceMap, setPriceMap] = useState<Record<string, StoreProductPrice[]>>(
     {}
@@ -185,8 +183,7 @@ export function PriceComparisonContent() {
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Find matching products with unit rates and best-price highlights.
-              Prices use your saved location
-              {postcode ? ` (${location} ${postcode})` : ` (${location})`}.
+              Prices use your saved location ({location}).
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground">
@@ -322,12 +319,11 @@ export function PriceComparisonContent() {
         ) : null}
       </section>
 
-      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+      <div className="mb-8">
         <BarcodeLookup
           location={location}
           onMatchedPrices={(prices) => setManualResults(prices)}
         />
-        <AreaStoresPanel city={location} postcode={postcode} />
       </div>
 
       {unpurchasedItems.length === 0 ? (

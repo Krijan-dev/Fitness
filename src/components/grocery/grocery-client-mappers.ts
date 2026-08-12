@@ -6,7 +6,6 @@ const STORES: StoreName[] = [
   "coles",
   "woolworths",
   "aldi",
-  "iga",
   "costco",
   "harris-farm",
 ];

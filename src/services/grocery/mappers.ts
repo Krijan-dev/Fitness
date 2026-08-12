@@ -12,7 +12,6 @@ const STORE_NAMES: StoreName[] = [
   "coles",
   "woolworths",
   "aldi",
-  "iga",
   "costco",
   "harris-farm",
 ];

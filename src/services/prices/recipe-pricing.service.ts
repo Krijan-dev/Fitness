@@ -54,7 +54,6 @@ const STORE_LABELS: Record<StoreName, string> = {
   coles: "Coles",
   woolworths: "Woolworths",
   aldi: "ALDI",
-  iga: "IGA",
   costco: "Costco",
   "harris-farm": "Harris Farm",
 };

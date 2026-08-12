@@ -50,7 +50,6 @@ export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
   const aldi = Boolean(
     getApifyToken() || process.env.ALDI_CACHE_URL || getApifyDatasetId()
   );
-  const iga = Boolean(process.env.IGA_CACHE_URL);
   const google = Boolean(getGoogleMapsApiKey());
   const mode = process.env.PRICE_PROVIDER_MODE || "auto";
   const forceMock = mode === "mock";
@@ -94,13 +93,6 @@ export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
           ? "Apify dataset catalogue"
           : "Apify Actor live runs"
         : "Set APIFY_API_TOKEN + APIFY_DATASET_ID (or ALDI_CACHE_URL)",
-    },
-    {
-      id: "iga",
-      label: "IGA (cache)",
-      configured: iga,
-      live: iga && !forceMock,
-      hint: iga ? "Cached catalogue" : "Set IGA_CACHE_URL (optional)",
     },
     {
       id: "open-food-facts",

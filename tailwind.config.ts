@@ -47,7 +47,6 @@ const config: Config = {
           woolworths: "#059669",
           coles: "#9f1239",
           aldi: "#1d4ed8",
-          iga: "#b91c1c",
         },
       },
       borderRadius: {

@@ -11,7 +11,7 @@ describe("places utils", () => {
     expect(detectChain("Woolworths Metro")).toBe("woolworths");
     expect(detectChain("Coles Express")).toBe("coles");
     expect(detectChain("ALDI Canberra")).toBe("aldi");
-    expect(detectChain("IGA Plus")).toBe("iga");
+    expect(detectChain("Corner Market")).toBe("other");
   });
 
   it("builds store ids", () => {
