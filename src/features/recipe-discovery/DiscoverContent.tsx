@@ -29,6 +29,7 @@ export function DiscoverContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [dataSource, setDataSource] = useState<string>("TheMealDB (free)");
 
   const fetchRecipes = useCallback(async () => {
     setLoading(true);
@@ -39,8 +40,20 @@ export function DiscoverContent() {
       if (!response.ok) {
         throw new Error("Failed to load recipes.");
       }
-      const json = (await response.json()) as { data: DiscoveredRecipe[] };
+      const json = (await response.json()) as {
+        data: DiscoveredRecipe[];
+        providerLabel?: string;
+        source?: string;
+      };
       setRecipes(json.data);
+      setDataSource(
+        json.providerLabel ||
+          (json.source?.includes("themealdb")
+            ? "TheMealDB (free)"
+            : json.source === "mock"
+              ? "Mock provider"
+              : json.source || "TheMealDB (free)")
+      );
     } catch {
       setError("Could not load discovered recipes. Please try again.");
       setRecipes([]);
@@ -62,12 +75,17 @@ export function DiscoverContent() {
     <>
       <PageHeader
         title="Discover Recipes"
-        description="Find new recipes from curated mock data. External providers can be connected later via API configuration."
+        description="Find free recipes from TheMealDB — no paid API keys required."
       />
 
-      <p className="mb-6 text-xs text-muted-foreground rounded-lg border border-border bg-muted/50 px-3 py-2">
-        Data source: <span className="font-medium text-foreground">Mock provider</span>
-        — nutrition values are estimates for demonstration.
+      <p className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+        Data source:{" "}
+        <span className="font-semibold">{dataSource}</span>
+        {dataSource.toLowerCase().includes("themealdb")
+          ? " — public free recipe API (no billing)."
+          : dataSource.toLowerCase().includes("mock")
+            ? " — demonstration fallback."
+            : "."}
       </p>
 
       {actionMessage ? (

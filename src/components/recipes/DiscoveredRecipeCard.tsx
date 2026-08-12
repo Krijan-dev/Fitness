@@ -57,8 +57,14 @@ export function DiscoveredRecipeCard({
               {totalTime} min
             </span>
           ) : null}
-          <span>{Math.round(recipe.caloriesPerServing)} cal</span>
-          <span>{recipe.proteinPerServing}g protein</span>
+          {recipe.caloriesPerServing > 0 ? (
+            <span>{Math.round(recipe.caloriesPerServing)} cal</span>
+          ) : (
+            <span>Nutrition n/a</span>
+          )}
+          {recipe.proteinPerServing > 0 ? (
+            <span>{recipe.proteinPerServing}g protein</span>
+          ) : null}
           <span>{recipe.servings} servings</span>
         </div>
 

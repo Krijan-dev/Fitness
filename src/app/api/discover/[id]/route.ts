@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockRecipeProvider } from "@/services/recipes/mock-recipe.provider";
+import { themealdbRecipeProvider } from "@/services/recipes/themealdb.provider";
 import { connectMongo } from "@/lib/mongodb";
 import { Recipe } from "@/models/Recipe";
 import { toClientRecipe } from "@/lib/mappers";
@@ -59,20 +60,39 @@ export async function GET(
       });
     }
 
-    const provider = process.env.RECIPE_API_PROVIDER || "mock";
-    if (provider !== "mock") {
-      return NextResponse.json(
-        { error: "Recipe provider not configured. Set RECIPE_API_PROVIDER=mock." },
-        { status: 503 }
-      );
+    if (id.startsWith("themealdb-") || /^\d+$/.test(id)) {
+      const recipe = await themealdbRecipeProvider.getRecipeById(id);
+      if (!recipe) {
+        return NextResponse.json({ error: "Recipe not found." }, { status: 404 });
+      }
+      return NextResponse.json({
+        data: recipe,
+        source: "themealdb",
+        billing: "free",
+      });
     }
 
-    const recipe = await mockRecipeProvider.getRecipeById(id);
-    if (!recipe) {
-      return NextResponse.json({ error: "Recipe not found." }, { status: 404 });
+    const provider = (process.env.RECIPE_API_PROVIDER || "themealdb").toLowerCase();
+
+    if (provider === "themealdb" || provider === "auto") {
+      const recipe = await themealdbRecipeProvider.getRecipeById(id);
+      if (recipe) {
+        return NextResponse.json({
+          data: recipe,
+          source: "themealdb",
+          billing: "free",
+        });
+      }
     }
 
-    return NextResponse.json({ data: recipe, source: "mock" });
+    if (provider === "mock" || provider === "themealdb" || provider === "auto") {
+      const recipe = await mockRecipeProvider.getRecipeById(id);
+      if (recipe) {
+        return NextResponse.json({ data: recipe, source: "mock" });
+      }
+    }
+
+    return NextResponse.json({ error: "Recipe not found." }, { status: 404 });
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch recipe." },
