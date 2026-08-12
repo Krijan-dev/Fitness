@@ -84,7 +84,7 @@ export default function AdminGroceryUploadPage() {
             value={csv}
             onChange={(e) => setCsv(e.target.value)}
             rows={10}
-            className="w-full rounded-xl border border-[#2B3548] bg-[#0A0F1C] px-3 py-2 font-mono text-xs"
+            className="w-full rounded-xl border border-border bg-muted px-3 py-2 font-mono text-xs"
           />
           <Button onClick={() => void uploadText()} disabled={loading}>
             <Upload className="h-4 w-4" />
@@ -102,7 +102,7 @@ export default function AdminGroceryUploadPage() {
             type="file"
             accept=".csv,text/csv"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-sm text-slate-300"
+            className="block w-full text-sm text-muted-foreground"
           />
           <Button onClick={() => void uploadFile()} disabled={loading || !file}>
             <Upload className="h-4 w-4" />
@@ -112,7 +112,7 @@ export default function AdminGroceryUploadPage() {
       </Card>
 
       {message ? (
-        <p className="text-sm text-emerald-300" role="status">
+        <p className="text-sm text-emerald-700" role="status">
           {message}
         </p>
       ) : null}

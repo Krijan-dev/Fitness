@@ -258,13 +258,13 @@ export default function AdminRecipeUploadPage() {
                   const file = e.target.files?.[0];
                   if (file) void onUpload(file);
                 }}
-                className="block w-full text-sm text-slate-400 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-500/15 file:px-4 file:py-2 file:text-emerald-300"
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-500/15 file:px-4 file:py-2 file:text-emerald-700"
               />
               {uploading ? (
-                <p className="text-sm text-slate-400">Uploading...</p>
+                <p className="text-sm text-muted-foreground">Uploading...</p>
               ) : null}
               {imageUrl ? (
-                <div className="relative h-48 w-full overflow-hidden rounded-2xl border border-[#2B3548]">
+                <div className="relative h-48 w-full overflow-hidden rounded-2xl border border-border">
                   <Image
                     src={imageUrl}
                     alt="Recipe preview"
@@ -274,7 +274,7 @@ export default function AdminRecipeUploadPage() {
                   />
                 </div>
               ) : (
-                <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-[#2B3548] text-slate-500">
+                <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground">
                   <Upload className="mr-2 h-4 w-4" />
                   Preview appears here
                 </div>
@@ -308,7 +308,7 @@ export default function AdminRecipeUploadPage() {
               {ingredients.map((row) => (
                 <div
                   key={row.id}
-                  className="grid gap-3 rounded-2xl border border-[#2B3548] bg-[#0A0F1C]/50 p-4 sm:grid-cols-7"
+                  className="grid gap-3 rounded-2xl border border-border bg-muted/50 p-4 sm:grid-cols-7"
                 >
                   <div className="sm:col-span-2">
                     <Input
@@ -417,25 +417,25 @@ export default function AdminRecipeUploadPage() {
             </CardHeader>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-xl bg-emerald-500/10 p-3">
-                <dt className="text-slate-400">Calories</dt>
+                <dt className="text-muted-foreground">Calories</dt>
                 <dd className="mt-1 text-2xl font-semibold tabular-nums">
                   {Math.round(nutrition.calories)}
                 </dd>
               </div>
               <div className="rounded-xl bg-blue-500/10 p-3">
-                <dt className="text-slate-400">Protein</dt>
+                <dt className="text-muted-foreground">Protein</dt>
                 <dd className="mt-1 text-2xl font-semibold tabular-nums">
                   {nutrition.protein.toFixed(1)}g
                 </dd>
               </div>
               <div className="rounded-xl bg-violet-500/10 p-3">
-                <dt className="text-slate-400">Carbs</dt>
+                <dt className="text-muted-foreground">Carbs</dt>
                 <dd className="mt-1 text-2xl font-semibold tabular-nums">
                   {nutrition.carbs.toFixed(1)}g
                 </dd>
               </div>
               <div className="rounded-xl bg-amber-500/10 p-3">
-                <dt className="text-slate-400">Fat</dt>
+                <dt className="text-muted-foreground">Fat</dt>
                 <dd className="mt-1 text-2xl font-semibold tabular-nums">
                   {nutrition.fat.toFixed(1)}g
                 </dd>

@@ -90,8 +90,8 @@ export default function AdminAnalyticsPage() {
               <YAxis allowDecimals={false} stroke="#64748b" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  background: "#111827",
-                  border: "1px solid #2B3548",
+                  background: "var(--card)",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: 12,
                 }}
               />
@@ -111,8 +111,8 @@ export default function AdminAnalyticsPage() {
               <YAxis allowDecimals={false} stroke="#64748b" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  background: "#111827",
-                  border: "1px solid #2B3548",
+                  background: "var(--card)",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: 12,
                 }}
               />
@@ -132,8 +132,8 @@ export default function AdminAnalyticsPage() {
               <YAxis allowDecimals={false} stroke="#64748b" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  background: "#111827",
-                  border: "1px solid #2B3548",
+                  background: "var(--card)",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: 12,
                 }}
               />

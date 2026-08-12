@@ -162,7 +162,7 @@ export default function AdminUsersPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             Search, manage roles, and review accounts.
           </p>
         </div>
@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111827]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         {loading ? (
           <div className="p-8">
             <LoadingState message="Loading users..." />
@@ -186,7 +186,7 @@ export default function AdminUsersPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-white/10 text-zinc-400">
+              <thead className="border-b border-border text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Email</th>
@@ -205,14 +205,14 @@ export default function AdminUsersPage() {
                         <span className="text-xs text-amber-400">Disabled</span>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3 text-zinc-300">{user.email}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
                     <td className="px-4 py-3 capitalize">{user.role}</td>
-                    <td className="px-4 py-3 text-zinc-400">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {user.createdAt
                         ? new Date(user.createdAt).toLocaleDateString()
                         : "—"}
                     </td>
-                    <td className="px-4 py-3 text-zinc-400">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {user.lastActivityAt
                         ? new Date(user.lastActivityAt).toLocaleString()
                         : "—"}
@@ -221,13 +221,13 @@ export default function AdminUsersPage() {
                       <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/admin/users/${user.id}`}
-                          className="rounded-md px-2 py-1 text-xs text-indigo-300 hover:bg-white/5"
+                          className="rounded-md px-2 py-1 text-xs text-emerald-700 hover:bg-muted"
                         >
                           View
                         </Link>
                         <button
                           type="button"
-                          className="rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-white/5"
+                          className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
                           onClick={() => openRoleDialog(user)}
                           disabled={busy}
                         >
@@ -235,14 +235,14 @@ export default function AdminUsersPage() {
                         </button>
                         <button
                           type="button"
-                          className="rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-white/5"
+                          className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
                           onClick={() => openResetDialog(user)}
                         >
                           Reset password
                         </button>
                         <button
                           type="button"
-                          className="rounded-md px-2 py-1 text-xs text-amber-300 hover:bg-white/5"
+                          className="rounded-md px-2 py-1 text-xs text-amber-700 hover:bg-muted"
                           onClick={() => void toggleDisable(user)}
                           disabled={busy}
                         >
@@ -250,7 +250,7 @@ export default function AdminUsersPage() {
                         </button>
                         <button
                           type="button"
-                          className="rounded-md px-2 py-1 text-xs text-red-300 hover:bg-white/5"
+                          className="rounded-md px-2 py-1 text-xs text-rose-700 hover:bg-muted"
                           onClick={() => setPendingDelete(user)}
                         >
                           Delete
@@ -274,7 +274,7 @@ export default function AdminUsersPage() {
         >
           Previous
         </Button>
-        <span className="text-sm text-zinc-400">
+        <span className="text-sm text-muted-foreground">
           Page {page} of {totalPages}
         </span>
         <Button

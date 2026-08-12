@@ -42,11 +42,11 @@ export function StatCard({
             </p>
           ) : null}
           {trend ? (
-            <p className="mt-2 text-xs font-medium text-primary">{trend}</p>
+            <p className="mt-2 text-xs font-medium text-emerald-700">{trend}</p>
           ) : null}
         </div>
         {Icon ? (
-          <div className="rounded-xl bg-primary/10 p-2.5 text-primary shrink-0">
+          <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-700 shrink-0">
             <Icon className="h-4 w-4" />
           </div>
         ) : null}

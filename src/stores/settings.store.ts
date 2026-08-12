@@ -28,7 +28,7 @@ export const defaultSettings: UserSettings = {
     city: "Canberra",
     postcode: "2600",
   },
-  theme: "dark",
+  theme: "light",
 };
 
 interface SettingsState {

@@ -132,7 +132,7 @@ export default function AdminGroceryPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm text-slate-400">Last successful sync</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Last successful sync</CardTitle>
           </CardHeader>
           <p className="px-5 pb-5 text-lg font-semibold">
             {status?.lastSyncedAt
@@ -142,7 +142,7 @@ export default function AdminGroceryPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm text-slate-400">Next Wednesday refresh</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Next Wednesday refresh</CardTitle>
           </CardHeader>
           <p className="px-5 pb-5 text-lg font-semibold">
             {status?.nextWednesdayRefreshAt
@@ -155,12 +155,12 @@ export default function AdminGroceryPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm text-slate-400">Catalogue products</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Catalogue products</CardTitle>
           </CardHeader>
           <p className="px-5 pb-5 text-lg font-semibold">
             {status?.productCount ?? products.length}
             {status?.specialsCount != null ? (
-              <span className="ml-2 text-sm font-normal text-emerald-300">
+              <span className="ml-2 text-sm font-normal text-emerald-700">
                 {status.specialsCount} specials
               </span>
             ) : null}
@@ -174,26 +174,26 @@ export default function AdminGroceryPage() {
         </CardHeader>
         <div className="px-5 pb-5 space-y-2">
           {(status?.providers ?? []).length === 0 ? (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               No refresh has been run yet. Trigger a weekly refresh to populate.
             </p>
           ) : (
             status?.providers.map((p) => (
               <div
                 key={p.name}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#2B3548] px-3 py-2 text-sm"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border px-3 py-2 text-sm"
               >
                 <span>{p.name}</span>
                 <div className="flex items-center gap-2">
                   {p.productCount != null ? (
-                    <span className="text-slate-400">{p.productCount} products</span>
+                    <span className="text-muted-foreground">{p.productCount} products</span>
                   ) : null}
                   <Badge
                     className={
                       p.status === "ok"
-                        ? "bg-emerald-500/15 text-emerald-300"
+                        ? "bg-emerald-500/15 text-emerald-700"
                         : p.status === "skipped"
-                          ? "bg-slate-500/15 text-slate-300"
+                          ? "bg-slate-500/15 text-muted-foreground"
                           : "bg-rose-500/15 text-rose-300"
                     }
                   >
@@ -216,7 +216,7 @@ export default function AdminGroceryPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search name or barcode"
-              className="flex-1 min-w-[180px] rounded-xl border border-[#2B3548] bg-[#0A0F1C] px-3 py-2 text-sm"
+              className="flex-1 min-w-[180px] rounded-xl border border-border bg-muted px-3 py-2 text-sm"
             />
             <Button variant="secondary" onClick={() => void load()}>
               Search
@@ -224,7 +224,7 @@ export default function AdminGroceryPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-slate-400">
+              <thead className="text-muted-foreground">
                 <tr>
                   <th className="py-2 pr-3">Store</th>
                   <th className="py-2 pr-3">Product</th>
@@ -235,25 +235,25 @@ export default function AdminGroceryPage() {
               </thead>
               <tbody>
                 {products.map((p) => (
-                  <tr key={p.id} className="border-t border-[#2B3548]">
+                  <tr key={p.id} className="border-t border-border">
                     <td className="py-2 pr-3 capitalize">{p.store}</td>
                     <td className="py-2 pr-3">
                       {p.name}
                       {p.isOnSpecial ? (
-                        <span className="ml-2 text-xs text-emerald-300">Special</span>
+                        <span className="ml-2 text-xs text-emerald-700">Special</span>
                       ) : null}
                       {p.size ? (
-                        <span className="block text-xs text-slate-500">{p.size}</span>
+                        <span className="block text-xs text-muted-foreground">{p.size}</span>
                       ) : null}
                     </td>
                     <td className="py-2 pr-3">
                       {p.currentPrice != null ? `$${p.currentPrice.toFixed(2)}` : "—"}
                     </td>
-                    <td className="py-2 pr-3 text-slate-400">{p.dataSource}</td>
+                    <td className="py-2 pr-3 text-muted-foreground">{p.dataSource}</td>
                     <td className="py-2">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1 text-emerald-300 hover:underline"
+                        className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
                         onClick={() => {
                           setEditing(p);
                           setEditPrice(String(p.currentPrice ?? ""));
@@ -273,15 +273,15 @@ export default function AdminGroceryPage() {
 
       {editing ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-[#2B3548] bg-[#111827] p-6 space-y-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 space-y-4">
             <h3 className="text-lg font-semibold">Edit price</h3>
-            <p className="text-sm text-slate-400">{editing.name}</p>
+            <p className="text-sm text-muted-foreground">{editing.name}</p>
             <input
               type="number"
               step="0.01"
               value={editPrice}
               onChange={(e) => setEditPrice(e.target.value)}
-              className="w-full rounded-xl border border-[#2B3548] bg-[#0A0F1C] px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-border bg-muted px-3 py-2 text-sm"
             />
             <div className="flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setEditing(null)}>

@@ -11,4 +11,4 @@ export { Table, TableRow, TableCell } from "./Table";
 export { StatCard } from "./StatCard";
 export { PageHeader } from "./PageHeader";
 export { EmptyState } from "./EmptyState";
-export { Skeleton, SkeletonCard } from "./Skeleton";
+export { Skeleton, SkeletonCard, ProductSearchSkeleton, PriceRowSkeleton } from "./Skeleton";

@@ -187,14 +187,14 @@ export default function AdminRecipesPage() {
                         sizes="48px"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-sm font-semibold text-slate-500">
+                      <div className="flex h-full items-center justify-center text-sm font-semibold text-muted-foreground">
                         {row.name.charAt(0)}
                       </div>
                     )}
                   </div>
                   <div>
                     <p className="font-medium">{row.name}</p>
-                    <p className="text-xs text-slate-500 capitalize">
+                    <p className="text-xs text-muted-foreground capitalize">
                       {row.ownerType || "user"}
                     </p>
                   </div>
@@ -207,13 +207,13 @@ export default function AdminRecipesPage() {
                 {row.user ? (
                   <div>
                     <div>{row.user.name}</div>
-                    <div className="text-xs text-slate-500">{row.user.email}</div>
+                    <div className="text-xs text-muted-foreground">{row.user.email}</div>
                   </div>
                 ) : (
                   "—"
                 )}
               </TableCell>
-              <TableCell className="text-slate-400">
+              <TableCell className="text-muted-foreground">
                 {new Date(row.createdAt).toLocaleDateString()}
               </TableCell>
               <TableCell>
@@ -224,7 +224,7 @@ export default function AdminRecipesPage() {
               <TableCell>
                 <DropdownMenu
                   trigger={
-                    <span className="rounded-lg px-2 py-1 text-xs text-slate-300 hover:bg-white/5">
+                    <span className="rounded-lg px-2 py-1 text-xs text-muted-foreground hover:bg-muted">
                       Actions
                     </span>
                   }
@@ -266,7 +266,7 @@ export default function AdminRecipesPage() {
         >
           Previous
         </Button>
-        <span className="text-sm text-slate-400">
+        <span className="text-sm text-muted-foreground">
           Page {page} of {totalPages}
         </span>
         <Button

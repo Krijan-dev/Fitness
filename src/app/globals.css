@@ -2,62 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fresh Minimal / Emerald Clean — light-first design system */
 :root,
-[data-theme="dark"] {
-  --background: #0a0f1c;
-  --foreground: #f8fafc;
-  --surface: #111827;
-  --surface-elevated: #1a2234;
-  --surface-hover: #243045;
-  --card: #111827;
-  --card-foreground: #f8fafc;
-  --border: #2b3548;
-  --muted: #1a2234;
-  --muted-foreground: #94a3b8;
-  --text-muted: #64748b;
-  --primary: #22c55e;
-  --primary-hover: #16a34a;
-  --primary-foreground: #052e16;
-  --secondary: #3b82f6;
-  --secondary-foreground: #eff6ff;
-  --accent: #8b5cf6;
-  --accent-foreground: #f5f3ff;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --ring: #22c55e;
-  --radius: 0.875rem;
-  --sidebar: rgba(17, 24, 39, 0.72);
-  --glow: rgba(34, 197, 94, 0.22);
-}
-
 [data-theme="light"] {
-  --background: #f8fafc;
+  --background: #ffffff;
+  --background-muted: #f8fafc;
   --foreground: #0f172a;
   --surface: #ffffff;
   --surface-elevated: #ffffff;
   --surface-hover: #f1f5f9;
   --card: #ffffff;
   --card-foreground: #0f172a;
-  --border: #e2e8f0;
-  --muted: #f1f5f9;
+  --border: #f1f5f9;
+  --border-strong: #e2e8f0;
+  --muted: #f8fafc;
   --muted-foreground: #64748b;
   --text-muted: #94a3b8;
-  --primary: #16a34a;
-  --primary-hover: #15803d;
+  --primary: #059669;
+  --primary-hover: #047857;
   --primary-foreground: #ffffff;
-  --secondary: #2563eb;
+  --primary-soft: #ecfdf5;
+  --primary-soft-foreground: #047857;
+  --secondary: #0f172a;
   --secondary-foreground: #ffffff;
-  --accent: #7c3aed;
+  --accent: #059669;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --success: #16a34a;
+  --success: #059669;
   --warning: #d97706;
-  --ring: #16a34a;
-  --sidebar: rgba(255, 255, 255, 0.85);
-  --glow: rgba(22, 163, 74, 0.15);
+  --ring: #059669;
+  --radius: 1rem;
+  --sidebar: rgba(255, 255, 255, 0.88);
+  --glow: rgba(5, 150, 105, 0.18);
+  --shadow-soft: 0 10px 40px -24px rgba(15, 23, 42, 0.18);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="dark"] {
+  --background: #0b1220;
+  --background-muted: #0f172a;
+  --foreground: #f8fafc;
+  --surface: #111827;
+  --surface-elevated: #1a2234;
+  --surface-hover: #243045;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --border: #1e293b;
+  --border-strong: #334155;
+  --muted: #1a2234;
+  --muted-foreground: #94a3b8;
+  --text-muted: #64748b;
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-foreground: #042f2e;
+  --primary-soft: rgba(16, 185, 129, 0.14);
+  --primary-soft-foreground: #6ee7b7;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #0f172a;
+  --accent: #10b981;
+  --accent-foreground: #042f2e;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --ring: #10b981;
+  --radius: 1rem;
+  --sidebar: rgba(17, 24, 39, 0.82);
+  --glow: rgba(16, 185, 129, 0.22);
+  --shadow-soft: 0 10px 40px -20px rgba(0, 0, 0, 0.55);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -78,17 +92,61 @@ body {
 }
 
 .app-shell-bg {
+  background-color: var(--background-muted);
   background-image:
-    radial-gradient(ellipse 70% 45% at 10% -10%, color-mix(in srgb, var(--primary) 14%, transparent), transparent),
-    radial-gradient(ellipse 50% 40% at 90% 0%, color-mix(in srgb, var(--secondary) 10%, transparent), transparent);
+    radial-gradient(
+      ellipse 70% 45% at 8% -8%,
+      color-mix(in srgb, var(--primary) 10%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 45% 35% at 96% 0%,
+      color-mix(in srgb, var(--primary) 6%, transparent),
+      transparent
+    );
 }
 
 .surface-card {
   border-radius: 1rem;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--card) 90%, transparent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(8px);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(10px);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.surface-card-hover:hover,
+.surface-card.hoverable:hover {
+  box-shadow: var(--shadow-soft);
+  border-color: color-mix(in srgb, var(--border-strong) 80%, var(--primary) 20%);
+}
+
+.pill {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.pill-slate {
+  @apply bg-slate-100 text-slate-700;
+}
+
+.pill-emerald {
+  @apply bg-emerald-50 text-emerald-700;
+}
+
+.pill-best {
+  @apply bg-emerald-600 text-white shadow-sm;
+}
+
+.focus-emerald {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+}
+
+.product-grid {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.skeleton-shimmer {
+  @apply animate-pulse rounded-xl bg-slate-200;
 }
 
 .page-enter {
@@ -113,10 +171,22 @@ body {
 }
 
 dialog::backdrop {
-  background: rgba(2, 6, 23, 0.72);
+  background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(4px);
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--primary) 35%, transparent);
+  background: color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+[data-theme="dark"] .pill-slate {
+  @apply bg-slate-800 text-slate-200;
+}
+
+[data-theme="dark"] .pill-emerald {
+  @apply bg-emerald-500/15 text-emerald-300;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+  @apply bg-slate-700/80;
 }

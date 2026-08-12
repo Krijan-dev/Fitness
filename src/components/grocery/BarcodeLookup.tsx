@@ -55,10 +55,10 @@ export function BarcodeLookup({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+    <div className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card transition-all duration-200 hover:shadow-lg">
       <div className="flex items-center gap-2">
-        <ScanBarcode className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold">Barcode lookup</h3>
+        <ScanBarcode className="h-4 w-4 text-emerald-600" />
+        <h3 className="text-sm font-semibold text-foreground">Barcode lookup</h3>
       </div>
       <p className="text-xs text-muted-foreground">
         Uses Open Food Facts for product metadata and images, then matches
@@ -71,26 +71,30 @@ export function BarcodeLookup({
           value={barcode}
           onChange={(e) => setBarcode(e.target.value)}
           placeholder="Enter barcode (EAN/UPC)"
-          className="flex-1 min-w-[160px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          className="min-w-[160px] flex-1 rounded-xl border border-border bg-muted px-3.5 py-2.5 text-sm transition-all focus:border-emerald-500 focus:bg-card focus:outline-none focus:ring-2 focus:ring-emerald-500"
           onKeyDown={(e) => {
             if (e.key === "Enter") void lookup();
           }}
         />
-        <Button onClick={() => void lookup()} disabled={loading || !barcode.trim()}>
+        <Button
+          className="rounded-xl"
+          onClick={() => void lookup()}
+          disabled={loading || !barcode.trim()}
+        >
           <Search className="h-4 w-4" />
           {loading ? "Looking up…" : "Lookup"}
         </Button>
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {metadata ? (
-        <div className="flex items-center gap-3 rounded-lg bg-muted/40 p-3 text-sm">
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/60 p-3 text-sm">
           <ProductThumbnail
             src={metadata.imageUrl}
             alt={metadata.name}
             size={48}
           />
           <div className="min-w-0">
-            <p className="font-medium truncate">{metadata.name}</p>
+            <p className="truncate font-medium text-foreground">{metadata.name}</p>
             <p className="text-xs text-muted-foreground">
               {metadata.brand ? `${metadata.brand} · ` : ""}
               {metadata.barcode}
@@ -104,16 +108,18 @@ export function BarcodeLookup({
           {matches.map((m) => (
             <li
               key={m.id}
-              className="flex items-center gap-3 rounded-lg border border-border px-3 py-2"
+              className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 transition-all duration-200 hover:shadow-lg"
             >
               <ProductThumbnail src={m.imageUrl} alt={m.name} size={40} />
               <span className="min-w-0 flex-1 truncate">
                 {m.store} · {m.name}
                 {m.isOnSpecial ? (
-                  <span className="ml-2 text-xs text-success">Special</span>
+                  <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+                    Special
+                  </span>
                 ) : null}
               </span>
-              <span className="shrink-0 font-medium">
+              <span className="shrink-0 font-bold text-emerald-600">
                 {m.currentPrice != null ? formatCurrency(m.currentPrice) : "—"}
               </span>
             </li>

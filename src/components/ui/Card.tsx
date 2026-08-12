@@ -22,7 +22,11 @@ export function Card({
 }: CardProps) {
   return (
     <div
-      className={`surface-card ${paddingMap[padding]} ${hover ? "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft hover:border-primary/30" : ""} ${className}`}
+      className={`surface-card rounded-2xl border border-border bg-card ${paddingMap[padding]} ${
+        hover
+          ? "hoverable transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+          : ""
+      } ${className}`}
       {...props}
     >
       {children}
@@ -48,7 +52,9 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h3 className={`text-base font-semibold tracking-tight text-foreground ${className}`}>
+    <h3
+      className={`text-base font-semibold tracking-tight text-foreground ${className}`}
+    >
       {children}
     </h3>
   );
@@ -61,5 +67,7 @@ export function CardDescription({
   children: ReactNode;
   className?: string;
 }) {
-  return <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>;
+  return (
+    <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
+  );
 }

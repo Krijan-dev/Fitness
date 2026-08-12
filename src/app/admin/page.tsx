@@ -143,8 +143,8 @@ export default function AdminDashboardPage() {
               <YAxis allowDecimals={false} stroke="#64748b" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  background: "#111827",
-                  border: "1px solid #2B3548",
+                  background: "var(--card)",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: 12,
                 }}
               />
@@ -164,8 +164,8 @@ export default function AdminDashboardPage() {
               <YAxis allowDecimals={false} stroke="#64748b" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  background: "#111827",
-                  border: "1px solid #2B3548",
+                  background: "var(--card)",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: 12,
                 }}
               />
@@ -179,7 +179,7 @@ export default function AdminDashboardPage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-3">
             <CardTitle>Recent activity</CardTitle>
-            <Link href="/admin/analytics" className="text-sm text-emerald-300 hover:underline">
+            <Link href="/admin/analytics" className="text-sm text-emerald-700 hover:underline">
               View analytics
             </Link>
           </div>
@@ -188,16 +188,16 @@ export default function AdminDashboardPage() {
           {activity.map((item) => (
             <li
               key={`${item.type}-${item.id}-${item.at}`}
-              className="flex items-start justify-between gap-3 rounded-xl bg-white/5 px-4 py-3"
+              className="flex items-start justify-between gap-3 rounded-xl bg-muted px-4 py-3"
             >
               <div>
                 <p className="font-medium">{item.title}</p>
-                <p className="text-sm text-slate-400">{item.subtitle}</p>
+                <p className="text-sm text-muted-foreground">{item.subtitle}</p>
                 <Badge tone="info" className="mt-2">
                   {item.type.replace("_", " ")}
                 </Badge>
               </div>
-              <span className="shrink-0 text-xs text-slate-500">
+              <span className="shrink-0 text-xs text-muted-foreground">
                 {item.at ? new Date(item.at).toLocaleString() : "—"}
               </span>
             </li>

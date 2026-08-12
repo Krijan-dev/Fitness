@@ -44,9 +44,9 @@ export function MobileNavigation() {
             <li key={item.href} className="flex-1 max-w-[5rem]">
               <Link
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 rounded-lg px-2 py-2.5 min-h-[3.25rem] text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                className={`flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2.5 min-h-[3.25rem] text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   isActive
-                    ? "text-primary bg-primary/10"
+                    ? "text-emerald-700 bg-emerald-50"
                     : "text-muted-foreground"
                 }`}
                 aria-current={isActive ? "page" : undefined}

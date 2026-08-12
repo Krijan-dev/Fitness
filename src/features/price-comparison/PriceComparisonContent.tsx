@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { RefreshCw, ShoppingCart, Tags } from "lucide-react";
+import { MapPin, RefreshCw, Search, ShoppingCart, Tags } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Select } from "@/components/common/Select";
 import { Button } from "@/components/common/Button";
@@ -21,7 +21,10 @@ import {
   calculateBasketSummary,
 } from "@/features/price-comparison/basket-calculator";
 import { ProductThumbnail } from "@/components/grocery/ProductThumbnail";
+import { StoreBadge } from "@/components/grocery/StoreBadge";
+import { ProductSearchSkeleton } from "@/components/ui/Skeleton";
 import { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
+import { formatCurrency } from "@/utils/currency";
 import type { StoreProductPrice } from "@/types/price";
 
 interface FetchState {
@@ -145,8 +148,12 @@ export function PriceComparisonContent() {
   };
 
   const anyLoading =
-    isRefreshing ||
-    Object.values(fetchStates).some((s) => s.loading);
+    isRefreshing || Object.values(fetchStates).some((s) => s.loading);
+
+  const cheapestManualId =
+    manualResults.length > 0
+      ? [...manualResults].sort(compareByUnitThenShelfPrice)[0]?.id
+      : null;
 
   return (
     <>
@@ -162,7 +169,6 @@ export function PriceComparisonContent() {
             </Button>
           </Link>
           <Button
-            variant="secondary"
             onClick={() => fetchAllPrices()}
             disabled={anyLoading || unpurchasedItems.length === 0}
           >
@@ -176,21 +182,150 @@ export function PriceComparisonContent() {
 
       <GroceryDataSourceBanner />
 
-      <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_auto]">
-        <Select
-          label="Location"
-          value={location}
-          options={LOCATION_OPTIONS.map((o) => ({
-            value: o.value,
-            label: o.label,
-          }))}
-          onChange={(e) => handleLocationChange(e.target.value)}
-        />
-        <p className="text-sm text-muted-foreground lg:max-w-xs lg:self-end">
-          {dataNotice ??
-            "Location is saved in settings. Live supermarket prices require API keys in .env.local."}
-        </p>
-      </div>
+      {/* Hero search + location */}
+      <section className="mb-8 overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              Search products across stores
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {dataNotice ??
+                "Find matching products with thumbnails, unit rates, and best-price highlights."}
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground">
+            <MapPin className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+            <label htmlFor="price-location" className="sr-only">
+              Location
+            </label>
+            <select
+              id="price-location"
+              value={location}
+              onChange={(e) => handleLocationChange(e.target.value)}
+              className="max-w-[11rem] cursor-pointer border-0 bg-transparent text-sm font-medium text-foreground focus:outline-none focus:ring-0"
+            >
+              {LOCATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              value={manualQuery}
+              onChange={(e) => setManualQuery(e.target.value)}
+              placeholder="Search e.g. greek yoghurt, chicken breast…"
+              className="w-full rounded-xl border border-border bg-muted/80 py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-text-muted transition-all focus:border-emerald-500 focus:bg-card focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void searchManual();
+              }}
+            />
+          </div>
+          <Button
+            className="rounded-xl px-6"
+            onClick={() => void searchManual()}
+            disabled={manualLoading}
+          >
+            {manualLoading ? "Searching…" : "Search"}
+          </Button>
+        </div>
+
+        <div className="mt-4 sm:hidden">
+          <Select
+            label="Location"
+            value={location}
+            options={LOCATION_OPTIONS.map((o) => ({
+              value: o.value,
+              label: o.label,
+            }))}
+            onChange={(e) => handleLocationChange(e.target.value)}
+          />
+        </div>
+
+        {manualLoading ? (
+          <div className="mt-6">
+            <ProductSearchSkeleton count={4} />
+          </div>
+        ) : manualResults.length > 0 ? (
+          <ul className="product-grid mt-6">
+            {manualResults
+              .slice()
+              .sort(compareByUnitThenShelfPrice)
+              .slice(0, 12)
+              .map((p) => {
+                const isBest = p.id === cheapestManualId;
+                const savings =
+                  p.regularPrice != null && p.regularPrice > p.currentPrice
+                    ? p.regularPrice - p.currentPrice
+                    : null;
+                return (
+                  <li
+                    key={p.id}
+                    className={`flex flex-col rounded-2xl border bg-card p-4 transition-all duration-200 hover:shadow-lg ${
+                      isBest
+                        ? "border-2 border-emerald-500 shadow-emerald-ring"
+                        : "border-border"
+                    }`}
+                  >
+                    <div className="relative mb-3 flex justify-center rounded-xl border border-border bg-muted/50 p-3">
+                      <ProductThumbnail
+                        src={p.imageUrl}
+                        alt={p.productName}
+                        size={88}
+                      />
+                      {isBest ? (
+                        <span className="absolute left-2 top-2 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">
+                          Best Price
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="mb-2 flex flex-wrap gap-1.5">
+                      <StoreBadge store={p.store} />
+                      {p.isOnSpecial ? (
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                          Special
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="line-clamp-2 text-sm font-semibold text-foreground">
+                      {p.productName}
+                    </p>
+                    <div className="mt-auto flex flex-wrap items-end justify-between gap-2 pt-3">
+                      <div>
+                        <p
+                          className={`text-lg font-bold tabular-nums ${
+                            isBest ? "text-emerald-600" : "text-foreground"
+                          }`}
+                        >
+                          {formatCurrency(p.currentPrice)}
+                        </p>
+                        {p.unitPrice != null ? (
+                          <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                            {formatCurrency(p.unitPrice)} {p.unitLabel ?? ""}
+                          </span>
+                        ) : null}
+                      </div>
+                      {savings != null && savings > 0 ? (
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                          You Save {formatCurrency(savings)}
+                        </span>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+          </ul>
+        ) : null}
+      </section>
 
       <div className="mb-8 grid gap-4 lg:grid-cols-2">
         <BarcodeLookup
@@ -198,66 +333,6 @@ export function PriceComparisonContent() {
           onMatchedPrices={(prices) => setManualResults(prices)}
         />
         <NearbyStoresPanel location={location} />
-      </div>
-
-      <div className="mb-8 rounded-xl border border-border bg-card p-4 space-y-3">
-        <h3 className="text-sm font-semibold">Search products across stores</h3>
-        <div className="flex flex-wrap gap-2">
-          <input
-            value={manualQuery}
-            onChange={(e) => setManualQuery(e.target.value)}
-            placeholder="e.g. greek yoghurt"
-            className="flex-1 min-w-[180px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void searchManual();
-            }}
-          />
-          <Button onClick={() => void searchManual()} disabled={manualLoading}>
-            {manualLoading ? "Searching…" : "Search"}
-          </Button>
-        </div>
-        {manualResults.length > 0 ? (
-          <ul className="space-y-2 text-sm">
-            {manualResults
-              .slice()
-              .sort(compareByUnitThenShelfPrice)
-              .slice(0, 12)
-              .map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center gap-3 rounded-lg border border-border px-3 py-2"
-                >
-                  <ProductThumbnail
-                    src={p.imageUrl}
-                    alt={p.productName}
-                    size={48}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">
-                      <span className="uppercase text-[10px] tracking-wide text-muted-foreground mr-2">
-                        {p.store}
-                      </span>
-                      {p.productName}
-                      {p.isOnSpecial ? (
-                        <span className="ml-2 text-xs text-success">Special</span>
-                      ) : null}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {p.unitPrice != null
-                        ? `${p.unitPrice.toFixed(2)} ${p.unitLabel ?? ""}`
-                        : p.size ?? ""}
-                      {p.catalogueExpiresAt
-                        ? ` · until ${new Date(p.catalogueExpiresAt).toLocaleDateString("en-AU")}`
-                        : ""}
-                    </p>
-                  </div>
-                  <span className="shrink-0 font-semibold">
-                    ${p.currentPrice.toFixed(2)}
-                  </span>
-                </li>
-              ))}
-          </ul>
-        ) : null}
       </div>
 
       {unpurchasedItems.length === 0 ? (
@@ -277,10 +352,13 @@ export function PriceComparisonContent() {
           ) : null}
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Shopping list matches</h2>
-            <p className="text-sm text-muted-foreground mb-4">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              Shopping list matches
+            </h2>
+            <p className="mb-4 text-sm text-muted-foreground">
               Select the correct product match for each item. Defaults to the
-              cheapest option. Specials and unit prices are highlighted when available.
+              cheapest option. Specials and unit prices are highlighted when
+              available.
             </p>
             {itemMatches.map((match) => (
               <ShoppingItemPriceCard

@@ -36,7 +36,7 @@ export function PageHeader({
   );
 
   return (
-    <div className="mb-2 border-b border-border/70 pb-6">
+    <div className="mb-2 border-b border-border pb-6">
       <UiPageHeader
         title={title}
         description={description}

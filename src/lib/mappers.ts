@@ -127,7 +127,7 @@ export function toClientSettings(doc: UserSettingsDocument | null): UserSettings
       city: "Canberra",
       postcode: "2600",
     },
-    theme: "dark",
+    theme: "light",
   };
 
   if (!doc) return defaults;

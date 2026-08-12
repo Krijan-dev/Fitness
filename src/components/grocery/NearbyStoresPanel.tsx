@@ -3,10 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { MapPin, Navigation } from "lucide-react";
 import { Button } from "@/components/common/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { StoreBadge } from "@/components/grocery/StoreBadge";
 import type { NearbyStore } from "@/types/grocery";
+import type { StoreName } from "@/types/common";
 
 interface NearbyStoresPanelProps {
   location: string;
+}
+
+function chainToStoreName(chain: NearbyStore["chain"]): StoreName | null {
+  if (chain === "other") return null;
+  return chain;
 }
 
 export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
@@ -61,13 +69,13 @@ export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+    <div className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card transition-all duration-200 hover:shadow-lg">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">Nearby stores</h3>
+          <MapPin className="h-4 w-4 text-emerald-600" />
+          <h3 className="text-sm font-semibold text-foreground">Nearby stores</h3>
         </div>
-        <Button variant="secondary" onClick={useMyLocation} disabled={loading}>
+        <Button variant="outline" onClick={useMyLocation} disabled={loading}>
           <Navigation className="h-4 w-4" />
           Use my location
         </Button>
@@ -77,38 +85,50 @@ export function NearbyStoresPanel({ location }: NearbyStoresPanelProps) {
         {source ? ` · source: ${source}` : ""}.
       </p>
       {notice ? (
-        <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
           {notice}
         </p>
       ) : null}
       {loading ? (
-        <p className="text-sm text-muted-foreground">Finding stores…</p>
+        <div className="space-y-2" aria-busy="true">
+          <Skeleton className="h-14 w-full rounded-xl" />
+          <Skeleton className="h-14 w-full rounded-xl" />
+          <Skeleton className="h-14 w-full rounded-xl" />
+        </div>
       ) : error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : stores.length === 0 ? (
         <p className="text-sm text-muted-foreground">No stores found nearby.</p>
       ) : (
         <ul className="space-y-2">
-          {stores.map((store) => (
-            <li
-              key={store.id}
-              className="flex items-start justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm"
-            >
-              <div>
-                <p className="font-medium">{store.name}</p>
-                <p className="text-xs text-muted-foreground">{store.address}</p>
-                {store.storeId ? (
-                  <p className="text-[10px] text-muted-foreground/80">
-                    Store ID {store.storeId}
-                    {store.postcode ? ` · ${store.postcode}` : ""}
+          {stores.map((store) => {
+            const brand = chainToStoreName(store.chain);
+            return (
+              <li
+                key={store.id}
+                className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-lg"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {brand ? <StoreBadge store={brand} /> : null}
+                    <p className="font-medium text-foreground">{store.name}</p>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {store.address}
                   </p>
-                ) : null}
-              </div>
-              <span className="shrink-0 text-xs font-medium text-primary">
-                {(store.distanceMeters / 1000).toFixed(1)} km
-              </span>
-            </li>
-          ))}
+                  {store.storeId ? (
+                    <p className="text-[10px] text-text-muted">
+                      Store ID {store.storeId}
+                      {store.postcode ? ` · ${store.postcode}` : ""}
+                    </p>
+                  ) : null}
+                </div>
+                <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                  {(store.distanceMeters / 1000).toFixed(1)} km
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

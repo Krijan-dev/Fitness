@@ -17,20 +17,20 @@ interface AuthShellProps {
 
 export function AuthShell({ title, subtitle, children, footer }: AuthShellProps) {
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-      <div className="relative hidden lg:flex flex-col justify-between overflow-hidden p-10 text-primary-foreground">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background-muted">
+      <div className="relative hidden lg:flex flex-col justify-between overflow-hidden p-10 text-white">
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(145deg, #0A0F1C 0%, #0f2918 45%, #111827 100%)",
+              "linear-gradient(145deg, #064e3b 0%, #059669 48%, #0f172a 100%)",
           }}
         />
         <div
-          className="absolute inset-0 opacity-50"
+          className="absolute inset-0 opacity-40"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 20%, rgba(34,197,94,0.35), transparent 40%), radial-gradient(circle at 80% 0%, rgba(59,130,246,0.22), transparent 35%), radial-gradient(circle at 70% 80%, rgba(139,92,246,0.18), transparent 40%)",
+              "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 40%), radial-gradient(circle at 80% 0%, rgba(167,243,208,0.25), transparent 35%)",
           }}
         />
         <div className="relative z-10">
@@ -45,13 +45,13 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           <h1 className="text-4xl font-semibold leading-tight tracking-tight">
             Plan meals. Track macros. Shop smarter.
           </h1>
-          <p className="text-base text-white/75">
+          <p className="text-base text-emerald-50/85">
             Your personal meal prep workspace with recipes, daily tracking,
             shopping lists, and progress — synced securely across devices.
           </p>
         </div>
-        <p className="relative z-10 text-sm text-white/50">
-          Secure multi-user SaaS · JWT auth · MongoDB
+        <p className="relative z-10 text-sm text-white/55">
+          Fresh Minimal · Emerald Clean design
         </p>
       </div>
 
@@ -62,10 +62,10 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground text-sm font-bold">
                 M
               </div>
-              <span className="font-semibold">{APP_NAME}</span>
+              <span className="font-semibold text-foreground">{APP_NAME}</span>
             </Link>
           </div>
-          <div className="rounded-2xl border border-border/80 bg-card/80 p-6 shadow-xl backdrop-blur sm:p-8">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-soft sm:p-8">
             <div className="mb-6 space-y-1">
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">
                 {title}
@@ -116,7 +116,7 @@ export function PasswordInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
-          className={`w-full rounded-lg border border-border bg-background px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+          className={`w-full rounded-xl border border-border bg-card px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
             error ? "border-destructive" : ""
           }`}
         />

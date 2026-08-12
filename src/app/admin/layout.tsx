@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   if (!checked || loading) {
     return (
-      <div className="min-h-screen bg-[#0A0F1C] text-slate-100 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background-muted text-foreground">
         <LoadingState message="Loading admin portal..." />
       </div>
     );
@@ -56,10 +56,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   if (!user || user.role !== "admin") {
     return (
-      <div className="min-h-screen bg-[#0A0F1C] text-slate-100 flex items-center justify-center p-6">
-        <div className="max-w-md text-center space-y-4 rounded-3xl border border-[#2B3548] bg-[#111827] p-8">
+      <div className="flex min-h-screen items-center justify-center bg-background-muted p-6 text-foreground">
+        <div className="max-w-md space-y-4 rounded-3xl border border-border bg-card p-8 text-center shadow-soft">
           <h1 className="text-2xl font-semibold tracking-tight">403 Access Denied</h1>
-          <p className="text-slate-400">
+          <p className="text-muted-foreground">
             This portal is restricted to administrators.
           </p>
           <Button onClick={() => router.push("/dashboard")}>Back to app</Button>
@@ -78,17 +78,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             item.href !== "/admin/recipes/new" &&
             pathname.startsWith(item.href) &&
             !(item.href === "/admin/recipes" && pathname.startsWith("/admin/recipes/new")));
-        const isUpload = item.href === "/admin/recipes/new" && pathname.startsWith("/admin/recipes/new");
+        const isUpload =
+          item.href === "/admin/recipes/new" &&
+          pathname.startsWith("/admin/recipes/new");
         const isActive = item.href === "/admin/recipes/new" ? isUpload : active;
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={() => setMobileOpen(false)}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               isActive
-                ? "bg-emerald-500/15 text-emerald-300 shadow-[0_0_24px_rgba(34,197,94,0.18)]"
-                : "text-slate-400 hover:bg-white/5 hover:text-slate-100"
+                ? "bg-emerald-50 text-emerald-700 shadow-sm"
+                : "text-muted-foreground hover:bg-surface-hover hover:text-foreground"
             }`}
           >
             <Icon className="h-4 w-4 shrink-0" />
@@ -100,26 +102,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#0A0F1C] text-slate-100">
-      <div
-        className="pointer-events-none fixed inset-0 opacity-70"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 40% at 0% 0%, rgba(34,197,94,0.12), transparent), radial-gradient(ellipse 50% 35% at 100% 0%, rgba(59,130,246,0.1), transparent)",
-        }}
-      />
-
-      <div className="relative lg:hidden flex items-center justify-between border-b border-[#2B3548] px-4 py-3">
+    <div className="min-h-screen bg-background-muted text-foreground app-shell-bg">
+      <div className="relative flex items-center justify-between border-b border-border bg-card/80 px-4 py-3 backdrop-blur-xl lg:hidden">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="rounded-lg p-2 hover:bg-white/5"
+          className="rounded-xl p-2 hover:bg-muted"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
         </button>
         <span className="font-semibold tracking-tight">Admin Portal</span>
-        <Link href="/dashboard" className="text-sm text-slate-400 hover:text-white">
+        <Link
+          href="/dashboard"
+          className="text-sm text-muted-foreground hover:text-emerald-700"
+        >
           App
         </Link>
       </div>
@@ -128,12 +125,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-slate-900/40"
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-[#2B3548] bg-[#111827]">
-            <div className="flex items-center justify-between border-b border-[#2B3548] px-4 py-4">
+          <aside className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-border bg-card shadow-soft">
+            <div className="flex items-center justify-between border-b border-border px-4 py-4">
               <span className="font-semibold">MealPrep Admin</span>
               <button type="button" onClick={() => setMobileOpen(false)}>
                 <X className="h-5 w-5" />
@@ -146,22 +143,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       <div className="relative lg:flex">
         <aside
-          className={`hidden lg:flex lg:fixed lg:inset-y-4 lg:left-4 lg:flex-col rounded-3xl border border-[#2B3548] bg-[#111827]/80 backdrop-blur-xl shadow-2xl transition-all ${
+          className={`hidden lg:fixed lg:inset-y-4 lg:left-4 lg:flex lg:flex-col rounded-3xl border border-border bg-sidebar shadow-soft backdrop-blur-xl transition-all ${
             collapsed ? "lg:w-20" : "lg:w-64"
           }`}
         >
-          <div className="flex h-16 items-center justify-between border-b border-[#2B3548] px-4">
+          <div className="flex h-16 items-center justify-between border-b border-border px-4">
             {!collapsed ? (
               <div>
                 <p className="font-semibold tracking-tight">MealPrep Admin</p>
-                <p className="text-[11px] text-slate-500">Content & analytics</p>
+                <p className="text-[11px] text-muted-foreground">Content & analytics</p>
               </div>
             ) : (
-              <span className="mx-auto font-bold text-emerald-300">A</span>
+              <span className="mx-auto font-bold text-emerald-600">A</span>
             )}
             <button
               type="button"
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
+              className="rounded-xl p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
               onClick={() => setCollapsed((v) => !v)}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -173,17 +170,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </button>
           </div>
           {nav}
-          <div className="border-t border-[#2B3548] p-3 space-y-2">
+          <div className="space-y-2 border-t border-border p-3">
             {!collapsed ? (
-              <div className="px-2">
+              <div className="rounded-2xl border border-border bg-muted/70 px-3 py-2">
                 <p className="truncate text-sm font-medium">{user.name}</p>
-                <p className="truncate text-xs text-slate-500">{user.email}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
               </div>
             ) : null}
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-slate-300"
+              className="w-full justify-start"
               onClick={() => {
                 void logout().then(() => {
                   window.location.href = "/login";
@@ -197,7 +194,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </aside>
 
         <main
-          className={`flex-1 min-h-screen px-4 py-6 sm:px-6 lg:px-8 ${
+          className={`min-h-screen flex-1 px-4 py-6 sm:px-6 lg:px-8 ${
             collapsed ? "lg:pl-28" : "lg:pl-72"
           }`}
         >

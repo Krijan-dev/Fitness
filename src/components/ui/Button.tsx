@@ -11,12 +11,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-primary-foreground hover:bg-primary-hover border border-transparent shadow-sm",
+    "bg-primary text-primary-foreground hover:bg-primary-hover border border-transparent shadow-sm hover:shadow-md",
   secondary:
-    "bg-secondary text-secondary-foreground hover:opacity-90 border border-transparent",
+    "bg-slate-900 text-white hover:bg-slate-800 border border-transparent shadow-sm",
   outline:
-    "bg-transparent text-foreground hover:bg-surface-hover border border-border",
-  ghost: "bg-transparent text-foreground hover:bg-surface-hover border border-transparent",
+    "bg-card text-foreground hover:bg-muted border border-border",
+  ghost: "bg-transparent text-foreground hover:bg-muted border border-transparent",
   destructive:
     "bg-destructive text-destructive-foreground hover:opacity-90 border border-transparent",
 };
@@ -44,7 +44,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+        className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
         {...props}
       >
         {isLoading ? (

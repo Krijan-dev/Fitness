@@ -144,14 +144,14 @@ export default function AdminUserDetailPage() {
         <div>
           <Link
             href="/admin/users"
-            className="text-sm text-indigo-300 hover:underline"
+            className="text-sm text-emerald-700 hover:underline"
           >
             ← Back to users
           </Link>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight">
             {user.name}
           </h1>
-          <p className="text-sm text-zinc-400">{user.email}</p>
+          <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -194,7 +194,7 @@ export default function AdminUserDetailPage() {
           />
         </dl>
 
-        <div className="mt-6 max-w-sm space-y-3 border-t border-white/10 pt-5">
+        <div className="mt-6 max-w-sm space-y-3 border-t border-border pt-5">
           <Select
             label="Role"
             value={selectedRole}
@@ -355,8 +355,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#111827] p-5">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+    <section className="rounded-2xl border border-border bg-card p-5">
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h2>
       {children}
@@ -367,20 +367,20 @@ function Section({
 function Item({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-zinc-500">{label}</dt>
-      <dd className="mt-0.5 capitalize text-zinc-100">{value}</dd>
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 capitalize text-foreground">{value}</dd>
     </div>
   );
 }
 
 function ReadOnlyList({ items, empty }: { items: string[]; empty: string }) {
   if (items.length === 0) {
-    return <p className="text-sm text-zinc-500">{empty}</p>;
+    return <p className="text-sm text-muted-foreground">{empty}</p>;
   }
   return (
-    <ul className="space-y-2 text-sm text-zinc-300">
+    <ul className="space-y-2 text-sm text-muted-foreground">
       {items.map((item) => (
-        <li key={item} className="rounded-lg bg-white/5 px-3 py-2">
+        <li key={item} className="rounded-lg bg-muted px-3 py-2">
           {item}
         </li>
       ))}

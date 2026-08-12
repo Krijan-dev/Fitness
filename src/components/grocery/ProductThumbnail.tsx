@@ -31,12 +31,12 @@ export function ProductThumbnail({
 
   return (
     <div
-      className={`relative shrink-0 overflow-hidden rounded-lg border border-border bg-muted/40 ${className}`}
+      className={`relative shrink-0 overflow-hidden rounded-xl border border-border bg-muted ${className}`}
       style={{ width: size, height: size }}
     >
       {!loaded && !showPlaceholder ? (
         <div
-          className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted via-muted-foreground/10 to-muted"
+          className="absolute inset-0 animate-pulse bg-slate-200"
           aria-hidden
         />
       ) : null}
