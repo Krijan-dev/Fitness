@@ -32,6 +32,10 @@ export function getApifyToken(): string | undefined {
   return process.env.APIFY_API_TOKEN || undefined;
 }
 
+export function getApifyDatasetId(): string | undefined {
+  return process.env.APIFY_DATASET_ID || process.env.ALDI_DATASET_ID || undefined;
+}
+
 export interface GroceryProviderStatus {
   id: string;
   label: string;
@@ -43,7 +47,9 @@ export interface GroceryProviderStatus {
 export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
   const woolworthsRapid = Boolean(getWoolworthsApiKey());
   const colesRapid = Boolean(getColesApiKey());
-  const aldi = Boolean(getApifyToken() || process.env.ALDI_CACHE_URL);
+  const aldi = Boolean(
+    getApifyToken() || process.env.ALDI_CACHE_URL || getApifyDatasetId()
+  );
   const iga = Boolean(process.env.IGA_CACHE_URL);
   const google = Boolean(getGoogleMapsApiKey());
   const mode = process.env.PRICE_PROVIDER_MODE || "auto";
@@ -84,8 +90,10 @@ export function getGroceryProviderStatuses(): GroceryProviderStatus[] {
       configured: aldi,
       live: aldi && !forceMock,
       hint: aldi
-        ? "Live / cached specials"
-        : "Set APIFY_API_TOKEN or ALDI_CACHE_URL",
+        ? getApifyDatasetId() || process.env.ALDI_CACHE_URL
+          ? "Apify dataset catalogue"
+          : "Apify Actor live runs"
+        : "Set APIFY_API_TOKEN + APIFY_DATASET_ID (or ALDI_CACHE_URL)",
     },
     {
       id: "iga",
