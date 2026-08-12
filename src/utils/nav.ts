@@ -20,6 +20,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/meal-calculator", label: "Meal Calculator", icon: "Calculator" },
       { href: "/recipes", label: "My Recipes", icon: "BookOpen" },
       { href: "/discover", label: "Discover", icon: "Compass" },
+      { href: "/recipe-pricing", label: "Recipe Pricing", icon: "ChefHat" },
       { href: "/meal-planner", label: "Meal Planner", icon: "CalendarDays" },
       { href: "/daily-tracker", label: "Daily Tracker", icon: "Activity" },
     ],

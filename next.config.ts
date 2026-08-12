@@ -10,6 +10,7 @@ const groceryImageHosts = [
   "images.openfoodfacts.org",
   "static.openfoodfacts.org",
   "world.openfoodfacts.org",
+  "www.themealdb.com",
   "www.aldi.com.au",
   "dm.apac.cms.aldi.cx",
   "cdn.shopify.com",
