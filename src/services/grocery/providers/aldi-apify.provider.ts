@@ -3,6 +3,7 @@ import type { GroceryProvider } from "./grocery-provider.interface";
 import { enrichGroceryProduct, asNumber, asString } from "../mappers";
 import { resolveProductImageUrl } from "../image-urls";
 import { getApifyToken } from "../credentials";
+import { fetchWithTimeout, APIFY_TIMEOUT_MS } from "../http-headers";
 
 /**
  * Unofficial Apify ALDI Australia provider.
@@ -110,7 +111,11 @@ export class AldiApifyProvider implements GroceryProvider {
   }
 
   private async fetchDataset(url: string): Promise<GroceryProduct[]> {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetchWithTimeout(
+      url,
+      { next: { revalidate: 3600 } },
+      APIFY_TIMEOUT_MS
+    );
     if (!res.ok) throw new Error(`ALDI dataset HTTP ${res.status}`);
     const body = (await res.json()) as unknown;
     const rows = Array.isArray(body)

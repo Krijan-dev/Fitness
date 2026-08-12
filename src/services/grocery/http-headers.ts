@@ -17,3 +17,34 @@ export function browserJsonHeaders(options: {
 export function isForbiddenStatus(status: number): boolean {
   return status === 401 || status === 403 || status === 429;
 }
+
+/**
+ * fetch with AbortController timeout so blocked supermarket endpoints
+ * cannot hang price search for tens of seconds.
+ */
+export async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export const DIRECT_STORE_TIMEOUT_MS = Number(
+  process.env.GROCERY_DIRECT_TIMEOUT_MS || 4500
+);
+export const RAPIDAPI_TIMEOUT_MS = Number(
+  process.env.GROCERY_RAPIDAPI_TIMEOUT_MS || 6000
+);
+export const APIFY_TIMEOUT_MS = Number(
+  process.env.GROCERY_APIFY_TIMEOUT_MS || 8000
+);

@@ -45,57 +45,59 @@ export async function searchGroceryProducts(
   const sources: string[] = [];
 
   try {
-    await connectMongo();
-    const cached = await GroceryProductModel.find({
-      $or: [
-        {
-          name: {
-            $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-            $options: "i",
+    if (process.env.MONGODB_URI) {
+      await connectMongo();
+      const cached = await GroceryProductModel.find({
+        $or: [
+          {
+            name: {
+              $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+              $options: "i",
+            },
           },
-        },
-        {
-          normalizedName: {
-            $regex: q.toLowerCase().replace(/\s+/g, ".*"),
-            $options: "i",
+          {
+            normalizedName: {
+              $regex: q.toLowerCase().replace(/\s+/g, ".*"),
+              $options: "i",
+            },
           },
-        },
-        { barcode: q },
-      ],
-    })
-      .limit(40)
-      .lean();
+          { barcode: q },
+        ],
+      })
+        .limit(40)
+        .lean();
 
-    for (const doc of cached) {
-      results.push({
-        id: String(doc._id),
-        name: doc.name,
-        brand: doc.brand ?? undefined,
-        barcode: doc.barcode ?? undefined,
-        store: doc.store as GroceryProduct["store"],
-        currentPrice: doc.currentPrice ?? undefined,
-        regularPrice: doc.regularPrice ?? undefined,
-        unitPrice: doc.unitPrice ?? undefined,
-        unitLabel: doc.unitLabel ?? undefined,
-        size: doc.size ?? undefined,
-        imageUrl: doc.imageUrl ?? undefined,
-        productUrl: doc.productUrl ?? undefined,
-        isOnSpecial: doc.isOnSpecial ?? false,
-        discountPercentage: doc.discountPercentage ?? undefined,
-        catalogueExpiresAt: doc.catalogueExpiresAt
-          ? new Date(doc.catalogueExpiresAt).toISOString()
-          : undefined,
-        lastUpdated: doc.lastSyncedAt
-          ? new Date(doc.lastSyncedAt).toISOString()
-          : new Date().toISOString(),
-        dataSource: "cached",
-        normalizedName: doc.normalizedName,
-        quantityGrams: doc.quantityGrams ?? undefined,
-        quantityMl: doc.quantityMl ?? undefined,
-        providerId: doc.providerId ?? undefined,
-      });
+      for (const doc of cached) {
+        results.push({
+          id: String(doc._id),
+          name: doc.name,
+          brand: doc.brand ?? undefined,
+          barcode: doc.barcode ?? undefined,
+          store: doc.store as GroceryProduct["store"],
+          currentPrice: doc.currentPrice ?? undefined,
+          regularPrice: doc.regularPrice ?? undefined,
+          unitPrice: doc.unitPrice ?? undefined,
+          unitLabel: doc.unitLabel ?? undefined,
+          size: doc.size ?? undefined,
+          imageUrl: doc.imageUrl ?? undefined,
+          productUrl: doc.productUrl ?? undefined,
+          isOnSpecial: doc.isOnSpecial ?? false,
+          discountPercentage: doc.discountPercentage ?? undefined,
+          catalogueExpiresAt: doc.catalogueExpiresAt
+            ? new Date(doc.catalogueExpiresAt).toISOString()
+            : undefined,
+          lastUpdated: doc.lastSyncedAt
+            ? new Date(doc.lastSyncedAt).toISOString()
+            : new Date().toISOString(),
+          dataSource: "cached",
+          normalizedName: doc.normalizedName,
+          quantityGrams: doc.quantityGrams ?? undefined,
+          quantityMl: doc.quantityMl ?? undefined,
+          providerId: doc.providerId ?? undefined,
+        });
+      }
+      if (cached.length > 0) sources.push("cached");
     }
-    if (cached.length > 0) sources.push("cached");
   } catch (err) {
     console.error("Grocery cache lookup failed:", err);
   }
@@ -216,39 +218,25 @@ export async function lookupBarcode(barcode: string): Promise<{
   };
 }
 
-/** Fill missing supermarket images from Open Food Facts barcode / name search. */
+/** Fill missing supermarket images from Open Food Facts barcode lookups only (fast path). */
 async function enrichMissingImages(
   products: GroceryProduct[]
 ): Promise<GroceryProduct[]> {
-  const needsImage = products.filter((p) => !p.imageUrl);
+  const needsImage = products.filter((p) => !p.imageUrl && p.barcode);
   if (needsImage.length === 0) return products;
 
   const imageByBarcode = new Map<string, string>();
-  const imageByName = new Map<string, string>();
 
   await Promise.all(
-    needsImage.slice(0, 8).map(async (product) => {
+    needsImage.slice(0, 4).map(async (product) => {
+      if (!product.barcode) return;
       try {
-        if (product.barcode) {
-          const off = await openFoodFactsProvider.getProductByBarcode(
-            product.barcode
-          );
-          if (off?.imageUrl) {
-            imageByBarcode.set(product.barcode, off.imageUrl);
-            return;
-          }
-        }
-        if (product.name) {
-          const hits = await openFoodFactsProvider.searchProducts(product.name);
-          const best = hits.find(
-            (h) =>
-              h.imageUrl &&
-              (isLikelySameProduct(product.name, h.name) ||
-                nameSimilarity(product.name, h.name) > 0.45)
-          );
-          if (best?.imageUrl) {
-            imageByName.set(product.normalizedName ?? product.name, best.imageUrl);
-          }
+        const off = await Promise.race([
+          openFoodFactsProvider.getProductByBarcode(product.barcode),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+        ]);
+        if (off?.imageUrl) {
+          imageByBarcode.set(product.barcode, off.imageUrl);
         }
       } catch {
         // Soft-fail image enrichment
@@ -256,14 +244,12 @@ async function enrichMissingImages(
     })
   );
 
+  if (imageByBarcode.size === 0) return products;
+
   return products.map((p) => {
-    if (p.imageUrl) return p;
-    const fromBarcode = p.barcode ? imageByBarcode.get(p.barcode) : undefined;
-    const fromName = imageByName.get(p.normalizedName ?? p.name);
-    if (fromBarcode || fromName) {
-      return { ...p, imageUrl: fromBarcode ?? fromName };
-    }
-    return p;
+    if (p.imageUrl || !p.barcode) return p;
+    const fromBarcode = imageByBarcode.get(p.barcode);
+    return fromBarcode ? { ...p, imageUrl: fromBarcode } : p;
   });
 }
 

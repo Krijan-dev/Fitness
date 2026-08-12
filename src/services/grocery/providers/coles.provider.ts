@@ -2,14 +2,20 @@ import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { mapRapidResult, mockGroceryProvider } from "./mock-grocery.provider";
 import { getColesApiKey } from "../credentials";
-import { browserJsonHeaders, isForbiddenStatus } from "../http-headers";
+import {
+  browserJsonHeaders,
+  isForbiddenStatus,
+  fetchWithTimeout,
+  DIRECT_STORE_TIMEOUT_MS,
+  RAPIDAPI_TIMEOUT_MS,
+} from "../http-headers";
 import { enrichGroceryProduct, asNumber, asString } from "../mappers";
 import { resolveProductImageUrl } from "../image-urls";
 
 /**
  * Coles provider (unofficial).
- * 1) Direct BFF search: https://www.coles.com.au/api/bff/products/search
- * 2) RapidAPI fallback on 403 / failure
+ * 1) Direct BFF search
+ * 2) RapidAPI fallback on block / empty / timeout
  * 3) Mock fallback
  */
 export class ColesProvider implements GroceryProvider {
@@ -51,14 +57,16 @@ export class ColesProvider implements GroceryProvider {
       const direct = await this.searchDirect(q);
       if (direct.length > 0) return direct;
     } catch (err) {
-      console.warn("Coles direct search failed:", err);
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn(`Coles direct search skipped: ${message}`);
     }
 
     if (this.rapidApiKey) {
       try {
         return await this.searchRapidApi(q);
       } catch (err) {
-        console.warn("Coles RapidAPI search failed:", err);
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn(`Coles RapidAPI search skipped: ${message}`);
       }
     }
 
@@ -78,29 +86,36 @@ export class ColesProvider implements GroceryProvider {
       origin: "https://www.coles.com.au",
     });
 
-    const url = new URL(
-      "https://www.coles.com.au/api/bff/products/search"
-    );
+    const url = new URL("https://www.coles.com.au/api/bff/products/search");
     url.searchParams.set("searchTerm", query);
     url.searchParams.set("storeId", process.env.COLES_STORE_ID || "0584");
     url.searchParams.set("limit", "24");
 
-    const res = await fetch(url.toString(), {
-      method: "GET",
-      headers,
-      next: { revalidate: 0 },
-    });
-
-    if (isForbiddenStatus(res.status)) {
-      throw new Error(`Coles direct search blocked (${res.status})`);
+    let res: Response;
+    try {
+      res = await fetchWithTimeout(
+        url.toString(),
+        { method: "GET", headers, next: { revalidate: 0 } },
+        DIRECT_STORE_TIMEOUT_MS
+      );
+    } catch (err) {
+      const aborted =
+        err instanceof Error &&
+        (err.name === "AbortError" || /aborted/i.test(err.message));
+      throw new Error(
+        aborted
+          ? `timed out after ${DIRECT_STORE_TIMEOUT_MS}ms`
+          : "network error"
+      );
     }
-    if (!res.ok) {
-      throw new Error(`Coles direct search failed (${res.status})`);
+
+    // Soft-fail blocked/empty responses — RapidAPI / mock handle fallback
+    if (isForbiddenStatus(res.status) || !res.ok) {
+      return [];
     }
 
     const body = (await res.json()) as Record<string, unknown>;
-    const rows = extractColesResults(body);
-    return rows.map((row) => mapColesBffProduct(row));
+    return extractColesResults(body).map((row) => mapColesBffProduct(row));
   }
 
   private async searchRapidApi(query: string): Promise<GroceryProduct[]> {
@@ -109,17 +124,21 @@ export class ColesProvider implements GroceryProvider {
     url.searchParams.set("page", "1");
     url.searchParams.set("size", "20");
 
-    const res = await fetch(url.toString(), {
-      headers: {
-        "Content-Type": "application/json",
-        "X-RapidAPI-Key": this.rapidApiKey!,
-        "X-RapidAPI-Host": this.rapidHost,
+    const res = await fetchWithTimeout(
+      url.toString(),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-RapidAPI-Key": this.rapidApiKey!,
+          "X-RapidAPI-Host": this.rapidHost,
+        },
+        next: { revalidate: 0 },
       },
-      next: { revalidate: 0 },
-    });
+      RAPIDAPI_TIMEOUT_MS
+    );
 
     if (!res.ok) {
-      throw new Error(`Coles RapidAPI search failed (${res.status})`);
+      throw new Error(`HTTP ${res.status}`);
     }
 
     const body = (await res.json()) as Record<string, unknown>;

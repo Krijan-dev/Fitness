@@ -2,6 +2,7 @@ import type { GroceryProduct } from "@/types/grocery";
 import type { GroceryProvider } from "./grocery-provider.interface";
 import { enrichGroceryProduct, asString } from "../mappers";
 import { resolveProductImageUrl } from "../image-urls";
+import { fetchWithTimeout } from "../http-headers";
 
 /**
  * Official Open Food Facts API — barcode metadata (not live shelf prices).
@@ -38,10 +39,14 @@ export class OpenFoodFactsProvider implements GroceryProvider {
     url.searchParams.set("json", "1");
     url.searchParams.set("page_size", "20");
 
-    const res = await fetch(url.toString(), {
-      headers: { "User-Agent": this.userAgent },
-      next: { revalidate: 3600 },
-    });
+    const res = await fetchWithTimeout(
+      url.toString(),
+      {
+        headers: { "User-Agent": this.userAgent },
+        next: { revalidate: 3600 },
+      },
+      4000
+    );
 
     if (!res.ok) {
       throw new Error(`Open Food Facts search failed (${res.status})`);
@@ -59,10 +64,14 @@ export class OpenFoodFactsProvider implements GroceryProvider {
     if (!code) return null;
 
     const url = `${this.baseUrl}/api/v2/product/${encodeURIComponent(code)}.json`;
-    const res = await fetch(url, {
-      headers: { "User-Agent": this.userAgent },
-      next: { revalidate: 3600 },
-    });
+    const res = await fetchWithTimeout(
+      url,
+      {
+        headers: { "User-Agent": this.userAgent },
+        next: { revalidate: 3600 },
+      },
+      3500
+    );
 
     if (!res.ok) return null;
 
