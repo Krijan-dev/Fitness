@@ -3,6 +3,7 @@ import { connectMongo } from "@/lib/mongodb";
 import { getSessionFromRequest, type PublicUser } from "@/lib/auth";
 import { User } from "@/models/User";
 import { jsonOk, jsonError, handleApiError } from "@/lib/api";
+import { getOnboardingCompleted } from "@/services/onboarding/onboarding.service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
       email: user.email,
       role: user.role as "user" | "admin",
       createdAt: user.createdAt?.toISOString?.(),
+      onboardingCompleted: await getOnboardingCompleted(user._id.toString()),
     };
 
     return jsonOk({ user: publicUser });

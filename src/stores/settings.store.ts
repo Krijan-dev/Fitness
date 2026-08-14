@@ -11,9 +11,7 @@ import {
 export const defaultSettings: UserSettings = {
   profile: {
     displayName: "User",
-    heightCm: 178,
-    currentWeightKg: 81.2,
-    targetWeightKg: 78,
+    onboardingCompleted: false,
   },
   nutritionGoals: {
     dailyCalorieGoal: DEFAULT_CALORIE_GOAL,

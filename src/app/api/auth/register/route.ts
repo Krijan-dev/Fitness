@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role as "user" | "admin",
       createdAt: user.createdAt?.toISOString?.(),
+      onboardingCompleted: false,
     };
 
     const response = jsonOk({ user: publicUser }, 201);

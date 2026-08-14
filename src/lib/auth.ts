@@ -25,6 +25,7 @@ export interface PublicUser {
   role: UserRole;
   createdAt?: string;
   disabled?: boolean;
+  onboardingCompleted?: boolean;
 }
 
 function getJwtSecret(): string {

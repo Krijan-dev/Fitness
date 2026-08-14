@@ -136,6 +136,21 @@ export const settingsSchema = z.object({
       heightCm: z.number().optional(),
       currentWeightKg: z.number().optional(),
       targetWeightKg: z.number().optional(),
+      startingWeightKg: z.number().optional(),
+      age: z.number().optional(),
+      gender: z.enum(["male", "female"]).optional(),
+      activityLevel: z
+        .enum([
+          "sedentary",
+          "lightly-active",
+          "moderately-active",
+          "very-active",
+        ])
+        .optional(),
+      goal: z.enum(["weight-loss", "maintain", "muscle-gain"]).optional(),
+      onboardingCompleted: z.boolean().optional(),
+      bmr: z.number().optional(),
+      tdee: z.number().optional(),
     })
     .optional(),
   nutritionGoals: z

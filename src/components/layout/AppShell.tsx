@@ -11,6 +11,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { SkipLink } from "./SkipLink";
 import { useAuthStore } from "@/stores/auth-store";
 import { SkeletonCard } from "@/components/ui/Skeleton";
+import { OnboardingGate } from "./OnboardingGate";
 
 interface AppShellProps {
   children: ReactNode;
@@ -23,6 +24,7 @@ export function AppShell({ children }: AppShellProps) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/forgot-password");
+  const isOnboardingRoute = pathname.startsWith("/onboarding");
   const isAdminRoute = pathname.startsWith("/admin");
 
   useEffect(() => {
@@ -33,12 +35,18 @@ export function AppShell({ children }: AppShellProps) {
 
   const hydrated = useStoreHydration();
 
-  if (isAuthRoute || isAdminRoute) {
-    return <>{children}</>;
+  if (isAuthRoute || isAdminRoute || isOnboardingRoute) {
+    return (
+      <>
+        <OnboardingGate />
+        {children}
+      </>
+    );
   }
 
   return (
     <div className="min-h-screen bg-background app-shell-bg">
+      <OnboardingGate />
       <SkipLink />
       <Sidebar />
       <div className="lg:pl-[19rem]">

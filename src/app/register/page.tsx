@@ -33,7 +33,7 @@ export default function RegisterPage() {
     try {
       await register({ name, email, password, confirmPassword });
       push("Account created successfully", "success");
-      window.location.assign("/dashboard");
+      window.location.assign("/onboarding");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     }

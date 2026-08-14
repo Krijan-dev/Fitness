@@ -10,6 +10,7 @@ import { User } from "@/models/User";
 import { loginSchema } from "@/lib/validations";
 import { jsonOk, handleApiError, jsonError } from "@/lib/api";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { getOnboardingCompleted } from "@/services/onboarding/onboarding.service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role as "user" | "admin",
       createdAt: user.createdAt?.toISOString?.(),
+      onboardingCompleted: await getOnboardingCompleted(user._id.toString()),
     };
 
     const response = jsonOk({ user: publicUser });
