@@ -85,12 +85,13 @@ export function DiscoverContent() {
         />
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {DISCOVER_FILTER_OPTIONS.map((option) => (
           <Button
             key={option.value}
             variant={filter === option.value ? "primary" : "secondary"}
             size="sm"
+            className="shrink-0"
             onClick={() => setFilter(option.value)}
           >
             {option.label}

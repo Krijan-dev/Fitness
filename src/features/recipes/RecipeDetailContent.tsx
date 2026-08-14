@@ -93,9 +93,9 @@ export function RecipeDetailContent({ id }: RecipeDetailContentProps) {
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           <div
-            className={`relative h-48 sm:h-64 rounded-xl bg-gradient-to-br ${placeholderGradient} flex items-center justify-center overflow-hidden`}
+            className={`relative flex h-52 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br sm:h-64 ${placeholderGradient}`}
           >
             {recipe.imageUrl ? (
               <Image
@@ -131,34 +131,6 @@ export function RecipeDetailContent({ id }: RecipeDetailContentProps) {
               {recipe.servings} servings · {recipe.servingSize}g each
             </span>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Ingredients</CardTitle>
-            </CardHeader>
-            <ul className="space-y-2">
-              {recipe.ingredients.map((ingredient) => (
-                <li
-                  key={ingredient.id}
-                  className="flex justify-between gap-4 rounded-lg border border-border px-3 py-2 text-sm"
-                >
-                  <span className="font-medium">{ingredient.name}</span>
-                  <span className="text-muted-foreground shrink-0">
-                    {ingredient.quantity} {ingredient.unit}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          {recipe.notes ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Notes</CardTitle>
-              </CardHeader>
-              <p className="text-sm text-muted-foreground">{recipe.notes}</p>
-            </Card>
-          ) : null}
         </div>
 
         <div className="space-y-4">
@@ -167,44 +139,6 @@ export function RecipeDetailContent({ id }: RecipeDetailContentProps) {
             nutrition={perServing}
             subtitle="Estimated nutrition per serving"
           />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Total recipe</CardTitle>
-            </CardHeader>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt className="text-muted-foreground">Calories</dt>
-                <dd className="font-semibold">
-                  {Math.round(recipe.totalNutrition.calories)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Protein</dt>
-                <dd className="font-semibold">
-                  {recipe.totalNutrition.protein.toFixed(1)}g
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Carbs</dt>
-                <dd className="font-semibold">
-                  {recipe.totalNutrition.carbs.toFixed(1)}g
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Fat</dt>
-                <dd className="font-semibold">
-                  {recipe.totalNutrition.fat.toFixed(1)}g
-                </dd>
-              </div>
-              {recipe.cookedWeight ? (
-                <div>
-                  <dt className="text-muted-foreground">Cooked weight</dt>
-                  <dd className="font-semibold">{recipe.cookedWeight}g</dd>
-                </div>
-              ) : null}
-            </dl>
-          </Card>
 
           <Card>
             <CardHeader>
@@ -281,6 +215,76 @@ export function RecipeDetailContent({ id }: RecipeDetailContentProps) {
                 Delete recipe
               </Button>
             </div>
+          </Card>
+        </div>
+
+        <div className="space-y-6 lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ingredients</CardTitle>
+            </CardHeader>
+            <ul className="space-y-2">
+              {recipe.ingredients.map((ingredient) => (
+                <li
+                  key={ingredient.id}
+                  className="flex justify-between gap-4 rounded-lg border border-border px-3 py-2 text-sm"
+                >
+                  <span className="min-w-0 break-words font-medium">{ingredient.name}</span>
+                  <span className="shrink-0 text-muted-foreground">
+                    {ingredient.quantity} {ingredient.unit}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          {recipe.notes ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Notes</CardTitle>
+              </CardHeader>
+              <p className="text-sm text-muted-foreground">{recipe.notes}</p>
+            </Card>
+          ) : null}
+        </div>
+
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Total recipe</CardTitle>
+            </CardHeader>
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-muted-foreground">Calories</dt>
+                <dd className="font-semibold">
+                  {Math.round(recipe.totalNutrition.calories)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Protein</dt>
+                <dd className="font-semibold">
+                  {recipe.totalNutrition.protein.toFixed(1)}g
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Carbs</dt>
+                <dd className="font-semibold">
+                  {recipe.totalNutrition.carbs.toFixed(1)}g
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Fat</dt>
+                <dd className="font-semibold">
+                  {recipe.totalNutrition.fat.toFixed(1)}g
+                </dd>
+              </div>
+              {recipe.cookedWeight ? (
+                <div>
+                  <dt className="text-muted-foreground">Cooked weight</dt>
+                  <dd className="font-semibold">{recipe.cookedWeight}g</dd>
+                </div>
+              ) : null}
+            </dl>
           </Card>
         </div>
       </div>

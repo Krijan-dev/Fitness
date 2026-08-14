@@ -61,10 +61,10 @@ export function Modal({
   return (
     <dialog
       ref={dialogRef}
-      className={`fixed inset-0 z-50 m-auto w-full ${sizeStyles[size]} rounded-xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/60 open:flex open:flex-col`}
+      className={`fixed inset-x-0 bottom-0 z-50 m-0 w-full max-h-[min(92dvh,100%)] overflow-hidden rounded-t-2xl border border-border bg-card p-0 text-foreground shadow-xl open:flex open:flex-col sm:inset-auto sm:m-auto sm:max-w-[calc(100%-2rem)] sm:rounded-xl ${sizeStyles[size]} backdrop:bg-black/60`}
       aria-labelledby="modal-title"
     >
-      <div className="flex items-start justify-between border-b border-border p-5">
+      <div className="flex items-start justify-between border-b border-border p-4 sm:p-5">
         <div>
           <h2 id="modal-title" className="text-lg font-semibold">{title}</h2>
           {description ? (
@@ -76,12 +76,12 @@ export function Modal({
           size="sm"
           onClick={onClose}
           aria-label="Close modal"
-          className="shrink-0"
+          className="h-11 w-11 shrink-0 p-0"
         >
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <div className="p-5">{children}</div>
+      <div className="overflow-y-auto p-4 sm:p-5">{children}</div>
     </dialog>
   );
 }

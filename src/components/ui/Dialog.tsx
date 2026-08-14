@@ -39,7 +39,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className={`w-[calc(100%-2rem)] ${sizeMap[size]} rounded-2xl border border-border bg-surface p-0 text-foreground shadow-soft backdrop:bg-black/60`}
+      className={`fixed inset-x-0 bottom-0 z-50 m-0 w-full max-h-[min(92dvh,100%)] overflow-y-auto rounded-t-2xl border border-border bg-surface p-0 text-foreground shadow-soft sm:inset-auto sm:m-auto sm:max-w-[calc(100%-2rem)] sm:rounded-2xl ${sizeMap[size]} backdrop:bg-black/60`}
       onClose={onClose}
       onClick={(e) => {
         if (e.target === ref.current) onClose();

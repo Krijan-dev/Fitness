@@ -16,7 +16,7 @@ export function PageHeader({ title, description, actions, eyebrow }: PageHeaderP
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
           {title}
         </h1>
         {description ? (
@@ -25,7 +25,11 @@ export function PageHeader({ title, description, actions, eyebrow }: PageHeaderP
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center [&_a]:w-full sm:[&_a]:w-auto [&_button]:w-full sm:[&_button]:w-auto">
+          {actions}
+        </div>
+      ) : null}
     </div>
   );
 }

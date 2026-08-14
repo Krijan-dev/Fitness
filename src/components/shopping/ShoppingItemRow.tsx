@@ -20,7 +20,7 @@ export function ShoppingItemRow({
 }: ShoppingItemRowProps) {
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+      className={`flex items-start gap-3 rounded-lg border px-3 py-3 transition-colors sm:items-center ${
         item.purchased
           ? "border-border/50 bg-muted/30 opacity-70"
           : "border-border"
@@ -30,7 +30,7 @@ export function ShoppingItemRow({
         type="checkbox"
         checked={item.purchased}
         onChange={() => onTogglePurchased(item)}
-        className="h-4 w-4 shrink-0 rounded border-border accent-primary"
+        className="mt-1 h-5 w-5 shrink-0 rounded border-border accent-primary sm:mt-0"
         aria-label={`Mark ${item.name} as purchased`}
       />
       <div className="min-w-0 flex-1">

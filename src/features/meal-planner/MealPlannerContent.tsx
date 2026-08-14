@@ -39,6 +39,12 @@ export function MealPlannerContent() {
   const recipes = useRecipeStore((s) => s.recipes);
   const addShoppingItem = useShoppingListStore((s) => s.addItem);
 
+  const [selectedDay, setSelectedDay] = useState(() => {
+    const weekday = new Date()
+      .toLocaleDateString("en-AU", { weekday: "long" })
+      .toLowerCase();
+    return PLANNER_DAYS.some((d) => d.value === weekday) ? weekday : "monday";
+  });
   const [addOpen, setAddOpen] = useState(false);
   const [clearWeekOpen, setClearWeekOpen] = useState(false);
   const [copyDayOpen, setCopyDayOpen] = useState(false);
@@ -96,6 +102,90 @@ export function MealPlannerContent() {
     });
   };
 
+  const renderDayCard = (day: (typeof PLANNER_DAYS)[number]) => (
+    <Card key={day.value} padding="sm" className="min-w-0">
+      <CardHeader className="mb-3">
+        <CardTitle className="text-sm">{day.label}</CardTitle>
+      </CardHeader>
+      <div className="space-y-3">
+        {PLANNER_MEAL_SLOTS.map((slot) => {
+          const slotMeals =
+            mealsByDay[day.value]?.filter((m) => m.mealType === slot.type) ??
+            [];
+          return (
+            <div key={slot.type}>
+              <p className="mb-1 text-xs font-medium text-muted-foreground">
+                {slot.label}
+              </p>
+              {slotMeals.length === 0 ? (
+                <p className="text-xs text-muted-foreground/70">—</p>
+              ) : (
+                <ul className="space-y-2">
+                  {slotMeals.map((meal) => (
+                    <li
+                      key={meal.id}
+                      className="rounded-lg border border-border p-2 text-sm"
+                    >
+                      <p className="truncate font-medium">{meal.recipeName}</p>
+                      <div className="mt-1 flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min={1}
+                          value={meal.servings}
+                          onChange={(e) =>
+                            handleServingsChange(
+                              meal,
+                              Math.max(1, parseNumericInput(e.target.value))
+                            )
+                          }
+                          className="h-10 !py-1 sm:h-8"
+                          aria-label="Servings"
+                        />
+                        <span className="text-muted-foreground">srv</span>
+                      </div>
+                      <p className="mt-1 text-muted-foreground">
+                        {Math.round(meal.nutrition.calories)} cal
+                      </p>
+                      <div className="mt-2 flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 px-3"
+                          onClick={() => {
+                            setMoveMeal(meal);
+                            setMoveToDay(meal.day);
+                          }}
+                        >
+                          Move
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 px-3"
+                          onClick={() => removePlannedMeal(meal.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="mt-3 w-full"
+        onClick={() => clearDay(day.value)}
+      >
+        Clear day
+      </Button>
+    </Card>
+  );
+
   return (
     <>
       <PageHeader
@@ -138,90 +228,36 @@ export function MealPlannerContent() {
         </Button>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-7">
-        {PLANNER_DAYS.map((day) => (
-          <Card key={day.value} padding="sm" className="min-w-0">
-            <CardHeader className="mb-3">
-              <CardTitle className="text-sm">{day.label}</CardTitle>
-            </CardHeader>
-            <div className="space-y-3">
-              {PLANNER_MEAL_SLOTS.map((slot) => {
-                const slotMeals = mealsByDay[day.value]?.filter(
-                  (m) => m.mealType === slot.type
-                ) ?? [];
-                return (
-                  <div key={slot.type}>
-                    <p className="mb-1 text-xs font-medium text-muted-foreground">
-                      {slot.label}
-                    </p>
-                    {slotMeals.length === 0 ? (
-                      <p className="text-xs text-muted-foreground/70">—</p>
-                    ) : (
-                      <ul className="space-y-2">
-                        {slotMeals.map((meal) => (
-                          <li
-                            key={meal.id}
-                            className="rounded-lg border border-border p-2 text-xs"
-                          >
-                            <p className="font-medium truncate">{meal.recipeName}</p>
-                            <div className="mt-1 flex items-center gap-1">
-                              <Input
-                                type="number"
-                                min={1}
-                                value={meal.servings}
-                                onChange={(e) =>
-                                  handleServingsChange(
-                                    meal,
-                                    Math.max(1, parseNumericInput(e.target.value))
-                                  )
-                                }
-                                className="!py-1 text-xs h-8"
-                                aria-label="Servings"
-                              />
-                              <span className="text-muted-foreground">srv</span>
-                            </div>
-                            <p className="mt-1 text-muted-foreground">
-                              {Math.round(meal.nutrition.calories)} cal
-                            </p>
-                            <div className="mt-2 flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2"
-                                onClick={() => {
-                                  setMoveMeal(meal);
-                                  setMoveToDay(meal.day);
-                                }}
-                              >
-                                Move
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2"
-                                onClick={() => removePlannedMeal(meal.id)}
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-3 w-full"
-              onClick={() => clearDay(day.value)}
+      <div className="-mx-1 mb-3 flex gap-1 overflow-x-auto px-1 pb-1 lg:hidden">
+        {PLANNER_DAYS.map((day) => {
+          const isSelected = selectedDay === day.value;
+          const count = mealsByDay[day.value]?.length ?? 0;
+          return (
+            <button
+              key={day.value}
+              type="button"
+              onClick={() => setSelectedDay(day.value)}
+              className={`shrink-0 rounded-full px-3 py-2 text-sm font-medium transition-colors ${
+                isSelected
+                  ? "bg-emerald-600 text-white"
+                  : "bg-muted text-foreground"
+              }`}
             >
-              Clear day
-            </Button>
-          </Card>
-        ))}
+              {day.label.slice(0, 3)}
+              {count > 0 ? ` · ${count}` : ""}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="lg:hidden">
+        {PLANNER_DAYS.filter((day) => day.value === selectedDay).map(
+          renderDayCard
+        )}
+      </div>
+
+      <div className="hidden gap-4 lg:grid lg:grid-cols-7">
+        {PLANNER_DAYS.map(renderDayCard)}
       </div>
 
       <AddPlannedMealModal

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { ThemeApplier } from "@/components/layout/ThemeApplier";
@@ -15,6 +15,25 @@ export const metadata: Metadata = {
   title: "MealPrep Pro",
   description:
     "Calculate nutrition, plan meals, track calories, and optimise your grocery shopping.",
+  appleWebApp: {
+    capable: true,
+    title: "MealPrep Pro",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
+  ],
 };
 
 export default function RootLayout({

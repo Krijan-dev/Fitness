@@ -116,7 +116,7 @@ export function PasswordInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
-          className={`w-full rounded-xl border border-border bg-card px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+          className={`w-full rounded-xl border border-border bg-card px-3 py-3 pr-10 text-base text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:py-2.5 sm:text-sm ${
             error ? "border-destructive" : ""
           }`}
         />

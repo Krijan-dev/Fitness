@@ -58,7 +58,7 @@ export function PriceOptionRow({
               Best Price
             </span>
           ) : null}
-          <span className="text-sm font-semibold text-slate-900">
+          <span className="break-words text-sm font-semibold text-slate-900">
             {price.productName}
           </span>
           {price.isOnSpecial ? (

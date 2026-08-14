@@ -45,7 +45,7 @@ export function AppShell({ children }: AppShellProps) {
         <TopBar />
         <main
           id="main-content"
-          className="mx-auto max-w-6xl px-4 py-8 pb-28 lg:px-8 lg:pb-10"
+          className="mx-auto w-full max-w-6xl overflow-x-clip px-3 py-5 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:px-4 sm:py-8 lg:px-8 lg:pb-10"
         >
           {!hydrated ? (
             <div className="grid gap-4 sm:grid-cols-2">

@@ -186,7 +186,7 @@ export function PriceComparisonContent() {
               Prices use your saved location ({location}).
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground">
+          <div className="hidden items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground sm:inline-flex">
             <MapPin className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
             <label htmlFor="price-location" className="sr-only">
               Location
@@ -216,14 +216,14 @@ export function PriceComparisonContent() {
               value={manualQuery}
               onChange={(e) => setManualQuery(e.target.value)}
               placeholder="Search e.g. greek yoghurt, chicken breast…"
-              className="w-full rounded-xl border border-border bg-muted/80 py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-text-muted transition-all focus:border-emerald-500 focus:bg-card focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full rounded-xl border border-border bg-muted/80 py-3 pl-10 pr-4 text-base text-foreground placeholder:text-text-muted transition-all focus:border-emerald-500 focus:bg-card focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:text-sm"
               onKeyDown={(e) => {
                 if (e.key === "Enter") void searchManual();
               }}
             />
           </div>
           <Button
-            className="rounded-xl px-6"
+            className="w-full rounded-xl px-6 sm:w-auto"
             onClick={() => void searchManual()}
             disabled={manualLoading}
           >

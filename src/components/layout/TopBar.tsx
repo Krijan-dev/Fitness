@@ -1,45 +1,72 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Settings } from "lucide-react";
+import { Menu, Settings, LogOut, Shield, X } from "lucide-react";
 import { APP_NAME, NAV_GROUPS, getNavLabelForPath } from "@/utils/constants";
 import { Button } from "@/components/common/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { navIconMap } from "./nav-icons";
 import { usePathname } from "next/navigation";
+import { useAuthStore } from "@/stores/auth-store";
 
 export function TopBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const pageTitle = getNavLabelForPath(pathname);
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-4 lg:px-8">
-        <div className="flex items-center gap-3 lg:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-border bg-background/80 px-3 backdrop-blur-xl safe-area-pt sm:h-16 sm:px-4 lg:px-8">
+        <div className="flex min-w-0 items-center gap-2 lg:hidden">
           <Button
             variant="ghost"
             size="sm"
+            className="h-11 w-11 shrink-0 p-0"
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="font-semibold text-foreground truncate">
+          <span className="truncate font-semibold text-foreground">
             {pageTitle}
           </span>
         </div>
-        <div className="hidden lg:block min-w-0">
+        <div className="hidden min-w-0 lg:block">
           <p className="text-sm font-medium text-foreground">{pageTitle}</p>
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="truncate text-xs text-muted-foreground">
             {pathname === "/dashboard"
               ? "Your nutrition and meal prep at a glance"
               : APP_NAME}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1">
           <Link href="/settings">
-            <Button variant="ghost" size="sm" aria-label="Settings">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-11 w-11 p-0"
+              aria-label="Settings"
+            >
               <Settings className="h-5 w-5" />
             </Button>
           </Link>
@@ -58,19 +85,20 @@ export function TopBar() {
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-card border-r border-border p-5 shadow-xl">
-            <div className="mb-6 flex items-center justify-between">
+          <div className="absolute bottom-0 left-0 top-0 flex w-80 max-w-[min(85vw,22rem)] flex-col border-r border-border bg-card shadow-xl safe-area-pt">
+            <div className="mb-2 flex items-center justify-between px-5 pt-5">
               <span className="font-semibold">{APP_NAME}</span>
               <Button
                 variant="ghost"
                 size="sm"
+                className="h-11 w-11 p-0"
                 onClick={() => setMenuOpen(false)}
                 aria-label="Close menu"
               >
-                ✕
+                <X className="h-5 w-5" />
               </Button>
             </div>
-            <nav className="space-y-6">
+            <nav className="flex-1 space-y-6 overflow-y-auto px-5 pb-4">
               {NAV_GROUPS.map((group) => (
                 <div key={group.label}>
                   <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -89,13 +117,13 @@ export function TopBar() {
                           <Link
                             href={item.href}
                             onClick={() => setMenuOpen(false)}
-                            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                            className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                               isActive
                                 ? "bg-emerald-50 text-emerald-700"
                                 : "text-muted-foreground hover:bg-muted"
                             }`}
                           >
-                            <Icon className="h-5 w-5" />
+                            <Icon className="h-5 w-5 shrink-0" />
                             {item.label}
                           </Link>
                         </li>
@@ -105,6 +133,42 @@ export function TopBar() {
                 </div>
               ))}
             </nav>
+            <div className="space-y-3 border-t border-border p-4 safe-area-pb">
+              {user ? (
+                <div className="rounded-2xl border border-border bg-muted/70 px-3 py-3">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {user.name}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </p>
+                  {user.role === "admin" ? (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 hover:underline"
+                    >
+                      <Shield className="h-3.5 w-3.5" />
+                      Admin portal
+                    </Link>
+                  ) : null}
+                </div>
+              ) : null}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setMenuOpen(false);
+                  void logout().then(() => {
+                    window.location.href = "/login";
+                  });
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Log out
+              </Button>
+            </div>
           </div>
         </div>
       ) : null}

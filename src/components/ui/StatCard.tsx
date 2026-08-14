@@ -30,8 +30,8 @@ export function StatCard({
         <div className="min-w-0">
           <p className="text-sm text-muted-foreground">{label}</p>
           <p
-            className={`mt-1.5 font-semibold tracking-tight tabular-nums ${
-              compact ? "text-xl" : "text-3xl"
+            className={`mt-1.5 break-words font-semibold tracking-tight tabular-nums ${
+              compact ? "text-xl" : "text-2xl sm:text-3xl"
             }`}
           >
             {value}
