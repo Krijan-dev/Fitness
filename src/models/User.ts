@@ -1,5 +1,7 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
 
+const BCRYPT_HASH = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+
 const userSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -18,6 +20,30 @@ const userSchema = new Schema(
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 );
+
+userSchema.pre("save", function refusePlaintextPassword(next) {
+  const doc = this as {
+    password?: unknown;
+    passwordHash?: string;
+    isModified: (path: string) => boolean;
+  };
+  if ("password" in doc) {
+    delete doc.password;
+  }
+  if (doc.isModified("passwordHash") && doc.passwordHash && !BCRYPT_HASH.test(doc.passwordHash)) {
+    next(new Error("Refusing to store a non-bcrypt password hash"));
+    return;
+  }
+  next();
+});
+
+userSchema.set("toJSON", {
+  transform(_doc, ret: Record<string, unknown>) {
+    delete ret.passwordHash;
+    delete ret.password;
+    return ret;
+  },
+});
 
 export type UserDocument = InferSchemaType<typeof userSchema> & {
   _id: mongoose.Types.ObjectId;

@@ -3,11 +3,22 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
 
 export const AUTH_COOKIE = "mealprep_token";
 export const JWT_EXPIRES_IN = "7d";
 export const JWT_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 export const BCRYPT_ROUNDS = 12;
+
+/** Dummy bcrypt hash used so missing users still pay for bcrypt.compare (user enumeration). */
+export const DUMMY_PASSWORD_HASH =
+  "$2b$12$VPz.JFgRYNSnqI.lPl2LgObr7O6I00mh4dLUP0WyqNVClB7ETi1me";
+
+const BCRYPT_HASH = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+
+export function isBcryptHash(value: string | undefined | null): value is string {
+  return Boolean(value && BCRYPT_HASH.test(value));
+}
 
 export type UserRole = "user" | "admin";
 
@@ -29,7 +40,7 @@ export interface PublicUser {
 }
 
 function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET;
+  const secret = env.JWT_SECRET || process.env.JWT_SECRET;
   if (!secret) {
     throw new Error("JWT_SECRET is not defined");
   }
@@ -37,14 +48,19 @@ function getJwtSecret(): string {
 }
 
 export async function hashPassword(password: string): Promise<string> {
+  if (!password) {
+    throw new Error("Password is required");
+  }
   return bcrypt.hash(password, BCRYPT_ROUNDS);
 }
 
+/** Constant-time bcrypt comparison (bcrypt.compare). */
 export async function verifyPassword(
   password: string,
   passwordHash: string
 ): Promise<boolean> {
-  return bcrypt.compare(password, passwordHash);
+  const hash = isBcryptHash(passwordHash) ? passwordHash : DUMMY_PASSWORD_HASH;
+  return bcrypt.compare(password, hash);
 }
 
 export function signToken(payload: JwtPayload): string {

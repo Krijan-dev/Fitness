@@ -1,3 +1,4 @@
+import "./env.mjs";
 import type { NextConfig } from "next";
 
 const groceryImageHosts = [

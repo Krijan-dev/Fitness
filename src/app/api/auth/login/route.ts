@@ -4,6 +4,8 @@ import {
   verifyPassword,
   signToken,
   setAuthCookie,
+  DUMMY_PASSWORD_HASH,
+  isBcryptHash,
   type PublicUser,
 } from "@/lib/auth";
 import { User } from "@/models/User";
@@ -29,7 +31,12 @@ export async function POST(request: NextRequest) {
       "+passwordHash name email role disabled createdAt"
     );
 
-    if (!user || !(await verifyPassword(data.password, user.passwordHash))) {
+    const storedHash = isBcryptHash(user?.passwordHash)
+      ? user!.passwordHash
+      : DUMMY_PASSWORD_HASH;
+    const passwordOk = await verifyPassword(data.password, storedHash);
+
+    if (!user || !passwordOk) {
       return jsonError("Invalid email or password", 401);
     }
 

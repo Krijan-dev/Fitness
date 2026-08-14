@@ -1,4 +1,46 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
+import {
+  applyFieldEncryption,
+  metricFieldAccessors,
+} from "@/lib/encrypted-metrics";
+
+const encryptedMetric = {
+  type: Schema.Types.Mixed,
+  ...metricFieldAccessors(),
+};
+
+const profileSchema = new Schema(
+  {
+    displayName: String,
+    heightCm: { ...encryptedMetric },
+    currentWeightKg: { ...encryptedMetric },
+    targetWeightKg: { ...encryptedMetric },
+    startingWeightKg: { ...encryptedMetric },
+    age: { ...encryptedMetric },
+    gender: { type: String, enum: ["male", "female"] },
+    activityLevel: {
+      type: String,
+      enum: [
+        "sedentary",
+        "lightly-active",
+        "moderately-active",
+        "very-active",
+      ],
+    },
+    goal: {
+      type: String,
+      enum: ["weight-loss", "maintain", "muscle-gain"],
+    },
+    onboardingCompleted: { type: Boolean, default: false },
+    bmr: Number,
+    tdee: Number,
+  },
+  {
+    _id: false,
+    toJSON: { getters: true },
+    toObject: { getters: true },
+  }
+);
 
 const userSettingsSchema = new Schema(
   {
@@ -35,29 +77,8 @@ const userSettingsSchema = new Schema(
       postcode: { type: String, default: "2600" },
     },
     profile: {
-      displayName: String,
-      heightCm: Number,
-      currentWeightKg: Number,
-      targetWeightKg: Number,
-      startingWeightKg: Number,
-      age: Number,
-      gender: { type: String, enum: ["male", "female"] },
-      activityLevel: {
-        type: String,
-        enum: [
-          "sedentary",
-          "lightly-active",
-          "moderately-active",
-          "very-active",
-        ],
-      },
-      goal: {
-        type: String,
-        enum: ["weight-loss", "maintain", "muscle-gain"],
-      },
-      onboardingCompleted: { type: Boolean, default: false },
-      bmr: Number,
-      tdee: Number,
+      type: profileSchema,
+      default: {},
     },
     priceSelections: {
       type: Map,
@@ -65,8 +86,14 @@ const userSettingsSchema = new Schema(
       default: {},
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { getters: true },
+    toObject: { getters: true },
+  }
 );
+
+applyFieldEncryption(userSettingsSchema);
 
 export type UserSettingsDocument = InferSchemaType<typeof userSettingsSchema> & {
   _id: mongoose.Types.ObjectId;

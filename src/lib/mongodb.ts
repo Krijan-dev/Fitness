@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { getMongoUri, mongoConnectionOptions } from "@/lib/mongo-tls";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -16,21 +17,17 @@ const cached: MongooseCache = global.mongooseCache ?? {
 
 global.mongooseCache = cached;
 
+export { getMongoUri, mongoConnectionOptions } from "@/lib/mongo-tls";
+
 export async function connectMongo(): Promise<typeof mongoose> {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    throw new Error("MONGODB_URI is not defined");
-  }
+  const uri = getMongoUri();
 
   if (cached.conn) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(uri, {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 10000,
-    });
+    cached.promise = mongoose.connect(uri, mongoConnectionOptions(uri));
   }
 
   cached.conn = await cached.promise;
