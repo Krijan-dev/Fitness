@@ -13,6 +13,7 @@ export function useStoreHydration(): boolean {
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/onboarding") ||
     pathname.startsWith("/admin");
   const [isReady, setIsReady] = useState(skip);
 

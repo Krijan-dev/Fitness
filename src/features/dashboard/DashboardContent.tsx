@@ -32,6 +32,7 @@ import { useMealPlannerStore } from "@/stores/meal-planner.store";
 import { formatDate } from "@/utils/date";
 import { calculateWeeklyWeightChange } from "@/utils/calculations";
 import { formatCurrency } from "@/utils/currency";
+import { DailyTargetsSummary } from "@/components/dashboard/DailyTargetsSummary";
 
 const quickActions = [
   { label: "Calculate meal", href: "/meal-calculator", icon: Calculator },
@@ -95,6 +96,11 @@ export function DashboardContent() {
       <PageHeader
         title="Dashboard"
         description="Your nutrition, meal prep, and progress at a glance."
+      />
+
+      <DailyTargetsSummary
+        settings={settings}
+        currentWeightKg={currentWeight || undefined}
       />
 
       <PageSection title="Today">

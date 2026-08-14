@@ -28,8 +28,12 @@ export default function LoginPage() {
       await login(email, password);
       push("Welcome back!", "success");
       const role = useAuthStore.getState().user?.role;
-      // Admins go straight to the admin portal — never the user app
-      window.location.assign(role === "admin" ? "/admin" : "/dashboard");
+      const onboarded = useAuthStore.getState().user?.onboardingCompleted;
+      if (role === "admin") {
+        window.location.assign("/admin");
+        return;
+      }
+      window.location.assign(onboarded ? "/dashboard" : "/onboarding");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     }

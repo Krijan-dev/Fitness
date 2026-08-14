@@ -39,6 +39,25 @@ const userSettingsSchema = new Schema(
       heightCm: Number,
       currentWeightKg: Number,
       targetWeightKg: Number,
+      startingWeightKg: Number,
+      age: Number,
+      gender: { type: String, enum: ["male", "female"] },
+      activityLevel: {
+        type: String,
+        enum: [
+          "sedentary",
+          "lightly-active",
+          "moderately-active",
+          "very-active",
+        ],
+      },
+      goal: {
+        type: String,
+        enum: ["weight-loss", "maintain", "muscle-gain"],
+      },
+      onboardingCompleted: { type: Boolean, default: false },
+      bmr: Number,
+      tdee: Number,
     },
     priceSelections: {
       type: Map,

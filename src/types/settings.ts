@@ -1,5 +1,10 @@
 import type { NutritionGoals } from "./nutrition";
 import type { ThemeMode, UnitSystem } from "./common";
+import type {
+  ActivityLevel,
+  BiologicalSex,
+  NutritionGoal,
+} from "./onboarding";
 
 export interface LocationSettings {
   country: string;
@@ -13,6 +18,14 @@ export interface ProfileSettings {
   heightCm?: number;
   currentWeightKg?: number;
   targetWeightKg?: number;
+  startingWeightKg?: number;
+  age?: number;
+  gender?: BiologicalSex;
+  activityLevel?: ActivityLevel;
+  goal?: NutritionGoal;
+  onboardingCompleted?: boolean;
+  bmr?: number;
+  tdee?: number;
 }
 
 export interface UserSettings {

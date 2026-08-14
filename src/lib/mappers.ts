@@ -110,9 +110,6 @@ export function toClientSettings(doc: UserSettingsDocument | null): UserSettings
   const defaults: UserSettings = {
     profile: {
       displayName: "User",
-      heightCm: 178,
-      currentWeightKg: 81.2,
-      targetWeightKg: 78,
     },
     nutritionGoals: {
       dailyCalorieGoal: 2200,
@@ -144,14 +141,35 @@ export function toClientSettings(doc: UserSettingsDocument | null): UserSettings
     }
   }
 
+  const profileDoc = doc.profile as
+    | (NonNullable<UserSettingsDocument["profile"]> & {
+        startingWeightKg?: number;
+        age?: number;
+        gender?: string;
+        activityLevel?: string;
+        goal?: string;
+        onboardingCompleted?: boolean;
+        bmr?: number;
+        tdee?: number;
+      })
+    | undefined;
+
   return {
     profile: {
-      displayName: doc.profile?.displayName ?? defaults.profile.displayName,
-      heightCm: doc.profile?.heightCm ?? defaults.profile.heightCm,
-      currentWeightKg:
-        doc.profile?.currentWeightKg ?? defaults.profile.currentWeightKg,
-      targetWeightKg:
-        doc.profile?.targetWeightKg ?? defaults.profile.targetWeightKg,
+      displayName: profileDoc?.displayName ?? defaults.profile.displayName,
+      heightCm: profileDoc?.heightCm ?? undefined,
+      currentWeightKg: profileDoc?.currentWeightKg ?? undefined,
+      targetWeightKg: profileDoc?.targetWeightKg ?? undefined,
+      startingWeightKg: profileDoc?.startingWeightKg ?? undefined,
+      age: profileDoc?.age ?? undefined,
+      gender: (profileDoc?.gender as UserSettings["profile"]["gender"]) ?? undefined,
+      activityLevel:
+        (profileDoc?.activityLevel as UserSettings["profile"]["activityLevel"]) ??
+        undefined,
+      goal: (profileDoc?.goal as UserSettings["profile"]["goal"]) ?? undefined,
+      onboardingCompleted: Boolean(profileDoc?.onboardingCompleted),
+      bmr: profileDoc?.bmr ?? undefined,
+      tdee: profileDoc?.tdee ?? undefined,
     },
     nutritionGoals: {
       dailyCalorieGoal: doc.calorieGoal ?? defaults.nutritionGoals.dailyCalorieGoal,
@@ -167,7 +185,6 @@ export function toClientSettings(doc: UserSettingsDocument | null): UserSettings
       postcode: doc.location?.postcode || defaults.location.postcode,
     },
     theme: (doc.theme as ThemeMode) || defaults.theme,
-    // priceSelections are synced separately via settings API
     ...(Object.keys(priceSelections).length
       ? ({ priceSelections } as unknown as object)
       : {}),

@@ -24,7 +24,7 @@ const USER_APP_PREFIXES = [
   "/settings",
 ];
 
-const PROTECTED_PREFIXES = [...USER_APP_PREFIXES, "/admin"];
+const PROTECTED_PREFIXES = [...USER_APP_PREFIXES, "/admin", "/onboarding"];
 
 const AUTH_PAGES = ["/login", "/register", "/forgot-password"];
 
@@ -141,6 +141,8 @@ export const config = {
     "/weight-tracker/:path*",
     "/weight/:path*",
     "/settings/:path*",
+    "/onboarding",
+    "/onboarding/:path*",
     "/admin",
     "/admin/:path*",
     "/login",

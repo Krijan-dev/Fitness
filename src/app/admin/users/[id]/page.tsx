@@ -281,6 +281,18 @@ export default function AdminUserDetailPage() {
             value={String(data.settings.nutritionGoals.dailyProteinGoal)}
           />
           <Item
+            label="Age / sex"
+            value={
+              data.settings.profile.age
+                ? `${data.settings.profile.age} · ${data.settings.profile.gender ?? "—"}`
+                : "—"
+            }
+          />
+          <Item
+            label="Goal"
+            value={data.settings.profile.goal ?? "—"}
+          />
+          <Item
             label="Location"
             value={`${data.settings.location.city}, ${data.settings.location.state}`}
           />

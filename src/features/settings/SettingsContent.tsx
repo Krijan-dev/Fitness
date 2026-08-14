@@ -32,6 +32,18 @@ import {
   clearAllAppData,
   downloadJsonExport,
 } from "@/services/data/export-import.service";
+import { onboardingSchema } from "@/lib/onboarding-schema";
+import { apiSend } from "@/lib/api-client";
+import {
+  ACTIVITY_HINTS,
+  ACTIVITY_LABELS,
+  GOAL_LABELS,
+  type ActivityLevel,
+  type BiologicalSex,
+  type NutritionGoal,
+} from "@/types/onboarding";
+import type { UserSettings } from "@/types/settings";
+import type { NutritionTargets } from "@/types/onboarding";
 
 export function SettingsContent() {
   const settings = useSettingsStore((s) => s.settings);
@@ -56,6 +68,7 @@ export function SettingsContent() {
   const [resetAllOpen, setResetAllOpen] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [recalculating, setRecalculating] = useState(false);
 
   const showMessage = (message: string) => {
     setActionMessage(message);
@@ -93,6 +106,41 @@ export function SettingsContent() {
     }
 
     e.target.value = "";
+  };
+
+  const handleRecalculateTargets = async () => {
+    const parsed = onboardingSchema.safeParse({
+      age: settings.profile.age,
+      gender: settings.profile.gender,
+      heightCm: settings.profile.heightCm,
+      currentWeightKg: settings.profile.currentWeightKg,
+      targetWeightKg: settings.profile.targetWeightKg,
+      goal: settings.profile.goal,
+      activityLevel: settings.profile.activityLevel,
+    });
+    if (!parsed.success) {
+      setImportError(null);
+      setActionMessage(null);
+      setImportError(
+        "Add age, biological sex, height, weights, goal, and activity level, then recalculate."
+      );
+      return;
+    }
+    setRecalculating(true);
+    setImportError(null);
+    try {
+      const res = await apiSend<{
+        data: { settings: UserSettings; targets: NutritionTargets };
+      }>("/api/onboarding", "POST", parsed.data);
+      updateSettings(res.data.settings);
+      showMessage("Daily calorie and macro targets recalculated.");
+    } catch (err) {
+      setImportError(
+        err instanceof Error ? err.message : "Could not recalculate targets."
+      );
+    } finally {
+      setRecalculating(false);
+    }
   };
 
   const handleClearFeature = () => {
@@ -161,7 +209,9 @@ export function SettingsContent() {
         <Card>
           <CardHeader>
             <CardTitle>Profile</CardTitle>
-            <CardDescription>Used for BMI and weight progress tracking.</CardDescription>
+            <CardDescription>
+              Used for Mifflin–St Jeor calorie targets, BMI, and weight progress.
+            </CardDescription>
           </CardHeader>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
@@ -169,6 +219,34 @@ export function SettingsContent() {
               value={settings.profile.displayName ?? ""}
               onChange={(e) =>
                 updateProfile({ displayName: e.target.value || undefined })
+              }
+            />
+            <Input
+              label="Age (years)"
+              type="number"
+              min={13}
+              max={100}
+              value={settings.profile.age ?? ""}
+              onChange={(e) =>
+                updateProfile({
+                  age: e.target.value
+                    ? parseNumericInput(e.target.value)
+                    : undefined,
+                })
+              }
+            />
+            <Select
+              label="Biological sex"
+              value={settings.profile.gender ?? ""}
+              options={[
+                { value: "", label: "Select…" },
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+              ]}
+              onChange={(e) =>
+                updateProfile({
+                  gender: (e.target.value || undefined) as BiologicalSex | undefined,
+                })
               }
             />
             <Input
@@ -212,13 +290,60 @@ export function SettingsContent() {
                 })
               }
             />
+            <Select
+              label="Primary goal"
+              value={settings.profile.goal ?? ""}
+              options={[
+                { value: "", label: "Select…" },
+                ...(Object.keys(GOAL_LABELS) as NutritionGoal[]).map((value) => ({
+                  value,
+                  label: GOAL_LABELS[value],
+                })),
+              ]}
+              onChange={(e) =>
+                updateProfile({
+                  goal: (e.target.value || undefined) as NutritionGoal | undefined,
+                })
+              }
+            />
+            <Select
+              label="Activity level"
+              value={settings.profile.activityLevel ?? ""}
+              options={[
+                { value: "", label: "Select…" },
+                ...(Object.keys(ACTIVITY_LABELS) as ActivityLevel[]).map(
+                  (value) => ({
+                    value,
+                    label: `${ACTIVITY_LABELS[value]} (${ACTIVITY_HINTS[value]})`,
+                  })
+                ),
+              ]}
+              onChange={(e) =>
+                updateProfile({
+                  activityLevel: (e.target.value || undefined) as
+                    | ActivityLevel
+                    | undefined,
+                })
+              }
+            />
+          </div>
+          <div className="mt-4">
+            <Button
+              type="button"
+              onClick={() => void handleRecalculateTargets()}
+              isLoading={recalculating}
+            >
+              Recalculate daily targets
+            </Button>
           </div>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Nutrition goals</CardTitle>
-            <CardDescription>Daily targets for the tracker and dashboard.</CardDescription>
+            <CardDescription>
+              Filled automatically from your profile. You can still override them.
+            </CardDescription>
           </CardHeader>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
