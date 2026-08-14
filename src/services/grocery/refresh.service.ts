@@ -8,6 +8,7 @@ import {
   aldiApifyProvider,
   mockGroceryProvider,
 } from "./providers";
+import { syncAldiCatalogueFromApify } from "./aldi-catalogue.service";
 import { normalizeProductName, nextWednesdayDate } from "./normalizer";
 import type { GroceryProduct } from "@/types/grocery";
 import type { GrocerySyncStatus } from "@/types/grocery";
@@ -36,10 +37,9 @@ export async function getGrocerySyncStatus(): Promise<GrocerySyncStatus> {
     lastSyncedAt: meta?.lastSyncedAt
       ? new Date(meta.lastSyncedAt).toISOString()
       : null,
-    nextWednesdayRefreshAt:
-      meta?.nextWednesdayRefreshAt
-        ? new Date(meta.nextWednesdayRefreshAt).toISOString()
-        : next.toISOString(),
+    nextWednesdayRefreshAt: meta?.nextWednesdayRefreshAt
+      ? new Date(meta.nextWednesdayRefreshAt).toISOString()
+      : next.toISOString(),
     providers: (meta?.providers ?? []).map((p) => ({
       name: p.name,
       status: p.status as "ok" | "skipped" | "error",
@@ -52,6 +52,8 @@ export async function getGrocerySyncStatus(): Promise<GrocerySyncStatus> {
 export async function runWeeklyGroceryRefresh(options?: {
   queries?: string[];
   triggeredBy?: string;
+  /** Force ALDI Apify re-download even if catalogue is still fresh */
+  forceAldi?: boolean;
 }): Promise<GrocerySyncStatus> {
   await connectMongo();
 
@@ -61,6 +63,7 @@ export async function runWeeklyGroceryRefresh(options?: {
 
   const providerResults: GrocerySyncStatus["providers"] = [];
   const allProducts: GroceryProduct[] = [];
+  let aldiSyncCount = 0;
 
   const runners: {
     name: string;
@@ -85,18 +88,6 @@ export async function runWeeklyGroceryRefresh(options?: {
         const out: GroceryProduct[] = [];
         for (const q of queries) {
           out.push(...(await colesProvider.searchProducts(q)));
-        }
-        return out;
-      },
-    },
-    {
-      name: aldiApifyProvider.displayName,
-      configured: aldiApifyProvider.isConfigured(),
-      run: async () => {
-        const out: GroceryProduct[] = [];
-        // ALDI: one Apify run per seed query (weekly, not per keystroke)
-        for (const q of queries.slice(0, 5)) {
-          out.push(...(await aldiApifyProvider.searchProducts(q)));
         }
         return out;
       },
@@ -131,8 +122,44 @@ export async function runWeeklyGroceryRefresh(options?: {
     }
   }
 
+  // ALDI: one full catalogue sync into Mongo (not per seed query / not per search)
+  if (aldiApifyProvider.isConfigured()) {
+    try {
+      const sync = await syncAldiCatalogueFromApify({
+        force: options?.forceAldi ?? true,
+        triggeredBy: options?.triggeredBy ?? "weekly-refresh",
+      });
+      aldiSyncCount = sync.productCount;
+      providerResults.push({
+        name: aldiApifyProvider.displayName,
+        status:
+          sync.status === "error"
+            ? "error"
+            : sync.status === "skipped"
+              ? "skipped"
+              : "ok",
+        message: sync.message,
+        productCount: sync.productCount,
+      });
+    } catch (err) {
+      providerResults.push({
+        name: aldiApifyProvider.displayName,
+        status: "error",
+        message: err instanceof Error ? err.message : "Unknown error",
+        productCount: 0,
+      });
+    }
+  } else {
+    providerResults.push({
+      name: aldiApifyProvider.displayName,
+      status: "skipped",
+      message: "APIFY_API_TOKEN + APIFY_DATASET_ID not configured",
+      productCount: 0,
+    });
+  }
+
   // Always seed mock snapshot so admin has data without live keys
-  if (allProducts.length === 0) {
+  if (allProducts.length === 0 && aldiSyncCount === 0) {
     for (const q of queries) {
       allProducts.push(...(await mockGroceryProvider.searchProducts(q)));
     }

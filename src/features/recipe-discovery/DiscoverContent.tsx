@@ -29,7 +29,6 @@ export function DiscoverContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [dataSource, setDataSource] = useState<string>("TheMealDB (free)");
 
   const fetchRecipes = useCallback(async () => {
     setLoading(true);
@@ -42,18 +41,8 @@ export function DiscoverContent() {
       }
       const json = (await response.json()) as {
         data: DiscoveredRecipe[];
-        providerLabel?: string;
-        source?: string;
       };
       setRecipes(json.data);
-      setDataSource(
-        json.providerLabel ||
-          (json.source?.includes("themealdb")
-            ? "TheMealDB (free)"
-            : json.source === "mock"
-              ? "Mock provider"
-              : json.source || "TheMealDB (free)")
-      );
     } catch {
       setError("Could not load discovered recipes. Please try again.");
       setRecipes([]);
@@ -75,18 +64,8 @@ export function DiscoverContent() {
     <>
       <PageHeader
         title="Discover Recipes"
-        description="Find free recipes from TheMealDB — no paid API keys required."
+        description="Browse recipes, check nutrition, and compare ingredient costs at Coles, Woolworths, and ALDI."
       />
-
-      <p className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-        Data source:{" "}
-        <span className="font-semibold">{dataSource}</span>
-        {dataSource.toLowerCase().includes("themealdb")
-          ? " — public free recipe API (no billing)."
-          : dataSource.toLowerCase().includes("mock")
-            ? " — demonstration fallback."
-            : "."}
-      </p>
 
       {actionMessage ? (
         <div
@@ -106,12 +85,13 @@ export function DiscoverContent() {
         />
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {DISCOVER_FILTER_OPTIONS.map((option) => (
           <Button
             key={option.value}
             variant={filter === option.value ? "primary" : "secondary"}
             size="sm"
+            className="shrink-0"
             onClick={() => setFilter(option.value)}
           >
             {option.label}

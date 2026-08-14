@@ -56,7 +56,6 @@ export async function GET(
       }
       return NextResponse.json({
         data: toDiscovered(toClientRecipe(doc)),
-        source: "admin",
       });
     }
 
@@ -67,8 +66,6 @@ export async function GET(
       }
       return NextResponse.json({
         data: recipe,
-        source: "themealdb",
-        billing: "free",
       });
     }
 
@@ -79,8 +76,6 @@ export async function GET(
       if (recipe) {
         return NextResponse.json({
           data: recipe,
-          source: "themealdb",
-          billing: "free",
         });
       }
     }
@@ -88,7 +83,7 @@ export async function GET(
     if (provider === "mock" || provider === "themealdb" || provider === "auto") {
       const recipe = await mockRecipeProvider.getRecipeById(id);
       if (recipe) {
-        return NextResponse.json({ data: recipe, source: "mock" });
+        return NextResponse.json({ data: recipe });
       }
     }
 

@@ -15,7 +15,6 @@ export const STORE_LABELS: Record<StoreName, string> = {
   coles: "Coles",
   woolworths: "Woolworths",
   aldi: "Aldi",
-  iga: "IGA",
   costco: "Costco",
   "harris-farm": "Harris Farm",
 };
@@ -24,7 +23,6 @@ export const ALL_STORES: StoreName[] = [
   "coles",
   "woolworths",
   "aldi",
-  "iga",
   "costco",
   "harris-farm",
 ];

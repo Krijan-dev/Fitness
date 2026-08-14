@@ -36,7 +36,7 @@ function toDiscovered(recipe: ReturnType<typeof toClientRecipe>): DiscoveredReci
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-    // Default to free TheMealDB — no paid keys required
+    // Default Discover provider
     const provider = (process.env.RECIPE_API_PROVIDER || "themealdb").toLowerCase();
 
     const params: RecipeSearchParams = {
@@ -58,23 +58,18 @@ export async function GET(request: NextRequest) {
     };
 
     let recipes: DiscoveredRecipe[] = [];
-    let source = provider;
 
     if (provider === "themealdb" || provider === "auto") {
       try {
         recipes = await themealdbRecipeProvider.searchRecipes(params);
-        source = "themealdb";
       } catch (err) {
         console.error("TheMealDB discover search failed:", err);
         if (provider === "themealdb") {
-          // Soft-fallback to mock so Discover never hard-crashes
           recipes = await mockRecipeProvider.searchRecipes(params);
-          source = "mock-fallback";
         }
       }
     } else if (provider === "mock") {
       recipes = await mockRecipeProvider.searchRecipes(params);
-      source = "mock";
     }
 
     try {
@@ -120,7 +115,6 @@ export async function GET(request: NextRequest) {
           );
         }
         recipes = [...adminRecipes, ...recipes];
-        if (adminRecipes.length) source = `${source}+admin`;
       }
     } catch {
       // Mongo optional for discover when DB unavailable
@@ -128,14 +122,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: recipes,
-      source,
-      billing: source.includes("themealdb") ? "free" : undefined,
-      providerLabel:
-        source.includes("themealdb")
-          ? "TheMealDB (free)"
-          : source.includes("mock")
-            ? "Mock provider"
-            : source,
     });
   } catch {
     return NextResponse.json(

@@ -4,20 +4,29 @@ import { enrichGroceryProduct, asNumber, asString } from "../mappers";
 import { resolveProductImageUrl } from "../image-urls";
 import mockPrices from "@/data/mock-prices.json";
 import type { StoreProductPrice } from "@/types/price";
+import { getRecipeStaplePrices } from "@/services/prices/recipe-staples";
 
 /**
  * Local mock provider for demos and CI when live API keys are absent.
+ * Includes everyday recipe staples so Coles/ALDI/WW rarely show false gaps.
  */
 export class MockGroceryProvider implements GroceryProvider {
   readonly id = "mock";
   readonly displayName = "Mock Grocery";
   readonly official = true;
 
+  private catalog(): StoreProductPrice[] {
+    return [
+      ...(mockPrices as StoreProductPrice[]),
+      ...getRecipeStaplePrices(),
+    ];
+  }
+
   async searchProducts(query: string): Promise<GroceryProduct[]> {
     const q = query.toLowerCase().trim();
     if (!q) return [];
 
-    return (mockPrices as StoreProductPrice[])
+    return this.catalog()
       .filter((p) => {
         const hay = `${p.query} ${p.productName} ${p.brand ?? ""}`.toLowerCase();
         return (
@@ -52,9 +61,7 @@ export class MockGroceryProvider implements GroceryProvider {
   async getProductByBarcode(barcode: string): Promise<GroceryProduct | null> {
     const code = barcode.trim();
     if (!code) return null;
-    const match = (mockPrices as StoreProductPrice[]).find(
-      (p) => p.barcode === code
-    );
+    const match = this.catalog().find((p) => p.barcode === code);
     if (!match) return null;
     const results = await this.searchProducts(match.query);
     return results[0] ?? null;

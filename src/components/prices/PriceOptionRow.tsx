@@ -3,7 +3,6 @@
 import type { StoreProductPrice } from "@/types/price";
 import { formatCurrency } from "@/utils/currency";
 import { STORE_LABELS } from "@/features/price-comparison/constants";
-import { DataSourceBadge } from "./DataSourceBadge";
 import { ProductThumbnail } from "@/components/grocery/ProductThumbnail";
 import { StoreBadge } from "@/components/grocery/StoreBadge";
 
@@ -59,10 +58,9 @@ export function PriceOptionRow({
               Best Price
             </span>
           ) : null}
-          <span className="text-sm font-semibold text-slate-900">
+          <span className="break-words text-sm font-semibold text-slate-900">
             {price.productName}
           </span>
-          <DataSourceBadge source={price.dataSource} />
           {price.isOnSpecial ? (
             <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
               Special

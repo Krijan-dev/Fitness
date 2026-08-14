@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import {
   Heart,
   Eye,
@@ -16,6 +15,7 @@ import type { Recipe } from "@/types/recipe";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { SafeRemoteImage } from "@/components/common/SafeRemoteImage";
 import {
   formatCategoryLabel,
   getPerServingNutrition,
@@ -57,12 +57,17 @@ export function RecipeCard({
         className={`relative h-44 bg-gradient-to-br ${placeholderGradient} flex items-center justify-center`}
       >
         {recipe.imageUrl ? (
-          <Image
+          <SafeRemoteImage
             src={recipe.imageUrl}
             alt={recipe.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 100vw, 33vw"
+            fallback={
+              <span className="text-5xl font-semibold text-muted-foreground/30">
+                {recipe.name.charAt(0).toUpperCase()}
+              </span>
+            }
           />
         ) : (
           <span className="text-5xl font-semibold text-muted-foreground/30">

@@ -271,7 +271,10 @@ export function SettingsContent() {
         <Card>
           <CardHeader>
             <CardTitle>Units & location</CardTitle>
-            <CardDescription>Location is used for price comparison.</CardDescription>
+            <CardDescription>
+              Your city is used for price comparison across Coles, Woolworths,
+              and ALDI.
+            </CardDescription>
           </CardHeader>
           <div className="grid gap-4 sm:grid-cols-2">
             <Select

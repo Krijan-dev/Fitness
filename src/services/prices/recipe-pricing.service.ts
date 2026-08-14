@@ -1,8 +1,15 @@
 import type { StoreName } from "@/types/common";
 import type { StoreProductPrice } from "@/types/price";
-import type { ThemealdbIngredient, ThemealdbMeal } from "@/services/recipes/themealdb.client";
+import type {
+  ThemealdbIngredient,
+  ThemealdbMeal,
+} from "@/services/recipes/themealdb.client";
 import { searchStorePrices } from "@/services/grocery/grocery-search.service";
 import { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
+import {
+  buildIngredientSearchQueries,
+  findStaplePrice,
+} from "@/services/prices/recipe-staples";
 
 /** Free recipe pricing only uses these three AU supermarket datasets. */
 export const RECIPE_PRICING_STORES: StoreName[] = [
@@ -47,15 +54,14 @@ const STORE_LABELS: Record<StoreName, string> = {
   coles: "Coles",
   woolworths: "Woolworths",
   aldi: "ALDI",
-  iga: "IGA",
   costco: "Costco",
   "harris-farm": "Harris Farm",
 };
 
 /**
  * Price a TheMealDB meal across Coles, Woolworths, and ALDI.
- * Uses existing grocery search (direct/free-first providers + local ALDI dataset).
- * Does not introduce any new paid billing endpoints.
+ * Uses grocery search first, then staple fallbacks so everyday items
+ * are not falsely marked missing when live APIs/catalogues miss them.
  */
 export async function priceThemealdbMeal(
   meal: ThemealdbMeal,
@@ -76,8 +82,7 @@ export async function priceThemealdbMeal(
     ingredients: lines,
     storeTotals,
     cheapestStore: cheapest,
-    sourceNote:
-      "Recipe data from free TheMealDB. Ingredient prices from Coles, Woolworths, and ALDI search (no paid recipe API).",
+    sourceNote: "Ingredient costs compared across Coles, Woolworths, and ALDI.",
   };
 }
 
@@ -85,31 +90,61 @@ async function priceOneIngredient(
   ingredient: ThemealdbIngredient,
   location: string
 ): Promise<PricedIngredientLine> {
-  const query = ingredient.cleanedName;
-  let prices: StoreProductPrice[] = [];
+  const queries = buildIngredientSearchQueries(ingredient.cleanedName);
+  const pricesByStore = new Map<StoreName, StoreProductPrice[]>();
 
-  try {
-    const { data } = await searchStorePrices(query, location);
-    prices = data.filter((p) =>
-      RECIPE_PRICING_STORES.includes(p.store)
-    );
-  } catch (err) {
-    console.warn(`Recipe pricing search failed for "${query}":`, err);
+  for (const store of RECIPE_PRICING_STORES) {
+    pricesByStore.set(store, []);
   }
 
-  const matches: IngredientStoreMatch[] = RECIPE_PRICING_STORES.map(
-    (store) => {
-      const storePrices = prices
-        .filter((p) => p.store === store)
-        .sort(compareByUnitThenShelfPrice);
-      const best = storePrices[0] ?? null;
-      return {
-        store,
-        product: best,
-        missing: best == null,
-      };
+  for (const query of queries) {
+    if (RECIPE_PRICING_STORES.every((s) => (pricesByStore.get(s)?.length ?? 0) > 0)) {
+      break;
     }
-  );
+    try {
+      const { data } = await searchStorePrices(query, location);
+      for (const price of data) {
+        if (!RECIPE_PRICING_STORES.includes(price.store)) continue;
+        const list = pricesByStore.get(price.store) ?? [];
+        if (!list.some((p) => p.id === price.id)) {
+          list.push(price);
+          pricesByStore.set(price.store, list);
+        }
+      }
+    } catch (err) {
+      console.warn(`Recipe pricing search failed for "${query}":`, err);
+    }
+  }
+
+  const matches: IngredientStoreMatch[] = RECIPE_PRICING_STORES.map((store) => {
+    const storePrices = (pricesByStore.get(store) ?? []).sort(
+      compareByUnitThenShelfPrice
+    );
+    let best = storePrices[0] ?? null;
+
+    // Everyday staples: fill Coles/ALDI/WW gaps so common items aren't "missing"
+    if (!best) {
+      for (const query of queries) {
+        const staple = findStaplePrice(query, store);
+        if (staple) {
+          best = { ...staple, location, query: ingredient.cleanedName };
+          break;
+        }
+      }
+    }
+    if (!best) {
+      const staple = findStaplePrice(ingredient.cleanedName, store);
+      if (staple) {
+        best = { ...staple, location, query: ingredient.cleanedName };
+      }
+    }
+
+    return {
+      store,
+      product: best,
+      missing: best == null,
+    };
+  });
 
   return {
     rawName: ingredient.rawName,
@@ -146,7 +181,6 @@ function buildStoreTotals(lines: PricedIngredientLine[]): RecipeStoreTotal[] {
     };
   });
 
-  // Cheapest among stores that matched at least one ingredient
   const eligible = totals.filter((t) => t.matchedCount > 0);
   if (eligible.length > 0) {
     const min = Math.min(...eligible.map((t) => t.total));

@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { LoadingState } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
+import { AdminGroceryIntegrations } from "@/components/admin/AdminGroceryIntegrations";
 import { apiGet, apiSend } from "@/lib/api-client";
 
 interface SyncStatus {
@@ -128,6 +129,8 @@ export default function AdminGroceryPage() {
           </div>
         }
       />
+
+      <AdminGroceryIntegrations />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

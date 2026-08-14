@@ -44,7 +44,7 @@ export class GooglePlacesProvider implements GroceryProvider {
   }
 
   /**
-   * Find nearby Coles, Woolworths, ALDI, and IGA.
+   * Find nearby Coles, Woolworths, and ALDI.
    * Prefers classic Places Nearby Search (`type=supermarket`), then New Places API.
    */
   async findNearbySupermarkets(

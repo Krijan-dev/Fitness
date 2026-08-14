@@ -37,7 +37,6 @@ export type StoreName =
   | "coles"
   | "woolworths"
   | "aldi"
-  | "iga"
   | "costco"
   | "harris-farm";
 

@@ -4,6 +4,8 @@ import {
   woolworthsCdnImage,
   colesCdnImage,
   openFoodFactsBarcodeImage,
+  absolutizeImageUrl,
+  stapleImageForQuery,
 } from "@/services/grocery/image-urls";
 import { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
 import type { StoreProductPrice } from "@/types/price";
@@ -13,9 +15,26 @@ describe("grocery image URL extraction", () => {
     expect(
       firstImageFromPayload({ mediumImage: "https://cdn.example/a.jpg" })
     ).toBe("https://cdn.example/a.jpg");
+    expect(firstImageFromPayload({ thumbnail: "//cdn.example/b.jpg" })).toBe(
+      "https://cdn.example/b.jpg"
+    );
+  });
+
+  it("absolutizes relative Coles and Woolworths paths", () => {
+    expect(absolutizeImageUrl("/productimages/12/123456.jpg", "coles")).toBe(
+      "https://cdn.productimages.coles.com.au/productimages/12/123456.jpg"
+    );
     expect(
-      firstImageFromPayload({ thumbnail: "//cdn.example/b.jpg" })
-    ).toBe("https://cdn.example/b.jpg");
+      absolutizeImageUrl(
+        "/content/wowproductimages/medium/555.jpg",
+        "woolworths"
+      )
+    ).toBe(
+      "https://cdn0.woolworths.media/content/wowproductimages/medium/555.jpg"
+    );
+    expect(absolutizeImageUrl("133211.jpg", "woolworths")).toContain(
+      "cdn0.woolworths.media"
+    );
   });
 
   it("builds Woolworths / Coles / OFF CDN fallbacks", () => {
@@ -44,6 +63,13 @@ describe("grocery image URL extraction", () => {
         barcode: "9300675001234",
       })
     ).toContain("openfoodfacts");
+  });
+
+  it("returns staple images for common grocery queries", () => {
+    expect(stapleImageForQuery("chicken breast")).toContain(
+      "images.unsplash.com"
+    );
+    expect(stapleImageForQuery("soy sauce")).toContain("images.unsplash.com");
   });
 });
 

@@ -34,6 +34,5 @@ function matchesPriceQuery(product: StoreProductPrice, query: string): boolean {
 export const mockColesProvider = new MockPriceProvider("coles");
 export const mockWoolworthsProvider = new MockPriceProvider("woolworths");
 export const mockAldiProvider = new MockPriceProvider("aldi");
-export const mockIGAProvider = new MockPriceProvider("iga");
 export const mockCostcoProvider = new MockPriceProvider("costco");
 export const mockHarrisFarmProvider = new MockPriceProvider("harris-farm");

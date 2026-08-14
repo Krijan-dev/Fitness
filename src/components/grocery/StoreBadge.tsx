@@ -8,7 +8,6 @@ const STORE_COLORS: Record<StoreName, string> = {
   woolworths: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100",
   coles: "bg-rose-50 text-rose-800 ring-1 ring-rose-100",
   aldi: "bg-sky-50 text-sky-800 ring-1 ring-sky-100",
-  iga: "bg-red-50 text-red-800 ring-1 ring-red-100",
   costco: "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
   "harris-farm": "bg-lime-50 text-lime-800 ring-1 ring-lime-100",
 };
@@ -17,7 +16,6 @@ const STORE_SHORT: Partial<Record<StoreName, string>> = {
   coles: "Coles",
   woolworths: "Woolies",
   aldi: "ALDI",
-  iga: "IGA",
   costco: "Costco",
   "harris-farm": "Harris Farm",
 };

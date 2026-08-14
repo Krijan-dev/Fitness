@@ -4,7 +4,6 @@ import {
   woolworthsProvider,
   colesProvider,
   aldiApifyProvider,
-  igaProvider,
   openFoodFactsProvider,
   mockGroceryProvider,
   type GroceryProvider,
@@ -19,7 +18,7 @@ import { hasAnyLivePriceProvider } from "./credentials";
 export { compareByUnitThenShelfPrice } from "@/features/price-comparison/sort-prices";
 
 function livePriceProviders(): GroceryProvider[] {
-  return [woolworthsProvider, colesProvider, aldiApifyProvider, igaProvider];
+  return [woolworthsProvider, colesProvider, aldiApifyProvider];
 }
 
 function shouldUseMockFallback(): boolean {
@@ -111,8 +110,7 @@ export async function searchGroceryProducts(
             "function"
             ? (provider as { isConfigured: () => boolean }).isConfigured()
             : true;
-        // IGA always contributes mock rows when unconfigured
-        if (!configured && provider.id !== "iga-cache") return;
+        if (!configured) return;
         const products = await provider.searchProducts(q);
         results.push(...products);
         if (products.length) sources.push(provider.id);
@@ -173,7 +171,7 @@ export async function lookupBarcode(barcode: string): Promise<{
           "function"
           ? (provider as { isConfigured: () => boolean }).isConfigured()
           : true;
-      if (!configured && provider.id !== "iga-cache") continue;
+      if (!configured) continue;
       const hit = await provider.getProductByBarcode(code);
       if (hit) {
         if (!hit.imageUrl && metadata?.imageUrl) {

@@ -129,7 +129,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-border bg-card shadow-soft">
+          <aside className="absolute inset-y-0 left-0 flex w-[min(18rem,85vw)] flex-col overflow-y-auto border-r border-border bg-card shadow-soft">
             <div className="flex items-center justify-between border-b border-border px-4 py-4">
               <span className="font-semibold">MealPrep Admin</span>
               <button type="button" onClick={() => setMobileOpen(false)}>
@@ -137,6 +137,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </button>
             </div>
             {nav}
+            <div className="mt-auto space-y-2 border-t border-border p-3 safe-area-pb">
+              <div className="rounded-2xl border border-border bg-muted/70 px-3 py-2">
+                <p className="truncate text-sm font-medium">{user.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => {
+                  void logout().then(() => {
+                    window.location.href = "/login";
+                  });
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Log out
+              </Button>
+            </div>
           </aside>
         </div>
       ) : null}

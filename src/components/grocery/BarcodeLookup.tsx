@@ -64,20 +64,20 @@ export function BarcodeLookup({
         Uses Open Food Facts for product metadata and images, then matches
         supermarket prices.
       </p>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <input
           type="text"
           inputMode="numeric"
           value={barcode}
           onChange={(e) => setBarcode(e.target.value)}
           placeholder="Enter barcode (EAN/UPC)"
-          className="min-w-[160px] flex-1 rounded-xl border border-border bg-muted px-3.5 py-2.5 text-sm transition-all focus:border-emerald-500 focus:bg-card focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="min-w-0 flex-1 rounded-xl border border-border bg-muted px-3.5 py-3 text-base transition-all focus:border-emerald-500 focus:bg-card focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:text-sm"
           onKeyDown={(e) => {
             if (e.key === "Enter") void lookup();
           }}
         />
         <Button
-          className="rounded-xl"
+          className="w-full rounded-xl sm:w-auto"
           onClick={() => void lookup()}
           disabled={loading || !barcode.trim()}
         >

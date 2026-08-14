@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowLeft,
   BookmarkPlus,
@@ -16,10 +15,12 @@ import { Card, CardHeader, CardTitle } from "@/components/common/Card";
 import { Input } from "@/components/common/Input";
 import { LoadingState } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
+import { SafeRemoteImage } from "@/components/common/SafeRemoteImage";
 import { AddToPlannerModal } from "@/components/recipes/AddToPlannerModal";
 import { NutritionSummary } from "@/components/meals/NutritionSummary";
 import type { DiscoveredRecipe } from "@/types/recipe";
 import { useDiscoverActions } from "@/features/recipe-discovery/useDiscoverActions";
+import { DiscoverRecipePricing } from "@/features/recipe-discovery/DiscoverRecipePricing";
 import {
   getTotalCookTime,
   scaleIngredients,
@@ -144,17 +145,20 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="relative h-48 sm:h-64 rounded-xl overflow-hidden bg-muted">
-            {recipe.imageUrl ? (
-              <Image
-                src={recipe.imageUrl}
-                alt={recipe.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 66vw"
-              />
-            ) : null}
+        <div className="space-y-6 lg:col-span-2">
+          <div className="relative h-52 overflow-hidden rounded-xl bg-muted sm:h-64">
+            <SafeRemoteImage
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 66vw"
+              fallback={
+                <div className="flex h-full w-full items-center justify-center text-4xl font-semibold text-muted-foreground/40">
+                  {recipe.title.charAt(0)}
+                </div>
+              }
+            />
           </div>
 
           <PageHeader title={recipe.title} description={recipe.description} />
@@ -187,41 +191,6 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
               </span>
             ) : null}
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Ingredients</CardTitle>
-            </CardHeader>
-            <ul className="space-y-2">
-              {scaledIngredients.map((ingredient) => (
-                <li
-                  key={ingredient.id}
-                  className="flex justify-between gap-4 rounded-lg border border-border px-3 py-2 text-sm"
-                >
-                  <span className="font-medium">{ingredient.name}</span>
-                  <span className="text-muted-foreground shrink-0">
-                    {ingredient.quantity} {ingredient.unit}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Instructions</CardTitle>
-            </CardHeader>
-            <ol className="space-y-3">
-              {recipe.instructions.map((step, index) => (
-                <li key={index} className="flex gap-3 text-sm">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {index + 1}
-                  </span>
-                  <span className="text-muted-foreground">{step}</span>
-                </li>
-              ))}
-            </ol>
-          </Card>
         </div>
 
         <div className="space-y-4">
@@ -247,7 +216,11 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
             <NutritionSummary
               title="Per serving"
               nutrition={perServingNutrition}
-              subtitle="Per single serving at published nutrition"
+              subtitle={
+                recipe.source?.toLowerCase().includes("themealdb")
+                  ? "Estimated from ingredient data (TheMealDB has no nutrition API)"
+                  : "Per single serving at published nutrition"
+              }
             />
           ) : null}
 
@@ -257,32 +230,6 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
               nutrition={batchNutrition}
             />
           ) : null}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Per original serving</CardTitle>
-            </CardHeader>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt className="text-muted-foreground">Calories</dt>
-                <dd className="font-semibold">
-                  {Math.round(recipe.caloriesPerServing)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Protein</dt>
-                <dd className="font-semibold">{recipe.proteinPerServing}g</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Carbs</dt>
-                <dd className="font-semibold">{recipe.carbsPerServing}g</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Fat</dt>
-                <dd className="font-semibold">{recipe.fatPerServing}g</dd>
-              </div>
-            </dl>
-          </Card>
 
           <Card>
             <CardHeader>
@@ -324,6 +271,84 @@ export function DiscoverDetailContent({ id }: DiscoverDetailContentProps) {
                 Add to Shopping List
               </Button>
             </div>
+          </Card>
+        </div>
+
+        <div className="space-y-6 lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ingredients</CardTitle>
+            </CardHeader>
+            <ul className="space-y-2">
+              {scaledIngredients.map((ingredient) => (
+                <li
+                  key={ingredient.id}
+                  className="flex justify-between gap-4 rounded-lg border border-border px-3 py-2 text-sm"
+                >
+                  <span className="min-w-0 break-words font-medium">
+                    {ingredient.name}
+                  </span>
+                  <span className="shrink-0 text-muted-foreground">
+                    {ingredient.quantity} {ingredient.unit}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Instructions</CardTitle>
+            </CardHeader>
+            <ol className="space-y-3">
+              {recipe.instructions.map((step, index) => (
+                <li key={index} className="flex gap-3 text-sm">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0 text-muted-foreground">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <DiscoverRecipePricing
+            recipeId={recipe.id}
+            recipeSource={recipe.source}
+          />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Per original serving</CardTitle>
+            </CardHeader>
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-muted-foreground">Calories</dt>
+                <dd className="font-semibold">
+                  {Math.round(recipe.caloriesPerServing)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Protein</dt>
+                <dd className="font-semibold">{recipe.proteinPerServing}g</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Carbs</dt>
+                <dd className="font-semibold">{recipe.carbsPerServing}g</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Fat</dt>
+                <dd className="font-semibold">{recipe.fatPerServing}g</dd>
+              </div>
+            </dl>
+            {recipe.source?.toLowerCase().includes("themealdb") ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                Nutrition is estimated from local ingredient data — not
+                laboratory values.
+              </p>
+            ) : null}
           </Card>
         </div>
       </div>

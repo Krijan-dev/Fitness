@@ -7,10 +7,10 @@ import { navIconMap } from "./nav-icons";
 
 const MOBILE_NAV_HREFS = [
   "/dashboard",
-  "/daily-tracker",
-  "/recipes",
+  "/discover",
   "/shopping-list",
   "/meal-planner",
+  "/daily-tracker",
 ] as const;
 
 export function MobileNavigation() {
@@ -33,26 +33,28 @@ export function MobileNavigation() {
             (item.href !== "/dashboard" && pathname.startsWith(item.href));
           const shortLabel =
             item.href === "/daily-tracker"
-              ? "Tracker"
+              ? "Track"
               : item.href === "/shopping-list"
                 ? "Shop"
                 : item.href === "/meal-planner"
                   ? "Plan"
-                  : item.label.split(" ")[0];
+                  : item.href === "/discover"
+                    ? "Discover"
+                    : item.label.split(" ")[0];
 
           return (
-            <li key={item.href} className="flex-1 max-w-[5rem]">
+            <li key={item.href} className="min-w-0 flex-1">
               <Link
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2.5 min-h-[3.25rem] text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                className={`flex min-h-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   isActive
-                    ? "text-emerald-700 bg-emerald-50"
+                    ? "bg-emerald-50 text-emerald-700"
                     : "text-muted-foreground"
                 }`}
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                <span className="truncate w-full text-center">{shortLabel}</span>
+                <span className="w-full truncate text-center">{shortLabel}</span>
               </Link>
             </li>
           );

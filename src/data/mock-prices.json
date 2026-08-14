@@ -16,7 +16,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-2",
@@ -34,7 +34,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-3",
@@ -52,7 +52,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-4",
@@ -71,7 +71,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-5",
@@ -89,7 +89,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-6",
@@ -107,7 +107,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-7",
@@ -126,7 +126,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-8",
@@ -144,7 +144,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-9",
@@ -162,7 +162,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-10",
@@ -181,7 +181,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-11",
@@ -199,7 +199,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-12",
@@ -218,7 +218,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-13",
@@ -236,25 +236,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200&h=200&fit=crop"
-  },
-  {
-    "id": "price-14",
-    "query": "chicken breast",
-    "productName": "Chicken Breast",
-    "brand": "IGA",
-    "size": "1kg",
-    "store": "iga",
-    "currentPrice": 12.8,
-    "regularPrice": 12.8,
-    "unitPrice": 12.8,
-    "unitLabel": "per kg",
-    "isOnSpecial": false,
-    "availability": "in-stock",
-    "location": "Canberra",
-    "dataSource": "mock",
-    "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82713?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-15",
@@ -272,7 +254,7 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     "id": "price-16",
@@ -290,6 +272,6 @@
     "location": "Canberra",
     "dataSource": "mock",
     "lastUpdated": "2026-03-20T10:00:00.000Z",
-    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop"
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=200&h=200&q=80"
   }
 ]

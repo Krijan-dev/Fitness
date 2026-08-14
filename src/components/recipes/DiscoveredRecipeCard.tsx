@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Clock, BookmarkPlus } from "lucide-react";
 import type { DiscoveredRecipe } from "@/types/recipe";
 import { Card } from "@/components/common/Card";
 import { Button } from "@/components/common/Button";
+import { SafeRemoteImage } from "@/components/common/SafeRemoteImage";
 import { getTotalCookTime } from "@/features/recipe-discovery/utils";
 
 interface DiscoveredRecipeCardProps {
@@ -22,19 +22,18 @@ export function DiscoveredRecipeCard({
   return (
     <Card padding="none" className="overflow-hidden">
       <div className="relative h-40 bg-gradient-to-br from-primary/10 to-muted flex items-center justify-center">
-        {recipe.imageUrl ? (
-          <Image
-            src={recipe.imageUrl}
-            alt={recipe.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 33vw"
-          />
-        ) : (
-          <span className="text-3xl font-bold text-muted-foreground/40">
-            {recipe.title.charAt(0)}
-          </span>
-        )}
+        <SafeRemoteImage
+          src={recipe.imageUrl}
+          alt={recipe.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 33vw"
+          fallback={
+            <span className="text-3xl font-bold text-muted-foreground/40">
+              {recipe.title.charAt(0)}
+            </span>
+          }
+        />
         {recipe.source ? (
           <span className="absolute bottom-2 left-2 rounded bg-card/90 px-2 py-0.5 text-xs text-muted-foreground">
             {recipe.source}
