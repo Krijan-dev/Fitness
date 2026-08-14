@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
-  LogOut,
   Menu,
   Settings,
   ShoppingBasket,
@@ -20,6 +19,7 @@ import {
 import { useAuthStore } from "@/stores/auth-store";
 import { LoadingState } from "@/components/common/LoadingState";
 import { Button } from "@/components/ui/Button";
+import { UserAccountPanel } from "@/components/layout/UserAccountPanel";
 
 const ADMIN_NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -37,7 +37,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const loading = useAuthStore((s) => s.loading);
   const fetchUser = useAuthStore((s) => s.fetchUser);
-  const logout = useAuthStore((s) => s.logout);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -137,24 +136,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </button>
             </div>
             {nav}
-            <div className="mt-auto space-y-2 border-t border-border p-3 safe-area-pb">
-              <div className="rounded-2xl border border-border bg-muted/70 px-3 py-2">
-                <p className="truncate text-sm font-medium">{user.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => {
-                  void logout().then(() => {
-                    window.location.href = "/login";
-                  });
-                }}
-              >
-                <LogOut className="h-4 w-4" />
-                Log out
-              </Button>
+            <div className="mt-auto border-t border-border p-3 safe-area-pb">
+              <UserAccountPanel
+                user={user}
+                showAdminLink={false}
+                onNavigate={() => setMobileOpen(false)}
+              />
             </div>
           </aside>
         </div>
@@ -189,26 +176,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </button>
           </div>
           {nav}
-          <div className="space-y-2 border-t border-border p-3">
-            {!collapsed ? (
-              <div className="rounded-2xl border border-border bg-muted/70 px-3 py-2">
-                <p className="truncate text-sm font-medium">{user.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-              </div>
-            ) : null}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => {
-                void logout().then(() => {
-                  window.location.href = "/login";
-                });
-              }}
-            >
-              <LogOut className="h-4 w-4" />
-              {!collapsed ? "Log out" : null}
-            </Button>
+          <div className="border-t border-border p-3">
+            <UserAccountPanel
+              user={user}
+              compact={collapsed}
+              showAdminLink={false}
+            />
           </div>
         </aside>
 
