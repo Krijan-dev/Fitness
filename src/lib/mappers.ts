@@ -12,6 +12,7 @@ import type { PantryItemDocument } from "@/models/PantryItem";
 import type { WeightEntryDocument } from "@/models/WeightEntry";
 import type { UserSettingsDocument } from "@/models/UserSettings";
 import type { RecipeCategory, ShoppingCategory, ThemeMode, UnitSystem } from "@/types/common";
+import { decryptProfileMetrics } from "@/lib/encrypted-metrics";
 
 export function toClientRecipe(doc: RecipeDocument): Recipe {
   return {
@@ -141,7 +142,9 @@ export function toClientSettings(doc: UserSettingsDocument | null): UserSettings
     }
   }
 
-  const profileDoc = doc.profile as
+  const profileDoc = decryptProfileMetrics(
+    (doc.profile ?? undefined) as Record<string, unknown> | undefined
+  ) as
     | (NonNullable<UserSettingsDocument["profile"]> & {
         startingWeightKg?: number;
         age?: number;

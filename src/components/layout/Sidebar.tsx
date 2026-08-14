@@ -5,13 +5,11 @@ import { usePathname } from "next/navigation";
 import { APP_NAME, NAV_GROUPS } from "@/utils/constants";
 import { navIconMap } from "./nav-icons";
 import { useAuthStore } from "@/stores/auth-store";
-import { Button } from "@/components/ui/Button";
-import { LogOut, Shield } from "lucide-react";
+import { UserAccountPanel } from "./UserAccountPanel";
 
 export function Sidebar() {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
 
   return (
     <aside
@@ -74,37 +72,8 @@ export function Sidebar() {
           </div>
         </nav>
 
-        <div className="border-t border-border p-4 space-y-3">
-          {user ? (
-            <div className="rounded-2xl border border-border bg-muted/70 px-3 py-3">
-              <p className="truncate text-sm font-medium text-foreground">
-                {user.name}
-              </p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-              {user.role === "admin" ? (
-                <Link
-                  href="/admin"
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 hover:underline"
-                >
-                  <Shield className="h-3.5 w-3.5" />
-                  Admin portal
-                </Link>
-              ) : null}
-            </div>
-          ) : null}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() => {
-              void logout().then(() => {
-                window.location.href = "/login";
-              });
-            }}
-          >
-            <LogOut className="h-4 w-4" />
-            Log out
-          </Button>
+        <div className="border-t border-border p-3">
+          <UserAccountPanel user={user} />
         </div>
       </div>
     </aside>
