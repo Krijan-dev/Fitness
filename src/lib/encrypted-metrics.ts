@@ -70,16 +70,16 @@ export function metricFieldAccessors() {
   };
 }
 
-type EncryptionSchema = {
-  pre: (hook: string, fn: (...args: unknown[]) => void) => void;
-};
-
 /**
  * Encrypts physical metrics on write (save + update operators) so plaintext
  * never lands in MongoDB. Pair with decryptProfileMetrics / schema getters on read.
  */
-export function applyFieldEncryption(schema: EncryptionSchema): void {
-  schema.pre("save", function encryptOnSave(this: { profile?: ProfileLike }) {
+export function applyFieldEncryption(schema: object): void {
+  const hookable = schema as {
+    pre: (hook: string, fn: (...args: never[]) => void) => void;
+  };
+
+  hookable.pre("save", function encryptOnSave(this: { profile?: ProfileLike }) {
     if (this.profile) encryptProfileMetrics(this.profile);
   });
 
@@ -87,7 +87,7 @@ export function applyFieldEncryption(schema: EncryptionSchema): void {
     encryptUpdatePayload(this.getUpdate() as Record<string, unknown> | null);
   };
 
-  schema.pre("findOneAndUpdate", encryptOnUpdate);
-  schema.pre("updateOne", encryptOnUpdate);
-  schema.pre("updateMany", encryptOnUpdate);
+  hookable.pre("findOneAndUpdate", encryptOnUpdate);
+  hookable.pre("updateOne", encryptOnUpdate);
+  hookable.pre("updateMany", encryptOnUpdate);
 }

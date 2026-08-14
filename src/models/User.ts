@@ -21,7 +21,7 @@ const userSchema = new Schema(
   { timestamps: { createdAt: true, updatedAt: true } }
 );
 
-userSchema.pre("save", function refusePlaintextPassword(next) {
+userSchema.pre("save", function refusePlaintextPassword() {
   const doc = this as {
     password?: unknown;
     passwordHash?: string;
@@ -31,10 +31,8 @@ userSchema.pre("save", function refusePlaintextPassword(next) {
     delete doc.password;
   }
   if (doc.isModified("passwordHash") && doc.passwordHash && !BCRYPT_HASH.test(doc.passwordHash)) {
-    next(new Error("Refusing to store a non-bcrypt password hash"));
-    return;
+    throw new Error("Refusing to store a non-bcrypt password hash");
   }
-  next();
 });
 
 userSchema.set("toJSON", {

@@ -1,14 +1,15 @@
 /**
  * Must load before next/jest so next.config.ts → env.mjs can validate.
+ * Do not assign process.env.NODE_ENV — TypeScript treats it as read-only.
  */
-process.env.NODE_ENV = process.env.NODE_ENV || "test";
-process.env.ENCRYPTION_KEY =
-  process.env.ENCRYPTION_KEY ||
+const testEnv = process.env as Record<string, string | undefined>;
+testEnv.ENCRYPTION_KEY =
+  testEnv.ENCRYPTION_KEY ||
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-process.env.JWT_SECRET =
-  process.env.JWT_SECRET || "jest-only-jwt-secret-32chars-min!";
-process.env.MONGODB_URI =
-  process.env.MONGODB_URI ||
-  process.env.DATABASE_URL ||
-  process.env.MONGODB_URL ||
+testEnv.JWT_SECRET =
+  testEnv.JWT_SECRET || "jest-only-jwt-secret-32chars-min!";
+testEnv.MONGODB_URI =
+  testEnv.MONGODB_URI ||
+  testEnv.DATABASE_URL ||
+  testEnv.MONGODB_URL ||
   "mongodb://127.0.0.1:27017/mealprep_test";

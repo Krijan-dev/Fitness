@@ -73,9 +73,7 @@ export function applyTestEnvDefaults(
   };
 }
 
-export function validateEnv(
-  raw: Record<string, unknown> = process.env
-): z.SafeParseReturnType<unknown, Env> {
+export function validateEnv(raw: Record<string, unknown> = process.env) {
   return envSchema.safeParse(raw);
 }
 
